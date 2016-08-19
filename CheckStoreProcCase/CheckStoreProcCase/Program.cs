@@ -1,15 +1,12 @@
 ﻿using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CheckStoreProcCase
 {
     // Notes
-    // 2133 sql Files 
+    // 2133 SQL Files 
     // 25510 Files to check (thats a lot to check)
     // About 30mins to run on a machine with an SSD
     // Could make it faster and parallel but so what, run once every few years.
@@ -28,11 +25,12 @@ namespace CheckStoreProcCase
             // Stage 0 Build Store Procedure list to check. This is every SQL file in the db\proc folder 
             // Not check multipliable folders 
 
-            const string sqlCheckFolder = @"C:\Dev\db\streams\procs"; 
+            const string sqlCheckFolder = @"C:\Dev\db\streams\procs";
             const string sqlCheckListFile = @"C:\Temp\sqlCheckList.txt";
 
             const string sourceCheckRootFolder = @"C:\Dev\";
             const string sourceCheckListFile = @"C:\Temp\sourceCheckList.txt";
+            string[] sourceSearchPatterns = { "*.mak", "*.sql", "*.xml", "*.cs", "*.h", "*.cpp", "*.csproj", "*.vcxproj", "*.py" };
 
             const string incorrectListFile = @"C:\Temp\incorrectListFile.txt";
 
@@ -51,7 +49,7 @@ namespace CheckStoreProcCase
             }
             if (stage.Contains("2"))
             {
-                Stage2BuildSourceFileList(sourceCheckRootFolder, sourceCheckListFile);
+                Stage2BuildSourceFileList(sourceCheckRootFolder, sourceCheckListFile, sourceSearchPatterns);
             }
             if (stage.Contains("3"))
             {
@@ -94,16 +92,10 @@ namespace CheckStoreProcCase
             return File.ReadLines(fileName).ToList();
         }
 
-        public static IEnumerable<string> GetFiles(string path, string[] searchPatterns, SearchOption searchOption = SearchOption.TopDirectoryOnly)
+        void Stage2BuildSourceFileList(string rootFolder, string outputFileName, string[] searchPatterns)
         {
-            return searchPatterns.AsParallel().SelectMany(searchPattern => Directory.EnumerateFiles(path, searchPattern, searchOption));
-        }
-
-        void Stage2BuildSourceFileList(string rootFolder, string outputFileName)
-        {
-            //var searchPatterns = new string[] { "*.mak", "*.sql", "*.xml", "*.cs", "*.h", "*.cpp", "*.csproj", "*.vcxproj" };
-            var searchPatterns = new string[] { "*.mak", "*.sql", "*.xml", "*.cs", "*.cpp", "*.csproj", "*.vcxproj" };
-            var files = GetFiles(rootFolder, searchPatterns, SearchOption.AllDirectories).ToList();
+            var files = searchPatterns.AsParallel()
+                            .SelectMany(searchPattern => Directory.EnumerateFiles(rootFolder, searchPattern, SearchOption.AllDirectories));
             File.WriteAllLines(outputFileName, files);
         }
 
@@ -112,50 +104,40 @@ namespace CheckStoreProcCase
             return File.ReadLines(fileName).ToList();
         }
 
-
         void Stage5CheckForIncorrectCase(List<string> sqlCheckList, List<string> sourceFileList, string incorrectListFile)
         {
-            // this method needs to be fast 
-            var filesToChange = new List<string>();
+            var filesToChange = sourceFileList.AsParallel()
+                        .Where(f => Stage5bCheckFile(f, sqlCheckList))
+                        .Select(f => f);
 
-            //Should make the outer for each Parallel
-            foreach (string file in sourceFileList)
-            {
-                var stopCheckingFile = false;
-                var text = File.ReadAllText(file);
-                foreach (string storeProc in sqlCheckList)
-                {
-                    if (file.Contains(@"streams\DBObjects"))
-                    {
-                        
-                    }
-                    if (stopCheckingFile) break;
-
-                    int index = text.IndexOf(storeProc, 0, StringComparison.OrdinalIgnoreCase);
-                    while (index >= 0)
-                    {
-                        // check for correctness at "index"
-                        var incorrectValue = text.Substring(index, storeProc.Length);
-                        bool test = incorrectValue == storeProc;
-                        if (!test)
-                        {
-                            filesToChange.Add(file);
-                            stopCheckingFile = true; // don't need to check for in the file again
-                            break;
-                        }
-                        if (index + storeProc.Length > text.Length) break;
-                        index = text.IndexOf(storeProc, index + storeProc.Length, StringComparison.OrdinalIgnoreCase);
-                    }
-                }
-            }
             File.WriteAllLines(incorrectListFile, filesToChange);
         }
 
+        bool Stage5bCheckFile(string fileName, List<string> sqlCheckList)
+        {
+            var text = File.ReadAllText(fileName);
+            foreach (string storeProc in sqlCheckList)
+            {
+                int index = text.IndexOf(storeProc, 0, StringComparison.OrdinalIgnoreCase);
+                while (index >= 0)
+                {
+                    // check for correctness at "index"
+                    var incorrectValue = text.Substring(index, storeProc.Length);
+                    bool test = incorrectValue == storeProc;
+                    if (!test)
+                    {
+                        return true; // One found, return true
+                    }
+                    if (index + storeProc.Length > text.Length) break;
+                    index = text.IndexOf(storeProc, index + storeProc.Length, StringComparison.OrdinalIgnoreCase);
+                }
+            }
+            return false;
+        }
 
         List<string> Stage6GetIncorrectFileList(string incorrectListFile)
         {
             return File.ReadLines(incorrectListFile).ToList();
-            ;
         }
 
         void Stage7ChangeCaseForIncorrectFiles(List<string> sqlCheckList, List<string> incorrectListFile)
