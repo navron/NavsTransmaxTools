@@ -123,11 +123,10 @@ namespace CheckStoreProcCase
                 {
                     // check for correctness at "index"
                     var incorrectValue = text.Substring(index, storeProc.Length);
-                    bool test = incorrectValue == storeProc;
-                    if (!test)
-                    {
-                        return true; // One found, return true
-                    }
+
+                    // One found, return true, test done
+                    if (incorrectValue != storeProc) return true; 
+                    
                     if (index + storeProc.Length > text.Length) break;
                     index = text.IndexOf(storeProc, index + storeProc.Length, StringComparison.OrdinalIgnoreCase);
                 }
@@ -140,6 +139,7 @@ namespace CheckStoreProcCase
             return File.ReadLines(incorrectListFile).ToList();
         }
 
+        // to do make the parallel, nope should not be that many
         void Stage7ChangeCaseForIncorrectFiles(List<string> sqlCheckList, List<string> incorrectListFile)
         {
             //Should make the outer for each Parallel
