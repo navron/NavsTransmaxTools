@@ -20,6 +20,7 @@ namespace ProjectFileFixer
         private void Execute(string stage)
         {
             string[] sourceSearchPatterns = { "*.csproj" };
+            //            const string sourceCheckRootFolder = @"C:\Dev\tools\";
             const string sourceCheckRootFolder = @"C:\Dev\";
 
             var sourceFileList = new List<string>();
@@ -38,12 +39,21 @@ namespace ProjectFileFixer
                 new ReferenceRules {Name = "Castle.Windsor", RemoveAllMetaData = true},
                 new ReferenceRules {Name = "Rhino.Mocks", RemoveAllMetaData = true},
                 new ReferenceRules {Name = "nunit.framework", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "Iesi.Collections", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "Caliburn.Micro", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "PresentationUI", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "NHibernate", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "NHibernate.ByteCode.Castle", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "NVelocity", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "CabLib", RemoveAllMetaData = true},
+                
             };
 
             // Stage Rules
             if (stage.Contains("2")) stage = stage + "1";
             if (stage.Contains("3")) stage = stage + "1";
             if (stage.Contains("4")) stage = stage + "1";
+            if (stage.Contains("5")) stage = stage + "1";
 
             // Run Stages
             if (stage.Contains("1"))
@@ -64,6 +74,11 @@ namespace ProjectFileFixer
             if (stage.Contains("4"))
             {
                 Stage4ProjectMarkAsDirty(sourceFileList);
+            }
+
+            if (stage.Contains("5"))
+            {
+                Stage5TsdProjectsAreVersion1(sourceFileList);
             }
         }
 
@@ -121,8 +136,7 @@ namespace ProjectFileFixer
                     // May do something if an TSD project
                 }
             }
-            if (project.IsDirty)
-                Console.WriteLine($"Changed: {fileName}");
+            if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
             project.Save();
         }
 
@@ -134,7 +148,7 @@ namespace ProjectFileFixer
             }
         }
 
-        void Stage3aProjectRemoveVersionNumbers(string fileName,List<ReferenceRules> rules)
+        void Stage3aProjectRemoveVersionNumbers(string fileName, List<ReferenceRules> rules)
         {
             // Set the Correct version of different DLL
 
@@ -145,15 +159,18 @@ namespace ProjectFileFixer
             {
                 foreach (var rule in rules)
                 {
-                    if (!reference.UnevaluatedInclude.Contains(rule.Name)) continue; // Case Search ?
-                    if (rule.RemoveAllMetaData && reference.UnevaluatedInclude.Length != rule.Name.Length)
+                    // Need to handle name that include other names etc
+                    // Castle.ActiveRecord and Castle
+                    // NHibernate NHibernate.ByteCode.Castle
+
+                    // Does 
+                    if (rule.RemoveAllMetaData && reference.UnevaluatedInclude.Contains(rule.Name + ","))
                     {
                         reference.UnevaluatedInclude = rule.Name;
                     }
                 }
             }
-            if (project.IsDirty)
-                Console.WriteLine($"Changed: {fileName}");
+            if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
             project.Save();
         }
 
@@ -165,6 +182,36 @@ namespace ProjectFileFixer
                 project.MarkDirty();
                 project.Save();
             }
+        }
+
+        void Stage5TsdProjectsAreVersion1(List<string> sourceFileList)
+        {
+            const string tsdVersion = " Version=1.0.0.0"; // Note Space is required
+            foreach (var fileName in sourceFileList)
+            {
+                var project = new Project(fileName);
+                var references = project.GetItems("Reference");
+                foreach (var reference in references)
+                {
+                    var include = reference.EvaluatedInclude;
+                    var values = include.Split(',');
+                    if (values.Length > 1)
+                    {
+                        if (values[0].Contains(@"Tsd."))
+                        {
+                            if (!values[1].Contains(tsdVersion))
+                            {
+                                values[1] = tsdVersion;
+                                reference.UnevaluatedInclude = String.Join(",", values);
+                            }
+                        }
+
+                    }
+                }
+                if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
+                project.Save();
+            }
+
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
