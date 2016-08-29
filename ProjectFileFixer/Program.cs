@@ -19,7 +19,7 @@ namespace ProjectFileFixer
 
         private void Execute(string stage)
         {
-            string[] sourceSearchPatterns = { "*.csproj" };
+            string[] sourceSearchPatterns = {"*.csproj"};
             //            const string sourceCheckRootFolder = @"C:\Dev\tools\";
             const string sourceCheckRootFolder = @"C:\Dev\";
 
@@ -46,7 +46,26 @@ namespace ProjectFileFixer
                 new ReferenceRules {Name = "NHibernate.ByteCode.Castle", RemoveAllMetaData = true},
                 new ReferenceRules {Name = "NVelocity", RemoveAllMetaData = true},
                 new ReferenceRules {Name = "CabLib", RemoveAllMetaData = true},
-                
+                new ReferenceRules {Name = "aspdu.net", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "NConsole", RemoveAllMetaData = true},
+
+
+                new ReferenceRules {Name = "System", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Configuration", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Core", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Data", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Data.DataSetExtensions", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Data.SqlServerCe", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Drawing", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.EnterpriseServices", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Management.Automation", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.ServiceModel", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Web", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Web.Mobile", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Web.Services", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Xml", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "System.Xml.Linq", RemoveAllMetaData = true},
+
             };
 
             // Stage Rules
@@ -54,6 +73,7 @@ namespace ProjectFileFixer
             if (stage.Contains("3")) stage = stage + "1";
             if (stage.Contains("4")) stage = stage + "1";
             if (stage.Contains("5")) stage = stage + "1";
+            if (stage.Contains("6")) stage = stage + "1";
 
             // Run Stages
             if (stage.Contains("1"))
@@ -80,13 +100,19 @@ namespace ProjectFileFixer
             {
                 Stage5TsdProjectsAreVersion1(sourceFileList);
             }
+
+            if (stage.Contains("5"))
+            {
+                Stage6ProjectSetDotVersion(sourceFileList,"4.6.2");
+            }
         }
 
 
         List<string> Stage1FindProjectFiles(string rootFolder, string[] searchPatterns)
         {
             var files = searchPatterns.AsParallel()
-                .SelectMany(searchPattern => Directory.EnumerateFiles(rootFolder, searchPattern, SearchOption.AllDirectories));
+                .SelectMany(
+                    searchPattern => Directory.EnumerateFiles(rootFolder, searchPattern, SearchOption.AllDirectories));
             return files.ToList();
         }
 
@@ -125,7 +151,9 @@ namespace ProjectFileFixer
                 if (reference.HasMetadata(@"Name"))
                 {
                     var test = reference.GetMetadataValue(@"Name");
-                    if (String.Compare(test, 0, reference.EvaluatedInclude, 0, test.Length, StringComparison.OrdinalIgnoreCase) == 0)
+                    if (
+                        String.Compare(test, 0, reference.EvaluatedInclude, 0, test.Length,
+                            StringComparison.OrdinalIgnoreCase) == 0)
                     {
                         reference.RemoveMetadata(@"Name");
                     }
@@ -211,7 +239,43 @@ namespace ProjectFileFixer
                 if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
                 project.Save();
             }
+        }
 
+        void Stage6ProjectSetDotVersion(List<string> sourceFileList, string version)
+        {
+            foreach (var fileName in sourceFileList)
+            {
+                Stage6aProjectSetDotVersion(fileName, version);
+            }
+        }
+    
+
+        void Stage6aProjectSetDotVersion(string fileName, string version)
+        {
+//TODO
+            // Set the Correct version of different DLL
+
+
+            //var project = new Project(fileName);
+
+            //var references = project.GetItems("Reference");
+            //foreach (ProjectItem reference in references)
+            //{
+            //    foreach (var rule in rules)
+            //    {
+            //        // Need to handle name that include other names etc
+            //        // Castle.ActiveRecord and Castle
+            //        // NHibernate NHibernate.ByteCode.Castle
+
+            //        // Does 
+            //        if (rule.RemoveAllMetaData && reference.UnevaluatedInclude.Contains(rule.Name + ","))
+            //        {
+            //            reference.UnevaluatedInclude = rule.Name;
+            //        }
+            //    }
+            //}
+            //if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
+            //project.Save();
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
