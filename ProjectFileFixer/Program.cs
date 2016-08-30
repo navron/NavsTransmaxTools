@@ -14,14 +14,13 @@ namespace ProjectFileFixer
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
             if (args.Length < 1) throw new Exception("No Stage to do");
 
-            new Program().Execute(args[0]);
+            new Program().Execute(args[0], args[1]);
         }
 
-        private void Execute(string stage)
+        private void Execute(string stage, string sourceCheckRootFolder)
         {
-            string[] sourceSearchPatterns = { "*.csproj" };
+            string[] sourceSearchPatterns = { "*.csproj", "*.config", "*.Config" };
             //            const string sourceCheckRootFolder = @"C:\Dev\tools\";
-            const string sourceCheckRootFolder = @"C:\Dev\";
 
             var sourceFileList = new List<string>();
 
@@ -54,6 +53,7 @@ namespace ProjectFileFixer
             if (stage.Contains("3")) stage = stage + "1";
             if (stage.Contains("4")) stage = stage + "1";
             if (stage.Contains("5")) stage = stage + "1";
+            if (stage.Contains("6")) stage += "1";
 
             // Run Stages
             if (stage.Contains("1"))
@@ -79,6 +79,10 @@ namespace ProjectFileFixer
             if (stage.Contains("5"))
             {
                 Stage5TsdProjectsAreVersion1(sourceFileList);
+            }
+            if (stage.Contains("6"))
+            {
+                Stage6RemoveSystemCore(sourceFileList);
             }
         }
 
@@ -211,7 +215,39 @@ namespace ProjectFileFixer
                 if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
                 project.Save();
             }
+        }
 
+        private void Stage6RemoveSystemCore(List<string> sourceFileList)
+        {
+            foreach (var file in sourceFileList)
+            {
+                if (file.Contains(".csproj"))
+                {
+                    var project = new Project(file);
+
+                    var references = project.GetItems("Reference");
+
+                    foreach (var reference in references)
+                    {
+                        if (reference.Xml.Include.Contains("System.Core"))
+                        {
+                            project.RemoveItem(reference);
+                            Console.WriteLine($"{reference.Xml.Include} has been removed from {project.FullPath}");
+                            break;
+                        }
+                    }
+                    if (project.IsDirty) Console.WriteLine($"Changed: {file}");
+
+                    project.Save();
+                }
+                else if (file.Contains(".config") || file.Contains(".Config"))
+                {
+                    var lineList = File.ReadAllLines(file).ToList();
+                    lineList = lineList.Where(x => !x.Contains("System.Core")).ToList();
+                    File.WriteAllLines(file, lineList.ToArray());
+                    Console.WriteLine($"Changed: {file}");
+                }
+            }
         }
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
