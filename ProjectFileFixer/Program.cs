@@ -229,7 +229,7 @@ namespace ProjectFileFixer
 
                     foreach (var reference in references)
                     {
-                        if (reference.Xml.Include.Equals("System.Core"))
+                        if (reference.Xml.Include.Contains("System.Core"))
                         {
                             project.RemoveItem(reference);
                             Console.WriteLine($"{reference.Xml.Include} has been removed from {project.FullPath}");
