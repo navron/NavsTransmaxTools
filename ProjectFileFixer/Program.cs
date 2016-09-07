@@ -46,7 +46,7 @@ namespace ProjectFileFixer
                 new ReferenceRules {Name = "NVelocity", RemoveAllMetaData = true},
                 new ReferenceRules {Name = "CabLib", RemoveAllMetaData = true},
                 new ReferenceRules {Name = "aspdu.net", RemoveAllMetaData = true},
-                new ReferenceRules {Name = "NConsole", RemoveAllMetaData = true},
+                new ReferenceRules {Name = "NConsole", RemoveAllMetaData = false},
 
 
                 new ReferenceRules {Name = "System", RemoveAllMetaData = true},
@@ -74,6 +74,7 @@ namespace ProjectFileFixer
             if (stage.Contains("5")) stage = stage + "1";
             if (stage.Contains("6")) stage = stage + "1";
             if (stage.Contains("7")) stage = stage + "1";
+            if (stage.Contains("8")) stage = stage + "1";
 
             // Run Stages
             if (stage.Contains("1"))
@@ -108,8 +109,37 @@ namespace ProjectFileFixer
             {
                 Stage7RemoveSystemCore(sourceFileList);
             }
+            if (stage.Contains("8"))
+            {
+                State8RemovePerfer32Bit(sourceFileList);
+            }
         }
 
+        /// <summary>
+        /// Set all executables to 64bit
+        /// </summary>
+        /// <param name="sourceFileList"></param>
+        private void State8RemovePerfer32Bit(List<string> sourceFileList)
+        {
+            foreach (var file in sourceFileList)
+            {
+                if (file.Contains(".csproj"))
+                {
+                    var project = new Project(file);
+
+                    var outputtype = project.GetProperty("OutputType");
+
+                    if (outputtype.EvaluatedValue.Contains("Exe"))
+                    {
+                        project.SetProperty("Prefer32Bit", "false");
+                    }
+
+                    if (project.IsDirty) Console.WriteLine($"Changed: {file}");
+
+                    project.Save();
+                }
+            }
+        }
 
         List<string> Stage1FindProjectFiles(string rootFolder, string[] searchPatterns)
         {
@@ -132,6 +162,7 @@ namespace ProjectFileFixer
 
         void Stage2aProjectRemoveMetaData(string fileName)
         {
+            if (!fileName.Contains("csproj")) return;
             var project = new Project(fileName);
 
             var references = project.GetItems("Reference");
@@ -182,7 +213,7 @@ namespace ProjectFileFixer
         void Stage3aProjectRemoveVersionNumbers(string fileName, List<ReferenceRules> rules)
         {
             // Set the Correct version of different DLL
-
+            if (!fileName.Contains("csproj")) return;
             var project = new Project(fileName);
 
             var references = project.GetItems("Reference");
@@ -209,6 +240,7 @@ namespace ProjectFileFixer
         {
             foreach (var fileName in sourceFileList)
             {
+                if (!fileName.Contains("csproj")) continue;
                 var project = new Project(fileName);
                 project.MarkDirty();
                 project.Save();
@@ -220,6 +252,7 @@ namespace ProjectFileFixer
             const string tsdVersion = " Version=1.0.0.0"; // Note Space is required
             foreach (var fileName in sourceFileList)
             {
+                if (!fileName.Contains("csproj")) continue;
                 var project = new Project(fileName);
                 var references = project.GetItems("Reference");
                 foreach (var reference in references)
@@ -319,6 +352,7 @@ namespace ProjectFileFixer
             var exception = e.ExceptionObject as Exception;
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Application exiting with error:{exception?.Message ?? "UnknownReason"}");
+            Console.WriteLine(exception?.StackTrace);
             Console.ForegroundColor = ConsoleColor.White;
             Environment.Exit(-1);
         }
