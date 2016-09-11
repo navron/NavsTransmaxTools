@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ProjectFileFixer
+namespace ProjectFileFixerMkII
 {
     public enum Stages
     {
@@ -105,7 +105,7 @@ namespace ProjectFileFixer
                 {
                     case Stages.UpgradeToVS15:
                         {
-                            UpgradeProjectsToVS2015(sourceCheckRootFolder);
+                            UpgradeProjectsToVS2015(sourceFileList);
                             break;
                         }
                     case Stages.RemoveMeta:
@@ -144,18 +144,20 @@ namespace ProjectFileFixer
                             break;
                         }
                     default:
-                        {
-                            Console.Error.WriteLine(Environment.StackTrace);
-                            throw new Exception("Stage not found");                            
-                        }
-                        
+                        break;
                 }
             }
         }
 
-        private static void UpgradeProjectsToVS2015(string sourcepath)
-        {                       
-            RunPowershell.ExecutePowerShellCommand(sourcepath); 
+        private static void UpgradeProjectsToVS2015(List<string> sourceFileList)
+        {
+            foreach (var file in sourceFileList)
+            {
+                if (file.Contains(".csproj"))
+                {
+                    RunPowershell.ExecutePowerShellCommand(file);
+                }
+            }
         }
         /// <summary>
         /// Set all executables to 64bit
@@ -181,7 +183,7 @@ namespace ProjectFileFixer
                     project.Save();
                 }
             }
-        }
+        }        
 
         static void ProjectRemoveMetaData(List<string> sourceFileList)
         {
