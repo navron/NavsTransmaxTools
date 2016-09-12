@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace ProjectFileFixer
+namespace ProjectFileFixerMkII
 {
     public enum Stages
     {
@@ -17,15 +17,14 @@ namespace ProjectFileFixer
         SetTsdVersion,
         Stage7,
         RemoveSystemCore,
-        Perfer64BIt,
-        RemoveDotNet35WebConfig
+        Perfer64BIt
     }
 
     class Program
     {
-        private const string help = "Usage: <source directory> <stage> <stage>...\n" +
+        private const string help = "Usage: <stages> <source directory> \n" +
                                     "   Each stage is additive\n" +
-                                    "       e.g C:/git/streams 1 2 3\n" +
+                                    "       e.g 123 C:/git/streams\n" +
                                     "Stages:\n" +
                                     "   1: Find all csproj files in a give directory\n" +
                                     "   2: Upgrade all csprog file to toolsversion 14.0 and framework 4.6.2\n" +
@@ -35,8 +34,7 @@ namespace ProjectFileFixer
                                     "   6: Set Tsd refernces to version 1.0.0.0\n" +
                                     "   7: Does nothing at the moment\n" +
                                     "   8: Removes System.Core from project files the given directory\n" +
-                                    "   9: Set executables to perfer 64 bit\n" +
-                                    "   10: Remove .net 3.5 version numbers from web config files\n";
+                                    "   9: Set executables to perfer 64 bit\n";
 
 
         static void Main(string[] args)
@@ -46,13 +44,13 @@ namespace ProjectFileFixer
             {
                 Console.WriteLine(help);
                 return;
-        }
+            }
 
             string[] sourceSearchPatterns = { "*.csproj", "*.config", "*.Config" };
             //            const string sourceCheckRootFolder = @"C:\Dev\tools\";
 
             var sourceFileList = new List<string>();
-            var sourceCheckRootFolder = args[0];
+            var sourceCheckRootFolder = args[1];
             var referenceRules = new List<ReferenceRules>
             {
                 new ReferenceRules {Name = "log4net", RemoveAllMetaData = true},
@@ -95,11 +93,8 @@ namespace ProjectFileFixer
                 new ReferenceRules {Name = "System.Xml.Linq", RemoveAllMetaData = true},
 
             };
-            var stages = new List<Stages>();
-            for (int i = 1; i < args.Count(); i++)
-            {
-                stages.Add((Stages)Enum.Parse(typeof(Stages), args[i]));
-            }
+
+            var stages = args[0].ToCharArray().Select(x => { return (Stages)int.Parse(x.ToString()); }).Where(x => x != Stages.FindAll).ToList();
 
             sourceFileList = Stage1FindProjectFiles(sourceCheckRootFolder, sourceSearchPatterns);
             Console.WriteLine($"Scanned returned {sourceFileList.Count} files");
@@ -108,80 +103,61 @@ namespace ProjectFileFixer
             {
                 switch (stage)
                 {
-                    case (Stages.FindAll):
-                        {
-                            break;
-            }
                     case Stages.UpgradeToVS15:
-            {
-                            UpgradeProjectsToVS2015(sourceCheckRootFolder);
+                        {
+                            UpgradeProjectsToVS2015(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.RemoveMeta:
-            {
+                        {
                             ProjectRemoveMetaData(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.RemoveVersion:
-            {
+                        {
                             ProjectRemoveVersionNumbers(sourceFileList, referenceRules);
                             break;
-            }
+                        }
                     case Stages.MarkAsDirty:
-            {
+                        {
                             ProjectMarkAsDirty(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.SetTsdVersion:
-            {
+                        {
                             TsdProjectsAreVersion1(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.Stage7:
-            {
+                        {
                             ProjectSetDotVersion(sourceFileList, "4.6.2");
                             break;
-            }
+                        }
                     case Stages.RemoveSystemCore:
                         {
                             RemoveSystemCore(sourceFileList);
                             break;
-        }
+                        }
                     case Stages.Perfer64BIt:
                         {
                             RemovePerfer32Bit(sourceFileList);
                             break;
                         }
-                    case Stages.RemoveDotNet35WebConfig:
-                        {
-                            RemoveDotNet35WebConfig(sourceFileList);
-                            break;
-                        }
                     default:
-                        {
-                            throw new Exception("Stage not found");
-                        }
-
+                        break;
                 }
             }
         }
 
-        private static void RemoveDotNet35WebConfig(List<string> sourceFileList)
+        private static void UpgradeProjectsToVS2015(List<string> sourceFileList)
         {
-            foreach (var filepath in sourceFileList)
+            foreach (var file in sourceFileList)
             {
-                if (filepath.Contains(".config") || filepath.Contains(".Config"))
+                if (file.Contains(".csproj"))
                 {
-                    string text = File.ReadAllText(filepath);
-                    text = text.Replace("Version=3.5.0.0", "Version=4.0.0.0");
-                    File.WriteAllText(filepath, text);
-        }
+                    RunPowershell.ExecutePowerShellCommand(file);
+                }
             }
-        }
-
-        private static void UpgradeProjectsToVS2015(string sourcepath)
-        {
-            RunPowershell.ExecutePowerShellCommand(sourcepath);
         }
         /// <summary>
         /// Set all executables to 64bit
@@ -207,7 +183,7 @@ namespace ProjectFileFixer
                     project.Save();
                 }
             }
-        }
+        }        
 
         static void ProjectRemoveMetaData(List<string> sourceFileList)
         {
