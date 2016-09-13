@@ -47,7 +47,7 @@ namespace ProjectFileFixer
             {
                 Console.WriteLine(help);
                 return;
-            }
+        }
 
             string[] sourceSearchPatterns = { "*.csproj", "*.config", "*.Config" };
             //            const string sourceCheckRootFolder = @"C:\Dev\tools\";
@@ -112,42 +112,42 @@ namespace ProjectFileFixer
                     case (Stages.FindAll):
                         {
                             break;
-                        }
+            }
                     case Stages.UpgradeToVS15:
-                        {
+            {
                             UpgradeProjectsToVS2015(sourceCheckRootFolder);
                             break;
-                        }
+            }
                     case Stages.RemoveMeta:
-                        {
+            {
                             ProjectRemoveMetaData(sourceFileList);
                             break;
-                        }
+            }
                     case Stages.RemoveVersion:
-                        {
+            {
                             ProjectRemoveVersionNumbers(sourceFileList, referenceRules);
                             break;
-                        }
+            }
                     case Stages.MarkAsDirty:
-                        {
+            {
                             ProjectMarkAsDirty(sourceFileList);
                             break;
-                        }
+            }
                     case Stages.SetTsdVersion:
-                        {
+            {
                             TsdProjectsAreVersion1(sourceFileList);
                             break;
-                        }
+            }
                     case Stages.Stage7:
-                        {
+            {
                             ProjectSetDotVersion(sourceFileList, "4.6.2");
                             break;
-                        }
+            }
                     case Stages.RemoveSystemCore:
                         {
                             RemoveSystemCore(sourceFileList);
                             break;
-                        }
+        }
                     case Stages.Perfer64BIt:
                         {
                             RemovePerfer32Bit(sourceFileList);
@@ -195,7 +195,7 @@ namespace ProjectFileFixer
                     string text = File.ReadAllText(filepath);
                     text = text.Replace("3.5", "4.0");
                     File.WriteAllText(filepath, text);
-                }
+        }
             }
         }
 
