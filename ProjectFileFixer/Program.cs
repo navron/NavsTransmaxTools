@@ -18,7 +18,8 @@ namespace ProjectFileFixer
         Stage7,
         RemoveSystemCore,
         Perfer64BIt,
-        RemoveDotNet35WebConfig
+        RemoveDotNet35WebConfig,
+        ChangeCSTargetTov14
     }
 
     class Program
@@ -157,11 +158,30 @@ namespace ProjectFileFixer
                             RemoveDotNet35WebConfig(sourceFileList);
                             break;
                         }
+                    case Stages.ChangeCSTargetTov14:
+                        {
+                            ChangeCSTargetTov14(sourceFileList);
+                            break;
+                        }
                     default:
                         {
                             throw new Exception("Stage not found");
                         }
 
+                }
+            }
+        }
+
+        private static void ChangeCSTargetTov14(List<string> sourceFileList)
+        {
+            foreach (var filepath in sourceFileList)
+            {
+                if (filepath.Contains(".csproj"))
+                {
+                    string text = File.ReadAllText(filepath);
+                    text = text.Replace("Project=\"$(MSBuildExtensionsPath)\\Microsoft\\VisualStudio\\v9.0\\WebApplications\\Microsoft.WebApplication.targets\""
+                                        ,"Project=\"$(MSBuildExtensionsPath)\\Microsoft\\VisualStudio\\v14.0\\WebApplications\\Microsoft.WebApplication.targets\"");
+                    File.WriteAllText(filepath, text,Encoding.UTF8);
                 }
             }
         }
@@ -173,7 +193,7 @@ namespace ProjectFileFixer
                 if (filepath.Contains(".config") || filepath.Contains(".Config"))
                 {
                     string text = File.ReadAllText(filepath);
-                    text = text.Replace("Version=3.5.0.0", "Version=4.0.0.0");
+                    text = text.Replace("3.5", "4.0");
                     File.WriteAllText(filepath, text);
                 }
             }
@@ -397,13 +417,13 @@ namespace ProjectFileFixer
 
                     project.Save();
                 }
-                else if (file.Contains(".config") || file.Contains(".Config"))
-                {
-                    var lineList = File.ReadAllLines(file).ToList();
-                    lineList = lineList.Where(x => !x.Contains("System.Core")).ToList();
-                    File.WriteAllLines(file, lineList.ToArray());
-                    Console.WriteLine($"Changed: {file}");
-                }
+                //else if (file.Contains(".config") || file.Contains(".Config"))
+                //{
+                //    var lineList = File.ReadAllLines(file).ToList();
+                //    lineList = lineList.Where(x => !x.Contains("System.Core")).ToList();
+                //    File.WriteAllLines(file, lineList.ToArray());
+                //    Console.WriteLine($"Changed: {file}");
+                //}
             }
         }
 
