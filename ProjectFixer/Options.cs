@@ -1,49 +1,59 @@
-﻿using System.Collections.Generic;
-using CommandLine;
+﻿using CommandLine;
 
 namespace ProjectFixer
 {
-    // Documentation https://github.com/gsscoder/commandline/wiki/Latest-Version
+    // Documentation at https://github.com/gsscoder/commandline/wiki/Latest-Version
 
 
-    class BaseOptions
+    class Options
     {
         private string folder;
+
         [Option('d', @"dir", Required = false, HelpText = "Base folder to search for files ", Default = "CurrentDir")]
         public string Folder
         {
             get { return folder; }
             set { folder = value == "CurrentDir" ? System.IO.Directory.GetCurrentDirectory() : value; }
         }
+        [Option('f', @"file", Required = false, HelpText = "Specifies a single file, Program does not scan for files")]
+        public string File { get; set; }
 
+        //[Option("SearchPatterns", HelpText = "file types to search for")]
+        public string[] SearchPatterns { get; set; }
 
-        [Option("LineLength", HelpText = "numeric value here")]
+        [Option(@"verbose", HelpText = "Verbosely output information")]
+        public bool Verbose { get; set; }
+    }
+
+    class MakeOptions : Options
+    {
+        [Option(@"length", HelpText = "Length of the Line that the project dependences wrap, --Zero to disable--", Default = 80)]
         public int LineLength { get; set; }
 
+        [Option("sort", HelpText = "Sort the project within the make file", Default = false)]
+        public bool SortProject { get; set; }
 
-        [Option('t', "text", Required = true, HelpText = "text value here")]
-        public string TextValue { get; set; }
-
-        [Option('n', "numeric", HelpText = "numeric value here")]
-        public double NumericValue { get; set; }
-
-        [Option('b', "bool", HelpText = "on|off switch here")]
-        public bool BooleanValue { get; set; }
-
-        [Option('t', Separator = ':')]
-        public IEnumerable<string> Types { get; set; }
-
-        //[HelpOption]
-        //public string GetUsage()
-        //{
-        //    return HelpText.AutoBuild(this, current => HelpText.DefaultParsingErrorsHandler(this, current));
-        //}
+        public MakeOptions()
+        {
+            SearchPatterns = new[] { "*.mak" };    
+        }
     }
 
-    [Verb("add", HelpText = "Add file contents to the index.")]
-    class AddOptions
-    { //normal options here
-
+    [Verb("MakeFormat", HelpText = "Format Make files")]
+    class MakeFormat : MakeOptions
+    {
     }
 
+    [Verb("MakeDependencyCheck", HelpText = "Checks Make file dependences and rewrites them if needed")]
+    class MakeDependencyCheck : MakeOptions
+    {
+        // Assume Make files are formated
+    }
+
+    [Verb("MakeScanErrors", HelpText = "Scan Make files for faults")]
+    class MakeScanErrors : MakeOptions
+    {
+        [Option(@"fix", HelpText = "Fix Errors", Default = false)]
+        public bool FixErrors { get; set; }
+    }
 }

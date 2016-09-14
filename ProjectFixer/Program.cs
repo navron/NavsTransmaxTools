@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using CommandLine;
 
 namespace ProjectFixer
@@ -9,12 +11,46 @@ namespace ProjectFixer
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
+            Parser.Default.ParseArguments<MakeFormat, MakeScanErrors, MakeDependencyCheck>(args)
+                .WithParsed<MakeFormat>(RunMakeFormater)
+                .WithParsed<MakeScanErrors>(RunMakeScanErrors)
+                .WithParsed<MakeDependencyCheck>(RunMakeDependencyCheck)
+                .WithNotParsed(CommandLineNotParsed);
+        }
 
-            // (1) default singleton
-            var result = Parser.Default.ParseArguments<BaseOptions>(args);
+        static void RunMakeFormater(MakeOptions options)
+        {
+            var files = Helper.FindFiles(options);
+            Parallel.ForEach(files, (file) =>
+            {
+                if (options.Verbose) Console.WriteLine($"Formatting {file}");
+                var make = new MakeFile();
+                make.ReadFile(file);
+                make.WriteFile(options.LineLength, options.SortProject);
+            });
+        }
+        static void RunMakeDependencyCheck(MakeDependencyCheck options)
+        {
 
-         //   result.Tag == ParserResultType.Parsed
-
+        }
+        static void RunMakeScanErrors(MakeScanErrors options)
+        {
+            var files = Helper.FindFiles(options);
+            //Parallel.ForEach(files, (file) =>
+            foreach (var file in files) // when write 
+            {
+                if (options.Verbose) Console.WriteLine($"Scanning {file}");
+                var make = new MakeFile();
+                make.ReadFile(file);
+                var found = make.ScanForErrors(options.FixErrors);
+                if (found && options.FixErrors)
+                {
+                    make.WriteFile(options.LineLength, options.SortProject);
+                }
+            }//);
+        }
+        static void CommandLineNotParsed(IEnumerable<Error> errs)
+        {
 
         }
 

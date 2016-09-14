@@ -52,25 +52,53 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper.cs" />
     <Compile Include="MakeFile.cs" />
+    <Compile Include="MakeFileHelper.cs" />
+    <Compile Include="MakeFileProject.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\TestHelper.cs" />
     <Compile Include="Tests\TestMakeFile.cs" />
+    <Compile Include="Tests\TestMakeFileHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Tests\TestSmallValid1Simple.mak" />
+    <EmbeddedResource Include="Tests\TestMake1Simple.mak" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Tests\TextFile1 - Copy.mak" />
+    <EmbeddedResource Include="Tests\TestFormatSorted.mak" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Tests\TestSmallValid2Complex.mak" />
+    <EmbeddedResource Include="Tests\TestProcessComplexRaw.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestFormatRaw.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestFormatUnSorted.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestFormatUnSortedLine20.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestFormatSortedLine20.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestFormatComplexRaw.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestFormatComplexRawSortedLine20.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestRealAS.mak" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Tests\TestRealASSortedLine80.mak" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
