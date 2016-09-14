@@ -52,12 +52,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="VisualStudioFile.cs" />
+    <Compile Include="VisualStudioProjectFile.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="MakeFile.cs" />
+    <Compile Include="MakeFileDependencyAllocator.cs" />
+    <Compile Include="MakeFileCircularRefCheck.cs" />
     <Compile Include="MakeFileHelper.cs" />
     <Compile Include="MakeFileProject.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Checkers\ProjectFileCSharp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\TestHelper.cs" />
     <Compile Include="Tests\TestMakeFile.cs" />

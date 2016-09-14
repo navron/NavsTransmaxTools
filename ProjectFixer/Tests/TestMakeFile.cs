@@ -112,7 +112,7 @@ namespace ProjectFixer.Tests
             var make = new MakeFile();
             make.ProcessMakeFileRawLines(given.ToList());
             var actual = make.FormatFile(lineLength, sortProjects);
-            File.WriteAllLines(@"c:\temp\out.mak",actual);
+    //        File.WriteAllLines(@"c:\temp\out.mak",actual);
             CollectionAssert.AreEquivalent(expected, actual);
         }
     }

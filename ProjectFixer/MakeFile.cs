@@ -257,5 +257,14 @@ namespace ProjectFixer
             }
             return problems;
         }
+
+        /// <summary>
+        /// Search all the Project Raw lines for copy .h files to COM\Include
+        /// This is how to determine c++ references
+        /// </summary>
+        public void ProcessPublishItems()
+        {
+            //TODO
+        }
     }
 }

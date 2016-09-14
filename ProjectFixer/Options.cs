@@ -56,4 +56,10 @@ namespace ProjectFixer
         [Option(@"fix", HelpText = "Fix Errors", Default = false)]
         public bool FixErrors { get; set; }
     }
+
+
+    [Verb("MakeDependencyAllocator", HelpText = "Allocators Correct Dependency")]
+    class MakeDependencyAllocator : MakeOptions
+    {
+    }
 }

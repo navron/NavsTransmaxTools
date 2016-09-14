@@ -16,7 +16,7 @@ namespace ProjectFixer
                 return new List<string> { options.File };
             }
 
-            // Scan in Parallel for all files matching the required
+            // Scan the Search Patterns in Parallel for all files matching the required
             var files = options.SearchPatterns.AsParallel()
                 .SelectMany(searchPattern => Directory.EnumerateFiles(options.Folder, searchPattern, SearchOption.AllDirectories))
                 .ToList();

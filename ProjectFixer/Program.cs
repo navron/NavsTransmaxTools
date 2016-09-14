@@ -11,10 +11,12 @@ namespace ProjectFixer
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            Parser.Default.ParseArguments<MakeFormat, MakeScanErrors, MakeDependencyCheck>(args)
+            Parser.Default.ParseArguments<MakeFormat, MakeScanErrors, MakeDependencyCheck,
+                                          MakeDependencyAllocator > (args)
                 .WithParsed<MakeFormat>(RunMakeFormater)
                 .WithParsed<MakeScanErrors>(RunMakeScanErrors)
                 .WithParsed<MakeDependencyCheck>(RunMakeDependencyCheck)
+                                .WithParsed<MakeDependencyAllocator>(RunMakeDependencyAllocator)
                 .WithNotParsed(CommandLineNotParsed);
         }
 
@@ -36,8 +38,7 @@ namespace ProjectFixer
         static void RunMakeScanErrors(MakeScanErrors options)
         {
             var files = Helper.FindFiles(options);
-            //Parallel.ForEach(files, (file) =>
-            foreach (var file in files) // when write 
+            Parallel.ForEach(files, (file) =>
             {
                 if (options.Verbose) Console.WriteLine($"Scanning {file}");
                 var make = new MakeFile();
@@ -47,7 +48,27 @@ namespace ProjectFixer
                 {
                     make.WriteFile(options.LineLength, options.SortProject);
                 }
-            }//);
+            });
+        }
+        static void RunMakeDependencyAllocator(MakeOptions options)
+        {
+            var files = Helper.FindFiles(options);
+            var makeFiles = new List<MakeFile>();
+            Parallel.ForEach(files, (file) =>
+            {
+                var make = new MakeFile();
+                make.ReadFile(file);
+                make.ProcessPublishItems();
+                makeFiles.Add(make);
+            });
+
+            var visualStudioFiles = new VisualStudioFile ();
+            options.SearchPatterns = new[] {"*.csproj", "*.vcxproj"};
+            visualStudioFiles.BuildProjectFileList(options);
+            // Scan for C++ Files
+            // Scan for CS Files
+
+
         }
         static void CommandLineNotParsed(IEnumerable<Error> errs)
         {
