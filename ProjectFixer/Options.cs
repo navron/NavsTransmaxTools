@@ -58,8 +58,9 @@ namespace ProjectFixer
     }
 
 
-    [Verb("MakeDependencyAllocator", HelpText = "Allocators Correct Dependency")]
-    class MakeDependencyAllocator : MakeOptions
-    {
-    }
+    //[Verb("MakeDependencyAllocator", HelpText = "Allocates Correct Dependency")]
+    //class MakeDependencyAllocator : MakeOptions
+    //{
+
+    //}
 }

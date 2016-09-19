@@ -12,11 +12,11 @@ namespace ProjectFixer
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
             Parser.Default.ParseArguments<MakeFormat, MakeScanErrors, MakeDependencyCheck,
-                                          MakeDependencyAllocator > (args)
+                                          MakeDependencyAllocator>(args)
                 .WithParsed<MakeFormat>(RunMakeFormater)
                 .WithParsed<MakeScanErrors>(RunMakeScanErrors)
                 .WithParsed<MakeDependencyCheck>(RunMakeDependencyCheck)
-                                .WithParsed<MakeDependencyAllocator>(RunMakeDependencyAllocator)
+                .WithParsed<MakeDependencyAllocator>(options => options.Run())
                 .WithNotParsed(CommandLineNotParsed);
         }
 
@@ -26,7 +26,7 @@ namespace ProjectFixer
             Parallel.ForEach(files, (file) =>
             {
                 if (options.Verbose) Console.WriteLine($"Formatting {file}");
-                var make = new MakeFile();
+                var make = new MakeFile.MakeFile();
                 make.ReadFile(file);
                 make.WriteFile(options.LineLength, options.SortProject);
             });
@@ -41,7 +41,7 @@ namespace ProjectFixer
             Parallel.ForEach(files, (file) =>
             {
                 if (options.Verbose) Console.WriteLine($"Scanning {file}");
-                var make = new MakeFile();
+                var make = new MakeFile.MakeFile();
                 make.ReadFile(file);
                 var found = make.ScanForErrors(options.FixErrors);
                 if (found && options.FixErrors)
@@ -50,26 +50,7 @@ namespace ProjectFixer
                 }
             });
         }
-        static void RunMakeDependencyAllocator(MakeOptions options)
-        {
-            var files = Helper.FindFiles(options);
-            var makeFiles = new List<MakeFile>();
-            Parallel.ForEach(files, (file) =>
-            {
-                var make = new MakeFile();
-                make.ReadFile(file);
-                make.ProcessPublishItems();
-                makeFiles.Add(make);
-            });
 
-            var visualStudioFiles = new VisualStudioFile ();
-            options.SearchPatterns = new[] {"*.csproj", "*.vcxproj"};
-            visualStudioFiles.BuildProjectFileList(options);
-            // Scan for C++ Files
-            // Scan for CS Files
-
-
-        }
         static void CommandLineNotParsed(IEnumerable<Error> errs)
         {
 
