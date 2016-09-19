@@ -28,6 +28,8 @@ namespace ProjectFixer
         }
     }
 
+    // from http://blog.danskingdom.com/saving-and-loading-a-c-objects-data-to-an-xml-json-or-binary-file/
+
     /// <summary>
     /// Functions for performing common Json Serialization operations.
     /// <para>Requires the Newtonsoft.Json assembly (Json.Net package in NuGet Gallery) to be referenced in your project.</para>
@@ -58,8 +60,7 @@ namespace ProjectFixer
             }
             finally
             {
-                if (writer != null)
-                    writer.Close();
+                writer?.Close();
             }
         }
 
@@ -81,8 +82,7 @@ namespace ProjectFixer
             }
             finally
             {
-                if (reader != null)
-                    reader.Close();
+                reader?.Close();
             }
         }
     }
