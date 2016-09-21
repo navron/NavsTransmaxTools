@@ -50,6 +50,12 @@
   <ItemGroup>
     <None Include="app.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectFileFixer\ProjectFileFixer.csproj">
+      <Project>{79935A87-A4E0-41E0-B7D8-0E7F9E0F06A9}</Project>
+      <Name>ProjectFileFixer</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

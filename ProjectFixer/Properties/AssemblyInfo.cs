@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CheckStoreProcCase")]
+[assembly: AssemblyTitle("ProjectFixer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CheckStoreProcCase")]
+[assembly: AssemblyProduct("ProjectFixer")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("5e0365d9-c12a-4396-a15f-7a844851e977")]
+[assembly: Guid("d7bf24cb-3b19-4e3c-9faf-e1a3fca57381")]
 
 // Version information for an assembly consists of the following four values:
 //
