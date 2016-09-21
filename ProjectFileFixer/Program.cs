@@ -30,11 +30,11 @@ namespace ProjectFileFixer
                                     "       e.g C:/git/streams 1 2 3\n" +
                                     "Stages:\n" +
                                     "   1: Find all csproj files in a give directory\n" +
-                                    "   2: Upgrade all csprog file to toolsversion 14.0 and framework 4.6.2\n" +
-                                    "   3: Remove meta data from refernces\n" +
-                                    "   4: Remove version numbers from refernces\n" +
+                                    "   2: Upgrade all csproj file to toolsversion 14.0 and framework 4.6.2\n" +
+                                    "   3: Remove meta data from references\n" +
+                                    "   4: Remove version numbers from references\n" +
                                     "   5: Mark project as dirty\n" +
-                                    "   6: Set Tsd refernces to version 1.0.0.0\n" +
+                                    "   6: Set Tsd references to version 1.0.0.0\n" +
                                     "   7: Does nothing at the moment\n" +
                                     "   8: Removes System.Core from project files the given directory\n" +
                                     "   9: Set executables to perfer 64 bit\n" +
