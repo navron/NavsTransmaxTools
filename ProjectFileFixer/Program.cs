@@ -19,7 +19,8 @@ namespace ProjectFileFixer
         RemoveSystemCore,
         Perfer64BIt,
         RemoveDotNet35WebConfig,
-        ChangeCSTargetTov14
+        ChangeCSTargetTov14,
+        SetWorkStationProjectsToAnyCPU
     }
 
     class Program
@@ -47,7 +48,7 @@ namespace ProjectFileFixer
             {
                 Console.WriteLine(help);
                 return;
-        }
+            }
 
             string[] sourceSearchPatterns = { "*.csproj", "*.config", "*.Config" };
             //            const string sourceCheckRootFolder = @"C:\Dev\tools\";
@@ -112,42 +113,42 @@ namespace ProjectFileFixer
                     case (Stages.FindAll):
                         {
                             break;
-            }
+                        }
                     case Stages.UpgradeToVS15:
-            {
+                        {
                             UpgradeProjectsToVS2015(sourceCheckRootFolder);
                             break;
-            }
+                        }
                     case Stages.RemoveMeta:
-            {
+                        {
                             ProjectRemoveMetaData(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.RemoveVersion:
-            {
+                        {
                             ProjectRemoveVersionNumbers(sourceFileList, referenceRules);
                             break;
-            }
+                        }
                     case Stages.MarkAsDirty:
-            {
+                        {
                             ProjectMarkAsDirty(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.SetTsdVersion:
-            {
+                        {
                             TsdProjectsAreVersion1(sourceFileList);
                             break;
-            }
+                        }
                     case Stages.Stage7:
-            {
+                        {
                             ProjectSetDotVersion(sourceFileList, "4.6.2");
                             break;
-            }
+                        }
                     case Stages.RemoveSystemCore:
                         {
                             RemoveSystemCore(sourceFileList);
                             break;
-        }
+                        }
                     case Stages.Perfer64BIt:
                         {
                             RemovePerfer32Bit(sourceFileList);
@@ -163,11 +164,38 @@ namespace ProjectFileFixer
                             ChangeCSTargetTov14(sourceFileList);
                             break;
                         }
+                    case Stages.SetWorkStationProjectsToAnyCPU:
+                        {
+                            SetWorkStationProjectsToAnyCPU(sourceFileList);
+                            break;
+                        }
                     default:
                         {
                             throw new Exception("Stage not found");
                         }
 
+                }
+            }
+        }
+
+        private static void SetWorkStationProjectsToAnyCPU(List<string> sourceFileList)
+        {
+            foreach (var filepath in sourceFileList)
+            {
+                if (filepath.Contains(@"\ws\") && filepath.Contains(".csproj"))
+                {
+                    var project = new Project(filepath);
+
+                    var platformTargets = project.GetItems("PlatformTarget");
+
+                    foreach (var platformTarget in platformTargets)
+                    {
+                        platformTarget.SetMetadataValue("PlatformTarget", "AnyCPU");
+                    }
+
+                    if (project.IsDirty) Console.WriteLine($"Changed: {filepath}");
+
+                    project.Save();
                 }
             }
         }
@@ -180,8 +208,8 @@ namespace ProjectFileFixer
                 {
                     string text = File.ReadAllText(filepath);
                     text = text.Replace("Project=\"$(MSBuildExtensionsPath)\\Microsoft\\VisualStudio\\v9.0\\WebApplications\\Microsoft.WebApplication.targets\""
-                                        ,"Project=\"$(MSBuildExtensionsPath)\\Microsoft\\VisualStudio\\v14.0\\WebApplications\\Microsoft.WebApplication.targets\"");
-                    File.WriteAllText(filepath, text,Encoding.UTF8);
+                                        , "Project=\"$(MSBuildExtensionsPath)\\Microsoft\\VisualStudio\\v14.0\\WebApplications\\Microsoft.WebApplication.targets\"");
+                    File.WriteAllText(filepath, text, Encoding.UTF8);
                 }
             }
         }
@@ -195,7 +223,7 @@ namespace ProjectFileFixer
                     string text = File.ReadAllText(filepath);
                     text = text.Replace("3.5", "4.0");
                     File.WriteAllText(filepath, text);
-        }
+                }
             }
         }
 
