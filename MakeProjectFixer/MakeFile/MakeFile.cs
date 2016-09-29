@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ProjectFixer.MakeFile
+namespace MakeProjectFixer.MakeFile
 {
     public class MakeFile
     {
@@ -23,7 +23,7 @@ namespace ProjectFixer.MakeFile
         internal string[] RawLines { get; set; }
 
         /// <summary>
-        /// File name full path
+        /// SingleFile name full path
         /// </summary>
         public string FileName { get; set; }
 

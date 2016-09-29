@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace ProjectFixer.Checkers
+namespace MakeProjectFixer.VisualStudioFile
 {
     class ProjectFileCSharp
 

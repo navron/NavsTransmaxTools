@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 
-namespace ProjectFixer.MakeFile.TestsMakeFile
+namespace MakeProjectFixer.MakeFile.TestsMakeFile
 {
     [TestFixture]
     public class TestMakeFileHelper

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ProjectFixer.VisualStudioFile
+namespace MakeProjectFixer.VisualStudioFile
 {
     class VisualStudioProjectFile
     {
@@ -15,7 +15,7 @@ namespace ProjectFixer.VisualStudioFile
         public string ProjectName { get; set; }
 
         /// <summary>
-        /// File name full path
+        /// SingleFile name full path
         /// </summary>
         public string FileName { get; set; }
 

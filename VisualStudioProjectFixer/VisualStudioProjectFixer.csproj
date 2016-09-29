@@ -7,8 +7,8 @@
     <ProjectGuid>{79935A87-A4E0-41E0-B7D8-0E7F9E0F06A9}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ProjectFileFixer</RootNamespace>
-    <AssemblyName>ProjectFileFixer</AssemblyName>
+    <RootNamespace>VisualStudioProjectFixer</RootNamespace>
+    <AssemblyName>VisualStudioProjectFixer</AssemblyName>
     <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

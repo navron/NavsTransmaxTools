@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace ProjectFixer
+namespace MakeProjectFixer
 {
     // Documentation at https://github.com/gsscoder/commandline/wiki/Latest-Version
 
@@ -16,7 +16,7 @@ namespace ProjectFixer
             set { folder = value == "CurrentDir" ? System.IO.Directory.GetCurrentDirectory() : value; }
         }
         [Option('f', @"file", Required = false, HelpText = "Specifies a single file, Program does not scan for files")]
-        public string File { get; set; }
+        public string SingleFile { get; set; }
 
         //[Option("SearchPatterns", HelpText = "file types to search for")]
         public string[] SearchPatterns { get; set; }
@@ -37,6 +37,9 @@ namespace ProjectFixer
         {
             SearchPatterns = new[] { "*.mak" };    
         }
+
+        [Option("stage", HelpText = "run stage x")]
+        public string Stage { get; set; }
     }
 
     [Verb("MakeFormat", HelpText = "Format Make files")]

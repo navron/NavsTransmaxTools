@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommandLine;
 
-namespace ProjectFixer
+namespace MakeProjectFixer
 {
     class Program
     {

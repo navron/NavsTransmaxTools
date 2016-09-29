@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
-namespace ProjectFixer.MakeFile
+namespace MakeProjectFixer.MakeFile
 {
     public class MakeFileProject
     {
@@ -34,6 +35,7 @@ namespace ProjectFixer.MakeFile
         /// </summary>
         public List<string> PostLines { get; set; }
 
+        [JsonIgnore]
         public IList<string> RawLines { get; set; }
 
         /// <summary>

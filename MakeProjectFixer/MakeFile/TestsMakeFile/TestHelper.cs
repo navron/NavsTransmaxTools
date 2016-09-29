@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace ProjectFixer.MakeFile.TestsMakeFile
+namespace MakeProjectFixer.MakeFile.TestsMakeFile
 {
     internal static class TestHelper
     {

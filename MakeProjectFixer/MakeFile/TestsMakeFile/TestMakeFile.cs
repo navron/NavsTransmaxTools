@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using NUnit.Framework;
 
-namespace ProjectFixer.MakeFile.TestsMakeFile
+namespace MakeProjectFixer.MakeFile.TestsMakeFile
 {
     [TestFixture]
     public class TestMakeFile
@@ -13,7 +13,7 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         [TestCase(new[] { "#Comment", "test_one: one two", "", "\tThirdLine" }, "test_one", new[] { "one", "two" }, new[] { "#Comment" }, new[] { "", "\tThirdLine" })]
         public void TestProcessRawProject(string[] given, string projectName, string[] projects, string[] preLines, string[] postLines)
         {
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             var result = make.ProcessRawProject(given);
 
             Assert.AreEqual(projectName, result.ProjectName);
@@ -41,7 +41,7 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         [TestCase(new[] { "#comment", "test_one: one two \\", "ThirdLine", "", "#comment one", "one: two" }, new[] { "#comment", "test_one: one two \\", "ThirdLine", "" })]
         public void GetRawHeaderLines(string[] given, string[] expected)
         {
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             var actual = make.GetRawHeaderLines(given);
             CollectionAssert.AreEquivalent(expected, actual);
         }
@@ -52,7 +52,7 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         [TestCase(new[] { "#Comment", "test_one: one two", "", "\tThirdLine", "FourLine" }, 4)]
         public void TestGetNextProjectLines(string[] given, int expected)
         {
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             var lines = make.GetRawProjectLines(given);
             Assert.AreEqual(expected, lines.Count);
         }
@@ -60,7 +60,7 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         [TestCase("ProjectFixer.Tests.TestMake1Simple.mak", "test_one", 2)]
         public void TestProcessMakeFileRawLines(string givenResource, string headerName, int projects)
         {
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             var makeFileRawLines = TestHelper.GetLinesFromResource(givenResource);
             make.ProcessMakeFileRawLines(makeFileRawLines.ToList());
 
@@ -76,7 +76,7 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         public void TestProcessMakeFileRawLinesComplex(string givenResource, string[] header, string[] project)
         {
             var given = TestHelper.GetLinesFromResource(givenResource);
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             make.ProcessMakeFileRawLines(given.ToList());
             CollectionAssert.AreEquivalent(header, make.Header.RawLines);
             CollectionAssert.AreEquivalent(project, make.Projects[0].RawLines);
@@ -92,7 +92,7 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         [TestCase(new[] { "#Comment", "one: two three", "", "Post Action", "", }, 8, true, new[] { "#Comment", "one: three \\", "\t\ttwo", "", "Post Action" })]
         public void FormatMakeProject(string[] givenProject, int lineLength, bool sort, string[] expectedProject)
         {
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             var c = make.ProcessRawProject(givenProject);
             var actual = c.FormatMakeProject(lineLength, sort);
             CollectionAssert.AreEquivalent(expectedProject, actual);
@@ -108,10 +108,10 @@ namespace ProjectFixer.MakeFile.TestsMakeFile
         {
             var given = TestHelper.GetLinesFromResource(givenResource);
             var expected = TestHelper.GetLinesFromResource(expectedResource);
-            var make = new ProjectFixer.MakeFile.MakeFile();
+            var make = new MakeFile();
             make.ProcessMakeFileRawLines(given.ToList());
             var actual = make.FormatFile(lineLength, sortProjects);
-    //        File.WriteAllLines(@"c:\temp\out.mak",actual);
+    //        SingleFile.WriteAllLines(@"c:\temp\out.mak",actual);
             CollectionAssert.AreEquivalent(expected, actual);
         }
     }

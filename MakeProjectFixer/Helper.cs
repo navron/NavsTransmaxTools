@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
-namespace ProjectFixer
+namespace MakeProjectFixer
 {
     internal static class Helper
     {
         internal static List<string> FindFiles(Options options)
         {
             // If file is specifier then return a list with just that file in it
-            if (!string.IsNullOrEmpty(options.File))
+            if (!string.IsNullOrEmpty(options.SingleFile))
             {
-                Console.WriteLine($"Processing Single file:{options.File}");
-                return new List<string> { options.File };
+                Console.WriteLine($"Processing Single file:{options.SingleFile}");
+                return new List<string> { options.SingleFile };
             }
 
             // Scan the Search Patterns in Parallel for all files matching the required
@@ -54,7 +55,7 @@ namespace ProjectFixer
             TextWriter writer = null;
             try
             {
-                var contentsToWriteToFile = Newtonsoft.Json.JsonConvert.SerializeObject(objectToWrite);
+                var contentsToWriteToFile = JsonConvert.SerializeObject(objectToWrite, Formatting.Indented);
                 writer = new StreamWriter(filePath, append);
                 writer.Write(contentsToWriteToFile);
             }
