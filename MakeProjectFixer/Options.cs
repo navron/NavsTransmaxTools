@@ -27,7 +27,7 @@ namespace MakeProjectFixer
 
     class MakeOptions : Options
     {
-        [Option(@"length", HelpText = "Length of the Line that the project dependences wrap, --Zero to disable--", Default = 80)]
+        [Option(@"length", HelpText = "Length of the Line that the project dependences wrap, --Zero to disable--", Default = 100)]
         public int LineLength { get; set; }
 
         [Option("sort", HelpText = "Sort the project within the make file", Default = false)]
@@ -37,33 +37,5 @@ namespace MakeProjectFixer
         {
             SearchPatterns = new[] { "*.mak" };    
         }
-
-        [Option("stage", HelpText = "run stage x")]
-        public string Stage { get; set; }
     }
-
-    [Verb("MakeFormat", HelpText = "Format Make files")]
-    class MakeFormat : MakeOptions
-    {
-    }
-
-    [Verb("MakeDependencyCheck", HelpText = "Checks Make file dependences and rewrites them if needed")]
-    class MakeDependencyCheck : MakeOptions
-    {
-        // Assume Make files are formated
-    }
-
-    [Verb("MakeScanErrors", HelpText = "Scan Make files for faults")]
-    class MakeScanErrors : MakeOptions
-    {
-        [Option(@"fix", HelpText = "Fix Errors", Default = false)]
-        public bool FixErrors { get; set; }
-    }
-
-
-    //[Verb("MakeDependencyAllocator", HelpText = "Allocates Correct Dependency")]
-    //class MakeDependencyAllocator : MakeOptions
-    //{
-
-    //}
 }

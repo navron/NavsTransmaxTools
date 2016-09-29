@@ -34,6 +34,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ColorConsole, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ColorConsole.1.0.1\lib\net40\ColorConsole.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="CommandLine, Version=2.0.275.0, Culture=neutral, PublicKeyToken=de6f01bd326f8c32, processorArchitecture=MSIL">
       <HintPath>..\packages\CommandLineParser.2.0.275-beta\lib\net45\CommandLine.dll</HintPath>
       <Private>True</Private>
@@ -58,12 +62,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MakeDependencyAllocator.cs" />
+    <Compile Include="MakeFileFormat.cs" />
     <Compile Include="VisualStudioFile\VisualStudioFile.cs" />
-    <Compile Include="VisualStudioFile\VisualStudioProjectFile.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="MakeFile\MakeFile.cs" />
-    <Compile Include="MakeFile\MakeFileDependencyAllocator.cs" />
-    <Compile Include="MakeFile\MakeFileCircularRefCheck.cs" />
     <Compile Include="MakeFile\MakeFileHelper.cs" />
     <Compile Include="MakeFile\MakeFileProject.cs" />
     <Compile Include="Options.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="MakeFile\TestsMakeFile\TestHelper.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFile.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFileHelper.cs" />
+    <Compile Include="VSFileFixer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

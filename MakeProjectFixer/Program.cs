@@ -11,49 +11,19 @@ namespace MakeProjectFixer
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            Parser.Default.ParseArguments<MakeFormat, MakeScanErrors, MakeDependencyCheck,
-                                          MakeDependencyAllocator>(args)
-                .WithParsed<MakeFormat>(RunMakeFormater)
-                .WithParsed<MakeScanErrors>(RunMakeScanErrors)
-                .WithParsed<MakeDependencyCheck>(RunMakeDependencyCheck)
+            Parser.Default.ParseArguments < MakeFileFormat,
+                                            MakeDependencyAllocator,
+                                            MakeScanErrors
+                                           >(args)
+                .WithParsed<MakeFileFormat>(options => options.Run())
+                .WithParsed<MakeScanErrors>(options => options.Run())
                 .WithParsed<MakeDependencyAllocator>(options => options.Run())
                 .WithNotParsed(CommandLineNotParsed);
         }
 
-        static void RunMakeFormater(MakeOptions options)
-        {
-            var files = Helper.FindFiles(options);
-            Parallel.ForEach(files, (file) =>
-            {
-                if (options.Verbose) Console.WriteLine($"Formatting {file}");
-                var make = new MakeFile.MakeFile();
-                make.ReadFile(file);
-                make.WriteFile(options.LineLength, options.SortProject);
-            });
-        }
-        static void RunMakeDependencyCheck(MakeDependencyCheck options)
-        {
-
-        }
-        static void RunMakeScanErrors(MakeScanErrors options)
-        {
-            var files = Helper.FindFiles(options);
-            Parallel.ForEach(files, (file) =>
-            {
-                if (options.Verbose) Console.WriteLine($"Scanning {file}");
-                var make = new MakeFile.MakeFile();
-                make.ReadFile(file);
-                var found = make.ScanForErrors(options.FixErrors);
-                if (found && options.FixErrors)
-                {
-                    make.WriteFile(options.LineLength, options.SortProject);
-                }
-            });
-        }
-
         static void CommandLineNotParsed(IEnumerable<Error> errs)
         {
-
+            Console.WriteLine("CommandLineNotParsed");
         }
 
         /// <summary>

@@ -12,6 +12,9 @@ namespace MakeProjectFixer
     [Verb("MakeDependencyAllocator", HelpText = "Allocates Correct Dependency")]
     internal class MakeDependencyAllocator : MakeOptions
     {
+        [Option("stage", HelpText = "run stage x")]
+        public string Stage { get; set; }
+
         [Option(@"temp", HelpText = "Specifies a directory where pre-process stage may save files")]
         public string PreProcessedFolder { get; set; }
 
@@ -47,10 +50,10 @@ namespace MakeProjectFixer
 
 
         /// <returns>True if Object should be preprocessed</returns>
-        private bool PreProcessedObject(string name, out string file, MakeOptions options, string stage)
+        private bool PreProcessedObject(string name, out string file, string stage)
         {
             file = Path.Combine(PreProcessedFolder, name + ".json");
-            if (!string.IsNullOrEmpty(options.Stage) && options.Stage.Contains(stage)) return false;
+            if (!string.IsNullOrEmpty(Stage) && Stage.Contains(stage)) return false;
 
             if (string.IsNullOrEmpty(PreProcessedFolder) || CleanPreProcessedFiles) return false;
             if (!File.Exists(file)) return false;
@@ -71,7 +74,7 @@ namespace MakeProjectFixer
         {
             string jsonFile;
             var fileName = "MakeFiles" + stage;
-            if (PreProcessedObject(fileName, out jsonFile, options, stage))
+            if (PreProcessedObject(fileName, out jsonFile, stage))
             {
                 MakeFiles = JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(jsonFile);
                 return;
@@ -95,7 +98,7 @@ namespace MakeProjectFixer
         {
             string jsonFile;
             var fileName = "MakeProjectList" + stage;
-            if (PreProcessedObject(fileName, out jsonFile, options, stage))
+            if (PreProcessedObject(fileName, out jsonFile, stage))
             {
                 MakeProjects = JsonSerialization.ReadFromJsonFile<List<MakeFileProject>>(jsonFile);
                 return;
@@ -114,7 +117,7 @@ namespace MakeProjectFixer
         {
             string jsonFile;
             var fileName = "VisualStudioFilesStage" + stage;
-            if (PreProcessedObject(fileName, out jsonFile, options, stage))
+            if (PreProcessedObject(fileName, out jsonFile, stage))
             {
                 VisualStudioFiles = JsonSerialization.ReadFromJsonFile<List<VisualStudioFile.VisualStudioFile>>(jsonFile);
                 return;
@@ -140,7 +143,7 @@ namespace MakeProjectFixer
         {
             string jsonFile;
             var fileName = "VisualStudioFilesStage" + stage;
-            if (PreProcessedObject(fileName, out jsonFile, options, stage))
+            if (PreProcessedObject(fileName, out jsonFile, stage))
             {
                 VisualStudioFiles = JsonSerialization.ReadFromJsonFile<List<VisualStudioFile.VisualStudioFile>>(jsonFile);
                 return;
@@ -162,7 +165,7 @@ namespace MakeProjectFixer
         {
             string jsonFile;
             var fileName = "VisualStudioFilesStage" + stage;
-            if (PreProcessedObject(fileName, out jsonFile, options, stage))
+            if (PreProcessedObject(fileName, out jsonFile, stage))
             {
                 VisualStudioFiles = JsonSerialization.ReadFromJsonFile<List<VisualStudioFile.VisualStudioFile>>(jsonFile);
                 return;
@@ -187,7 +190,9 @@ namespace MakeProjectFixer
                     {
                         if (reference.Value == VisualStudioFile.VisualStudioFile.ProjectFound.FoundCaseWrong)
                         {
-                            Console.WriteLine($"Project {visualStudioFile.MakeProjectName} has wrong case reference to {reference.Key}");
+                            var makeproject = MakeProjects.FirstOrDefault(m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
+                            if (makeproject != null)
+                                Console.WriteLine($"Project {visualStudioFile.MakeProjectName} has wrong case reference to {reference.Key} should be {makeproject.ProjectName}");
                         }
                         if (reference.Value == VisualStudioFile.VisualStudioFile.ProjectFound.NotFound)
                         {
@@ -198,6 +203,5 @@ namespace MakeProjectFixer
                 }
             }
         }
-
-    }
+   }
 }

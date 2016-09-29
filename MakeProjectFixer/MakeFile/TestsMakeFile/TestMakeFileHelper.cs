@@ -31,7 +31,8 @@ namespace MakeProjectFixer.MakeFile.TestsMakeFile
         [TestCase(new[] { "one:", "\ttwo" }, new[] { "one:", "two" })]
         [TestCase(new[] { "one:", "\ttwo", "" }, new[] { "one:", "two" })]
         [TestCase(new[] { "one:", "\t\t  ", "\ttwo", "" }, new[] { "one:", "two" })]
-        public void TesCleanLines(string[] given, string[] expected)
+//Wrong Test        [TestCase(new[] { "one:", "\ttwo\t\tthree", "" }, new[] { "one:", "two", "three" })]
+        public void TestCleanLines(string[] given, string[] expected)
         {
             var acutal = MakeFileHelper.CleanLines(given);
             CollectionAssert.AreEquivalent(expected, acutal);

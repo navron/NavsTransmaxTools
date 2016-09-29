@@ -22,10 +22,25 @@ namespace MakeProjectFixer
                 .SelectMany(searchPattern => Directory.EnumerateFiles(options.Folder, searchPattern, SearchOption.AllDirectories))
                 .ToList();
 
-            Console.WriteLine($"Processing Multiple Files: {files.Count}");
-            if (options.Verbose) files.ForEach(Console.WriteLine);
+            var knownProblemsListToRemove = new List<string>();
+            knownProblemsListToRemove.Add(@"DBErrorLogger\install.mak");
 
-            return files;
+            var limitedFiles = new List<string>();
+            foreach (var file in files)
+            {
+                var found = false;
+                foreach (var badString in knownProblemsListToRemove)
+                {
+                    if (file.Contains(badString)) found = true;
+                }
+                if(!found)
+                    limitedFiles.Add(file);
+            }
+
+            Console.WriteLine($"Total Files: {files.Count} Limited: {limitedFiles.Count}");
+            if (options.Verbose) limitedFiles.ForEach(Console.WriteLine);
+
+            return limitedFiles;
         }
     }
 

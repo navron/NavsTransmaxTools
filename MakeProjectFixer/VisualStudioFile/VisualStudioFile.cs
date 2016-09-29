@@ -25,7 +25,7 @@ namespace MakeProjectFixer.VisualStudioFile
             Found,
             FoundCaseWrong
         }
-        
+
         // List of Expected Make Project References and if they where found
         public Dictionary<string, ProjectFound> ExpectedMakeProjectReferences { get; set; }
 
@@ -67,7 +67,7 @@ namespace MakeProjectFixer.VisualStudioFile
                 var projectName = t.Last();
                 if (projectName.ToLower() == "workstation")
                 {
-                    projectName = tsdRefenence.Replace(@"Tsd.","");
+                    projectName = tsdRefenence.Replace(@"Tsd.", "");
                 }
 
                 if (ExpectedMakeProjectReferences.ContainsKey(projectName))
@@ -81,22 +81,22 @@ namespace MakeProjectFixer.VisualStudioFile
         public void MatchUpMakeProject(List<MakeFileProject> makeProjects)
         {
             var updateReferences = new Dictionary<string, ProjectFound>();
-            foreach (var references in ExpectedMakeProjectReferences)
+            foreach (var reference in ExpectedMakeProjectReferences)
             {
-                var found = makeProjects.Any(m => string.Equals(m.ProjectName, references.Key, StringComparison.Ordinal));
+                var found = makeProjects.Any(m => string.Equals(m.ProjectName, reference.Key, StringComparison.Ordinal));
                 if (found)
                 {
-                    updateReferences[references.Key] = ProjectFound.Found;
+                    updateReferences[reference.Key] = ProjectFound.Found;
                     continue;
                 }
 
-                var foundCaseWrong = makeProjects.Any(m => string.Equals(m.ProjectName,references.Key, StringComparison.OrdinalIgnoreCase));
+                var foundCaseWrong = makeProjects.Any(m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
                 if (foundCaseWrong)
                 {
-                    updateReferences[references.Key] = ProjectFound.FoundCaseWrong;
+                    updateReferences[reference.Key] = ProjectFound.FoundCaseWrong;
                     continue;
                 }
-                updateReferences[references.Key] = ProjectFound.NotFound;
+                updateReferences[reference.Key] = ProjectFound.NotFound;
             }
             ExpectedMakeProjectReferences = updateReferences;
         }

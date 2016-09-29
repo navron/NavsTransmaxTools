@@ -150,7 +150,7 @@ namespace MakeProjectFixer.MakeFile
                     }
                     c.ProjectName = lineSplit[0].Trim();
                     // There may be a space, known problem that is ok with make files
-                    var dependences = lineSplit[1].Split(' ');
+                    var dependences = lineSplit[1].Split(' ','\t');
                     c.DependencyProjects = MakeFileHelper.CleanLines(dependences);
 
                     continue;

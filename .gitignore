@@ -36,3 +36,4 @@ _ReSharper*/
 *.DotSettings
 #Ignore custom generated files
 packages/
+.vs/
