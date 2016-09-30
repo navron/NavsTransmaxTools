@@ -61,13 +61,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MakeDependencyAllocator.cs" />
-    <Compile Include="MakeFileFormat.cs" />
+    <Compile Include="MakeFileDependency.cs" />
+    <Compile Include="MakeFileFormatter.cs" />
+    <Compile Include="Store.cs" />
     <Compile Include="VisualStudioFile\VisualStudioFile.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="MakeFile\MakeFile.cs" />
     <Compile Include="MakeFile\MakeFileHelper.cs" />
-    <Compile Include="MakeFile\MakeFileProject.cs" />
+    <Compile Include="MakeFile\MakeProject.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="VisualStudioFile\ProjectFileCSharp.cs" />
@@ -75,7 +76,7 @@
     <Compile Include="MakeFile\TestsMakeFile\TestHelper.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFile.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFileHelper.cs" />
-    <Compile Include="VSFileFixer.cs" />
+    <Compile Include="VisualStudioFileFormatter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
-using MakeProjectFixer.MakeFile;
 using MakeProjectFixer.VisualStudioFile;
 
 namespace MakeProjectFixer
@@ -12,14 +9,7 @@ namespace MakeProjectFixer
     [Verb("VSProjectCaseReferenceFixer", HelpText = "Fix Project Reference Case in Visual Studio Project files")]
     internal class VisualStudioProjectReferenceCaseFixer : Options
     {
-        [Option(@"temp", HelpText = "Specifies a directory where pre-process stage may save files")]
-        public string PreProcessedFolder { get; set; }
-
-        [Option(@"clean", Default = false, HelpText = "clean and rewrite pre-process files")]
-        public bool CleanPreProcessedFiles { get; set; }
-
         public List<VisualStudioFile.VisualStudioFile> VisualStudioFiles { get; private set; }
-
 
         public VisualStudioProjectReferenceCaseFixer()
         {
@@ -52,14 +42,7 @@ namespace MakeProjectFixer
     [Verb("MakeProjectCaseMakeVisualStudioProject", HelpText = "Set the  Project Reference Case in Visual Studio Project files")]
     internal class MakeProjectCaseMakeVisualStudioProject : Options
     {
-        [Option(@"temp", HelpText = "Specifies a directory where pre-process stage may save files")]
-        public string PreProcessedFolder { get; set; }
-
-        [Option(@"clean", Default = false, HelpText = "clean and rewrite pre-process files")]
-        public bool CleanPreProcessedFiles { get; set; }
-
         public List<VisualStudioFile.VisualStudioFile> VisualStudioFiles { get; private set; }
-
 
         public MakeProjectCaseMakeVisualStudioProject()
         {

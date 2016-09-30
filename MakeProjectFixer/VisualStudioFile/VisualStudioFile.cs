@@ -10,13 +10,17 @@ namespace MakeProjectFixer.VisualStudioFile
 {
     class VisualStudioFile
     {
-        public string MakeProjectName { get; set; }
+        // Project Name, Should match in Make File, Case Sensitive
+        public string ProjectName { get; set; }
 
         [JsonIgnore]
         public string FileName { get; set; }
+        // CS or C++
         public string ProjectType { get; set; }
 
-        public List<string> TsdRefenences { get; set; }
+        // List of TSD Reference DLL
+        public List<string> TsdReferences { get; set; }
+
 
         public enum ProjectFound
         {
@@ -31,10 +35,10 @@ namespace MakeProjectFixer.VisualStudioFile
 
         public VisualStudioFile(string file)
         {
-            TsdRefenences = new List<string>();
+            TsdReferences = new List<string>();
             ExpectedMakeProjectReferences = new Dictionary<string, ProjectFound>();
             FileName = file;
-            MakeProjectName = Path.GetFileNameWithoutExtension(file);
+            ProjectName = Path.GetFileNameWithoutExtension(file);
 
             var extension = Path.GetExtension(file);
             if (extension != null) ProjectType = extension.ToLower();
@@ -52,14 +56,14 @@ namespace MakeProjectFixer.VisualStudioFile
                 var temp = include.Split(',');
                 if (temp[0].Contains(@"Tsd."))
                 {
-                    TsdRefenences.Add(temp[0]);
+                    TsdReferences.Add(temp[0]);
                 }
             }
         }
 
-        public void MakeExpectedMakeProjectRefenences()
+        public void BuildExpectedMakeProjectRefenences()
         {
-            foreach (var tsdRefenence in TsdRefenences)
+            foreach (var tsdRefenence in TsdReferences)
             {
                 if (tsdRefenence == null) continue;
 
@@ -78,7 +82,7 @@ namespace MakeProjectFixer.VisualStudioFile
             }
         }
 
-        public void MatchUpMakeProject(List<MakeFileProject> makeProjects)
+        public void MatchUpMakeProject(List<MakeProject> makeProjects)
         {
             var updateReferences = new Dictionary<string, ProjectFound>();
             foreach (var reference in ExpectedMakeProjectReferences)

@@ -23,19 +23,23 @@ namespace MakeProjectFixer
 
         [Option(@"verbose", HelpText = "Verbosely output information")]
         public bool Verbose { get; set; }
-    }
 
-    class MakeOptions : Options
-    {
         [Option(@"length", HelpText = "Length of the Line that the project dependences wrap, --Zero to disable--", Default = 100)]
         public int LineLength { get; set; }
 
         [Option("sort", HelpText = "Sort the project within the make file", Default = false)]
         public bool SortProject { get; set; }
 
-        public MakeOptions()
-        {
-            SearchPatterns = new[] { "*.mak" };    
-        }
+
+        [Option(@"fix", HelpText = "Fix Errors", Default = false)]
+        public bool FixErrors { get; set; }
+
+        [Option(@"temp", HelpText = "Specifies a directory where pre-process stage may save files")]
+        public string PreProcessedFolder { get; set; }
+
+        [Option(@"clean", Default = false, HelpText = "clean and rewrite pre-process files")]
+        public bool CleanPreProcessedFiles { get; set; }
+
+        public string JsonFile { get; set; }
     }
 }

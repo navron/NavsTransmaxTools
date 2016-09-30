@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 
 namespace MakeProjectFixer.MakeFile
 {
-    public class MakeFileProject
+    public class MakeProject
     {
-        public MakeFileProject()
+        public MakeProject()
         {
             RawLines = new List<string>();
             PreLines = new List<string>();
@@ -51,7 +51,11 @@ namespace MakeProjectFixer.MakeFile
             }
 
             var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
-            var projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength);
+            var projectLines = new List<string>();
+            if (!string.IsNullOrEmpty(ProjectName))
+            {
+                projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength);
+            }
 
             PreLines.RemoveAll(string.IsNullOrWhiteSpace);
             // Going to Allow Empty Lines, Expect at the end
