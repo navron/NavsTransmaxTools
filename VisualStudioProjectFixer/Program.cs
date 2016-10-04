@@ -1,11 +1,12 @@
-﻿using Microsoft.Build.Evaluation;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Build.Evaluation;
+using ProjectFileFixer;
 
-namespace ProjectFileFixer
+namespace VisualStudioProjectFixer
 {
     public enum Stages
     {

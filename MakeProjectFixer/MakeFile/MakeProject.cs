@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
-namespace ProjectFixer
+namespace MakeProjectFixer.MakeFile
 {
-    public class MakeFileProject
+    public class MakeProject
     {
-        public MakeFileProject()
+        public MakeProject()
         {
             RawLines = new List<string>();
             PreLines = new List<string>();
@@ -35,6 +35,7 @@ namespace ProjectFixer
         /// </summary>
         public List<string> PostLines { get; set; }
 
+        [JsonIgnore]
         public IList<string> RawLines { get; set; }
 
         /// <summary>
@@ -50,7 +51,11 @@ namespace ProjectFixer
             }
 
             var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
-            var projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength);
+            var projectLines = new List<string>();
+            if (!string.IsNullOrEmpty(ProjectName))
+            {
+                projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength);
+            }
 
             PreLines.RemoveAll(string.IsNullOrWhiteSpace);
             // Going to Allow Empty Lines, Expect at the end
@@ -65,5 +70,34 @@ namespace ProjectFixer
             project.AddRange(PostLines);
             return project;
         }
+
+
+        internal List<string> GetPublishCppHeaderFiles(List<string> postLines)
+        {
+            //Sample
+            //scripts/cpy $(as_lib_path) /$@/Header.gsoap $(GSOAP_IMPORT)
+            //scripts/cpy $(as_lib_path) /$@/TypesImpl.h $(AS_INC)
+
+            //I know, crappy code, just hope it works enough. 
+            var list = new List<string>();
+            foreach (var line in postLines)
+            {
+                var s = line.Split(' ');
+                foreach (var s1 in s)
+                {
+                    var s2 = s1.Split('/');
+                    foreach (var s3 in s2)
+                    {
+                        if (s3.ToLower().Contains(".h"))
+                        {
+                            list.Add(s3.Trim());
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
     }
 }

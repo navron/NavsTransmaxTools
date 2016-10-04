@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace ProjectFixer
+namespace MakeProjectFixer.MakeFile
 {
     public class MakeFile
     {
@@ -13,7 +13,7 @@ namespace ProjectFixer
 
         public MakeFile()
         {
-            Projects = new List<MakeFileProject>();
+            Projects = new List<MakeProject>();
         }
 
         /// <summary>
@@ -23,19 +23,19 @@ namespace ProjectFixer
         internal string[] RawLines { get; set; }
 
         /// <summary>
-        /// File name full path
+        /// SingleFile name full path
         /// </summary>
         public string FileName { get; set; }
 
         /// <summary>
         /// The Project Header
         /// </summary>
-        public MakeFileProject Header { get; set; }
+        public MakeProject Header { get; set; }
 
         /// <summary>
         /// List of Project Configurations
         /// </summary>
-        public List<MakeFileProject> Projects { get; set; }
+        public List<MakeProject> Projects { get; set; }
 
         public void ReadFile(string fileName)
         {
@@ -66,7 +66,7 @@ namespace ProjectFixer
             }
         }
 
-        internal MakeFileProject ProcessBody(List<string> rawlines, int startPos)
+        internal MakeProject ProcessBody(List<string> rawlines, int startPos)
         {
             var lines = rawlines.GetRange(startPos, rawlines.Count - startPos);
             var projectLines = GetRawProjectLines(lines);
@@ -125,10 +125,10 @@ namespace ProjectFixer
         }
 
         // Process both the Head and Project Sections
-        internal MakeFileProject ProcessRawProject(IList<string> rawLines)
+        internal MakeProject ProcessRawProject(IList<string> rawLines)
         {
             var combineLines = MakeFileHelper.CombineLines(rawLines);
-            var c = new MakeFileProject();
+            var c = new MakeProject();
             // Fine the header stop which is the end of file or first project
             var afterName = false;
             foreach (var line in combineLines)
@@ -150,7 +150,7 @@ namespace ProjectFixer
                     }
                     c.ProjectName = lineSplit[0].Trim();
                     // There may be a space, known problem that is ok with make files
-                    var dependences = lineSplit[1].Split(' ');
+                    var dependences = lineSplit[1].Split(' ', '\t');
                     c.DependencyProjects = MakeFileHelper.CleanLines(dependences);
 
                     continue;
@@ -163,7 +163,7 @@ namespace ProjectFixer
 
 
         /// <summary>
-        /// Returns a formated make file
+        /// Returns a formatted make file
         /// </summary>
         public List<string> FormatFile(int lineLength, bool sortProjects)
         {
@@ -175,7 +175,7 @@ namespace ProjectFixer
                 Projects.Sort((a, b) => string.Compare(a.ProjectName, b.ProjectName, StringComparison.OrdinalIgnoreCase));
             }
 
-            foreach (MakeFileProject project in Projects)
+            foreach (MakeProject project in Projects)
             {
                 output.Add(string.Empty);
                 output.AddRange(project.FormatMakeProject(lineLength, sortProjects));
@@ -184,22 +184,14 @@ namespace ProjectFixer
             return output;
         }
 
-        /// <summary>
-        /// Scan for known problems
-        /// </summary>
-        public bool ScanForErrors(bool fixProblems)
+        public bool ScanForErrorsExtraDependencyInTheMakeFileHeader()
         {
-            // Problems
-            var problems = ScanForErrorsExtraDependencyInTheMakeFileHeader(fixProblems)
-                //ScanForErrorsMissingDependencyFromTheMakeFileHeader(fixProblems)
-                // && 
-                //ScanForErrorsProjectorHeaderSyntaxIsWrong(fixProblems);
-                ;
-            return problems;
-        }
+            // Check For Directory Make file
+            if (IsDirectoryMakeFile())
+            {
+                return ScanForErrorsExtraDependencyInTheMakeFileHeaderForDirectoryMakeFile();
+            }
 
-        internal bool ScanForErrorsExtraDependencyInTheMakeFileHeader(bool fixProblems)
-        {
             var removeItems = new List<string>();
             var problems = false;
             foreach (var headerDependencyName in Header.DependencyProjects)
@@ -207,24 +199,66 @@ namespace ProjectFixer
                 if (Projects.Any(p => p.ProjectName == headerDependencyName)) continue;
 
                 // Extra Dependency in the make file header -- Report
-                Console.WriteLine($"Extra \"{headerDependencyName}\" Dependency in make file: {FileName}");
+                Program.Console.WriteLine($"Extra \"{headerDependencyName}\" Dependency in make file: {FileName}");
                 problems = true;
-                if (!fixProblems) continue;
-                Console.WriteLine($"Deleting Dependency {headerDependencyName} from make file {FileName} header section");
+
+                Program.Console.WriteLine($"Deleting Dependency {headerDependencyName} from make file {FileName} header section",ConsoleColor.Yellow);
                 removeItems.Add(headerDependencyName);
             }
-            if (fixProblems)
+            foreach (var removeItem in removeItems)
             {
-                foreach (var removeItem in removeItems)
-                {
-                    Header.DependencyProjects.Remove(removeItem);
-                }
+                Header.DependencyProjects.Remove(removeItem);
             }
             return problems;
         }
 
+        private bool IsDirectoryMakeFile()
+        {
+            var name = Path.GetFileNameWithoutExtension(FileName);
+            var folder = Path.GetDirectoryName(FileName);
+            if (name == null || folder == null)
+                throw new Exception($"FileName is invalid: {FileName} --aborting");
+            return folder.Contains(name);
+        }
 
-        internal bool ScanForErrorsMissingDependencyFromTheMakeFileHeader(bool fixProblems)
+        private bool ScanForErrorsExtraDependencyInTheMakeFileHeaderForDirectoryMakeFile()
+        {
+            var folder = Path.GetDirectoryName(FileName);
+            if (folder == null) throw new Exception($"FileName is invalid: {FileName} --aborting");
+            var folderName = Path.GetFileNameWithoutExtension(FileName);
+
+            var files = Directory.EnumerateFiles(folder, "*.mak", SearchOption.TopDirectoryOnly).ToList();
+            var fileProjects = new List<string>();
+            foreach (var file in files)
+            {
+                var name = Path.GetFileNameWithoutExtension(file);
+                var temp = $"{folderName}_{name}";
+                fileProjects.Add(temp);
+            }
+            var problems = false;
+            var removeItems = new List<string>();
+            foreach (var headerDependencyName in Header.DependencyProjects)
+            {
+                // Any file is ok
+                if (fileProjects.Any(f => f == headerDependencyName)) continue;
+                // and any project in the make file is ok
+                if (Projects.Any(p => p.ProjectName == headerDependencyName)) continue;
+
+                // Extra Dependency in the make file header -- Report
+                Program.Console.WriteLine($"Extra \"{headerDependencyName}\" Dependency in make file: {FileName}");
+                problems = true;
+
+                Program.Console.WriteLine($"Deleting Dependency {headerDependencyName} from make file {FileName} header section",ConsoleColor.Yellow);
+                removeItems.Add(headerDependencyName);
+            }
+            foreach (var removeItem in removeItems)
+            {
+                Header.DependencyProjects.Remove(removeItem);
+            }
+            return problems;
+        }
+
+        public bool ScanForErrorsMissingDependencyFromTheMakeFileHeader()
         {
             var problems = false;
             foreach (var project in Projects)
@@ -232,16 +266,16 @@ namespace ProjectFixer
                 if (Header.DependencyProjects.Any(p => p == project.ProjectName)) continue;
 
                 // Missing Dependency from the make file header
-                Console.WriteLine($"Missing Dependency in header for \"{project.ProjectName}\"");
+                Program.Console.WriteLine($"Missing Dependency in header for \"{project.ProjectName}\"");
                 problems = true;
-                if (!fixProblems) continue;
-                Console.WriteLine($"Add Dependency {project.ProjectName} to make file {FileName} header section");
+             
+                Program.Console.WriteLine($"Add Dependency {project.ProjectName} to make file {FileName} header section", ConsoleColor.Yellow);
                 Header.DependencyProjects.Add(project.ProjectName);
             }
             return problems;
         }
 
-        internal bool ScanForErrorsProjectorHeaderSyntaxIsWrong(bool fixProblems)
+        public bool ScanForErrorsProjectHeaderSyntax()
         {
             var problems = false;
             Regex projectCheckerOk = new Regex(@"^[a-zA-Z0-9_\.\- ]*:");
@@ -262,9 +296,16 @@ namespace ProjectFixer
         /// Search all the Project Raw lines for copy .h files to COM\Include
         /// This is how to determine c++ references
         /// </summary>
-        public void ProcessPublishItems()
+        public void ScanRawLinesForPublishItems()
         {
-            //TODO
+            // Jobs 
+            // 1. Scan for cpp published .h files
+
+            foreach (var p in Projects)
+            {
+               p.PublishCppHeaderFiles = p.GetPublishCppHeaderFiles(p.PostLines);
+            }
         }
+
     }
 }

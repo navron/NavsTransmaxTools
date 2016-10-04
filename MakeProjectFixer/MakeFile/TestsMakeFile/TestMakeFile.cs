@@ -1,8 +1,7 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using NUnit.Framework;
 
-namespace ProjectFixer.Tests
+namespace MakeProjectFixer.MakeFile.TestsMakeFile
 {
     [TestFixture]
     public class TestMakeFile
@@ -112,7 +111,7 @@ namespace ProjectFixer.Tests
             var make = new MakeFile();
             make.ProcessMakeFileRawLines(given.ToList());
             var actual = make.FormatFile(lineLength, sortProjects);
-    //        File.WriteAllLines(@"c:\temp\out.mak",actual);
+    //        SingleFile.WriteAllLines(@"c:\temp\out.mak",actual);
             CollectionAssert.AreEquivalent(expected, actual);
         }
     }
