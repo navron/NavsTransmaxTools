@@ -70,5 +70,34 @@ namespace MakeProjectFixer.MakeFile
             project.AddRange(PostLines);
             return project;
         }
+
+
+        internal List<string> GetPublishCppHeaderFiles(List<string> postLines)
+        {
+            //Sample
+            //scripts/cpy $(as_lib_path) /$@/Header.gsoap $(GSOAP_IMPORT)
+            //scripts/cpy $(as_lib_path) /$@/TypesImpl.h $(AS_INC)
+
+            //I know, crappy code, just hope it works enough. 
+            var list = new List<string>();
+            foreach (var line in postLines)
+            {
+                var s = line.Split(' ');
+                foreach (var s1 in s)
+                {
+                    var s2 = s1.Split('/');
+                    foreach (var s3 in s2)
+                    {
+                        if (s3.ToLower().Contains(".h"))
+                        {
+                            list.Add(s3.Trim());
+                        }
+                    }
+                }
+            }
+
+            return list;
+        }
+
     }
 }

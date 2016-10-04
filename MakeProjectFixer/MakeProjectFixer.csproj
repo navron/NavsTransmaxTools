@@ -61,9 +61,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MakeFileDependency.cs" />
+    <Compile Include="Checkers\mkCircularDependCheck.cs" />
+    <Compile Include="Checkers\mkReduceDepends.cs" />
+    <Compile Include="Checkers\vsFixCaseReference.cs" />
     <Compile Include="MakeFileFormatter.cs" />
+    <Compile Include="Checkers\mkDependAllocation.cs" />
     <Compile Include="Store.cs" />
+    <Compile Include="VisualStudioFile\TestVisualStudioFile\TestCSFiles.cs" />
+    <Compile Include="VisualStudioFile\TestVisualStudioFile\TestCppFiles.cs" />
     <Compile Include="VisualStudioFile\VisualStudioFile.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="MakeFile\MakeFile.cs" />
@@ -71,7 +76,9 @@
     <Compile Include="MakeFile\MakeProject.cs" />
     <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="VisualStudioFile\ProjectFileCSharp.cs" />
+    <Compile Include="VisualStudioFile\VisualStudioFileHelper.cs" />
+    <Compile Include="VisualStudioFile\VSCPlusPlus.cs" />
+    <Compile Include="VisualStudioFile\VSCSharp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestHelper.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFile.cs" />

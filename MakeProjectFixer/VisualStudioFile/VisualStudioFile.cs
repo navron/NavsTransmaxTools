@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MakeProjectFixer.MakeFile;
-using Microsoft.Build.Evaluation;
 using Newtonsoft.Json;
 
 namespace MakeProjectFixer.VisualStudioFile
@@ -13,14 +12,20 @@ namespace MakeProjectFixer.VisualStudioFile
         // Project Name, Should match in Make File, Case Sensitive
         public string ProjectName { get; set; }
 
-        [JsonIgnore]
         public string FileName { get; set; }
+
+        public string AssemblyName { get; set; }
+
         // CS or C++
-        public string ProjectType { get; set; }
+        public enum ProjectTypeValue { NotSet = 0, Cs, Cpp }
 
-        // List of TSD Reference DLL
-        public List<string> TsdReferences { get; set; }
+        public ProjectTypeValue ProjectType { get; }
 
+        // List of TSD Reference DLL C#
+        public List<string> TsdReferences { get; private set; }
+
+        // List of #include Files C++
+        public List<string> IncludeReferences { get; private set; }
 
         public enum ProjectFound
         {
@@ -36,52 +41,52 @@ namespace MakeProjectFixer.VisualStudioFile
         public VisualStudioFile(string file)
         {
             TsdReferences = new List<string>();
+            IncludeReferences = new List<string>();
             ExpectedMakeProjectReferences = new Dictionary<string, ProjectFound>();
             FileName = file;
             ProjectName = Path.GetFileNameWithoutExtension(file);
 
             var extension = Path.GetExtension(file);
-            if (extension != null) ProjectType = extension.ToLower();
-        }
-
-        public void ScanFile()
-        {
-            var projCollection = new ProjectCollection();
-            var p = projCollection.LoadProject(FileName);
-
-            var references = p.GetItems("Reference");
-            foreach (var item in references)
+            if (extension != null)
             {
-                var include = item.EvaluatedInclude;
-                var temp = include.Split(',');
-                if (temp[0].Contains(@"Tsd."))
-                {
-                    TsdReferences.Add(temp[0]);
-                }
+                if (extension.ToLower().Contains(@"csproj")) ProjectType = ProjectTypeValue.Cs;
+                if (extension.ToLower().Contains(@"vcxproj")) ProjectType = ProjectTypeValue.Cpp;
             }
         }
 
-        public void BuildExpectedMakeProjectRefenences()
+        public void ScanFileForReferences()
         {
-            foreach (var tsdRefenence in TsdReferences)
+            if (ProjectType == ProjectTypeValue.Cs)
             {
-                if (tsdRefenence == null) continue;
-
-                var t = tsdRefenence.Split('.');
-                var projectName = t.Last();
-                if (projectName.ToLower() == "workstation")
-                {
-                    projectName = tsdRefenence.Replace(@"Tsd.", "");
-                }
-
-                if (ExpectedMakeProjectReferences.ContainsKey(projectName))
-                {
-                    Console.WriteLine($"Visual Studio File {FileName} as a duplicate TSD Reference {projectName}");
-                }
-                ExpectedMakeProjectReferences.Add(projectName, ProjectFound.NotLooked);
+                var vscs = new VsCsharp();
+                vscs.OpenProject(FileName);
+                TsdReferences = vscs.GetTsdReferences();
+                AssemblyName = vscs.GetAssemblyName();
+            }
+            if (ProjectType == ProjectTypeValue.Cpp)
+            {
+                var vscpp = new VsCplusplus();
+                IncludeReferences = vscpp.ScanCppProjectForIncludeStatements(FileName);
             }
         }
 
+        // Method done before MatchUpMakeProject
+        public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects)
+        {
+            if (ProjectType == ProjectTypeValue.Cs)
+            {
+                var vscs = new VsCsharp();
+                ExpectedMakeProjectReferences = vscs.GetExpectedMakeProjectRefenences(TsdReferences);
+            }
+            if (ProjectType == ProjectTypeValue.Cpp)
+            {
+                var vscpp = new VsCplusplus();
+                ExpectedMakeProjectReferences = vscpp.GetExpectedMakeProjectRefenences(IncludeReferences, makeProjects);
+            }
+        }
+
+        // Scan the ExpectedMakeProjectReferences and match up the Case to the Make Project list
+        // Fist Fix the Make Project name from the Visual Studio Project Names (this method was done ass about)
         public void MatchUpMakeProject(List<MakeProject> makeProjects)
         {
             var updateReferences = new Dictionary<string, ProjectFound>();
@@ -94,7 +99,9 @@ namespace MakeProjectFixer.VisualStudioFile
                     continue;
                 }
 
-                var foundCaseWrong = makeProjects.Any(m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
+                var foundCaseWrong =
+                    makeProjects.Any(
+                        m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
                 if (foundCaseWrong)
                 {
                     updateReferences[reference.Key] = ProjectFound.FoundCaseWrong;
@@ -103,31 +110,6 @@ namespace MakeProjectFixer.VisualStudioFile
                 updateReferences[reference.Key] = ProjectFound.NotFound;
             }
             ExpectedMakeProjectReferences = updateReferences;
-        }
-    }
-
-    static class VisualStudioFileHelper
-    {
-        public static bool IncludeFile(string file)
-        {
-            // Don't want Unit Test in the list. Assume that these are ok
-            if (file.Contains(@"\UnitTest")) return false;  // UnitTests and UnitTestSupport Folders
-
-            // Don't want Test in the list. Assume that these are ok
-            if (file.Contains(@"\test\")) return false;
-
-            // Remove 3rdparty Project Files. On build machines the 3rdparty lib are check out to $src\lib\3rdparty and thus pick up
-            if (file.Contains(@"\3rdparty\")) return false;
-
-            var excludedlist = new List<string>
-            {
-                "Tsd.Libraries.Common.Eventing", // In code but not in build system, Need to ask about this 
-                "ManagementConsole" // Jono special, Its missing a number of files. Needs work, Not in build.
-            };
-            // Exclude any known problems
-            if (excludedlist.Any(file.Contains)) return false;
-
-            return true;
         }
     }
 }

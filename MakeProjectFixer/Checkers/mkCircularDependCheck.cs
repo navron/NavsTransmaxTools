@@ -3,104 +3,26 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using ColorConsole;
 using CommandLine;
 using MakeProjectFixer.MakeFile;
 using Newtonsoft.Json;
 
-namespace MakeProjectFixer
+namespace MakeProjectFixer.Checkers
 {
-    [Verb("MakeFileDependencyChecker", HelpText = "Allocates Correct Dependency")]
-    internal class MakeFileDependencyChecker : Store
-    {
-        [Option(@"add", HelpText = "add missing Dependency")]
-        public bool AddMissingDependencies { get; set; }
-
-        [Option(@"remove", HelpText = "Remove un-required Dependency")]
-        public bool RemoveNotRequiredDependencies { get; set; }
-
-        //method not unit tested
-        public void Run()
-        {
-            this.BuildStore();
-            foreach (MakeProject makeProject in MakeProjects)
-            {
-                var vsProject = VisualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
-                if (vsProject == null)
-                {
-                    if (Verbose) Console.WriteLine($"Didn't find MakeProject:{makeProject.ProjectName} VisualStudio File");
-                    continue; // Safe, there will be Make project that don't match up
-                }
-                //If add missing Dependencies
-                if (AddMissingDependencies)
-                {
-                    foreach (var reference in vsProject.ExpectedMakeProjectReferences)
-                    {
-                        if (!makeProject.DependencyProjects.Contains(reference.Key))
-                            makeProject.DependencyProjects.Add(reference.Key);
-                    }
-                }
-                //If add missing Dependencies
-                if (RemoveNotRequiredDependencies)
-                {
-                    var removelist = new List<string>();
-                    foreach (var dependency in makeProject.DependencyProjects)
-                    {
-                        if (!vsProject.ExpectedMakeProjectReferences.ContainsKey(dependency))
-                            removelist.Add(dependency);
-                    }
-                    foreach (var dependency in removelist)
-                    {
-                        makeProject.DependencyProjects.Remove(dependency);
-                    }
-                }
-            }
-
-            if (!FixErrors) return;
-            foreach (var makeFile in MakeFiles)
-            {
-                makeFile.WriteFile(this.LineLength, this.SortProject);
-            }
-        }
-    }
-
-    class MakeProjectDependency 
-    {
-        public int Level;
-        public bool Checking = false;
-        public bool Checked = false;
-
-        [JsonIgnore]
-        public List<MakeProjectDependency> DependencyMakeProject = new List<MakeProjectDependency>();
-        [JsonIgnore]
-        public MakeProject MakeProject;
-
-        public string ProjectName;
-
-        public MakeProjectDependency(MakeProject makeProject)
-        {
-            MakeProject = makeProject;
-            Checking = false;
-            Checked = false;
-            Level = 0;
-            ProjectName = makeProject.ProjectName;
-        }
-    }
-
-    [Verb("MakeFileCircularDependencyCheck", HelpText = "Checks for Circular Dependency in Make files")]
-    internal class MakeFileCircularDependencyCheck : Store
+    [Verb("mkCircularDependCheck", HelpText = "Checks for Circular Dependency in Make files")]
+    internal class MkCircularDependCheck : Store
     {
         private readonly Stack<string> dependencyStack = new Stack<string>();
         // Report, What to see
         // for each project the StackLevel=X, Project Name, Dependency= Dependency List=LevelX,
         // order by StackLevel then Project Name. Sort Dependency list
 
-        readonly ConsoleWriter console = new ConsoleWriter();
-
         readonly List<MakeProjectDependency> allProjects = new List<MakeProjectDependency>();
         //method not unit tested
         public void Run()
         {
+            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+
             this.BuildStoreMakeFilesOnly();
 
             foreach (var makeProject in MakeProjects)
@@ -121,7 +43,7 @@ namespace MakeProjectFixer
                     var depProject = allProjects.FirstOrDefault(p => p.MakeProject.ProjectName == dependencyProject);
                     if (depProject == null)
                     {
-                        console.WriteLine($"Make Project: {project.MakeProject.ProjectName} Dependency: {dependencyProject} does not exist", ConsoleColor.Red);
+                        Program.Console.WriteLine($"Make Project: {project.MakeProject.ProjectName} Dependency: {dependencyProject} does not exist", ConsoleColor.Red);
                         error = true;
                     }
                     if (depProject != null)
@@ -131,7 +53,7 @@ namespace MakeProjectFixer
 
                     if (dependencyProject == project.MakeProject.ProjectName)
                     {
-                        console.WriteLine($"Make Project: {project.MakeProject.ProjectName} contains a reference to itself in file ...", ConsoleColor.Red);
+                        Program.Console.WriteLine($"Make Project: {project.MakeProject.ProjectName} contains a reference to itself in file ...", ConsoleColor.Red);
                         error = true;
                     }
                 }
@@ -139,7 +61,7 @@ namespace MakeProjectFixer
 
             if (error)
             {
-                console.Write($"Error Detected Aborting", ConsoleColor.Red);
+                Program.Console.Write($"Error Detected Aborting", ConsoleColor.Red);
                 return;
             }
 
@@ -209,9 +131,9 @@ namespace MakeProjectFixer
             if (makeProject.Checking == true && makeProject.Checked == false)
             {
                 // error print stack
-                console.WriteLine($"Error Circular Reference Detected for Project {makeProject.MakeProject.ProjectName}", ConsoleColor.Red);
+                Program.Console.WriteLine($"Error Circular Reference Detected for Project {makeProject.MakeProject.ProjectName}", ConsoleColor.Red);
                 var stack = string.Join(", ", dependencyStack);
-                console.WriteLine($"Stack for Project {stack}: ", ConsoleColor.Red);
+                Program.Console.WriteLine($"Stack for Project {stack}: ", ConsoleColor.Red);
                 foreach (var item in dependencyStack)
                 {
                     var t = allProjects.FirstOrDefault(p => p.MakeProject.ProjectName == item);
@@ -235,9 +157,31 @@ namespace MakeProjectFixer
 
         private void PrintDependencyList(MakeProjectDependency makeProject)
         {
-            console.Write($"Project: {makeProject.MakeProject.ProjectName} ", ConsoleColor.Yellow);
+            Program.Console.Write($"Project: {makeProject.MakeProject.ProjectName} ", ConsoleColor.Yellow);
             var dependencis = string.Join(", ", makeProject.MakeProject.DependencyProjects);
-            console.WriteLine($"Dependency: {dependencis}", ConsoleColor.DarkYellow);
+            Program.Console.WriteLine($"Dependency: {dependencis}", ConsoleColor.DarkYellow);
+        }
+    }
+    class MakeProjectDependency
+    {
+        public int Level;
+        public bool Checking = false;
+        public bool Checked = false;
+
+        [JsonIgnore]
+        public readonly List<MakeProjectDependency> DependencyMakeProject = new List<MakeProjectDependency>();
+        [JsonIgnore]
+        public readonly MakeProject MakeProject;
+
+        public readonly string ProjectName;
+
+        public MakeProjectDependency(MakeProject makeProject)
+        {
+            MakeProject = makeProject;
+            Checking = false;
+            Checked = false;
+            Level = 0;
+            ProjectName = makeProject.ProjectName;
         }
     }
 }

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using CommandLine;
 using MakeProjectFixer.MakeFile;
 using MakeProjectFixer.VisualStudioFile;
 
 namespace MakeProjectFixer
 {
+    /// <summary>
+    /// holds an in memory set of Make file an Visual studio files so
+    /// that they made be queried quickly by 
+    /// </summary>
     internal class Store : Options
     {
         public List<MakeFile.MakeFile> MakeFiles { get; private set; }
@@ -25,14 +26,17 @@ namespace MakeProjectFixer
             VisualStudioFiles = new List<VisualStudioFile.VisualStudioFile>();
         }
 
+        // Build Both the Make Files and Visual Studio files Store
         public void BuildStore()
         {
+            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+
             BuildStoreMakeFilesOnly();
             ProcessVisualStudioFilesStage1BuildFileList();
-            ProcessVisualStudioFilesStage2BuildExpectedMakeProjectRefenences();
             ProcessVisualStudioFilesStage3MatchUpMakeProject();
         }
 
+        // Only build the Make Files
         public void BuildStoreMakeFilesOnly()
         {
             ProcessMakeFiles();
@@ -56,7 +60,7 @@ namespace MakeProjectFixer
             {
                 var make = new MakeFile.MakeFile();
                 make.ReadFile(file);
-                make.ProcessPublishItems(); //TODO
+                make.ScanRawLinesForPublishItems(); 
                 MakeFiles.Add(make);
             });
 
@@ -88,29 +92,9 @@ namespace MakeProjectFixer
             Parallel.ForEach(files, (file) =>
             {
                 var vsFile = new VisualStudioFile.VisualStudioFile(file);
-                vsFile.ScanFile();
+                vsFile.ScanFileForReferences();
                 VisualStudioFiles.Add(vsFile);
             });
-
-            Helper.PreProcessedFileSave(JsonFile, VisualStudioFiles);
-        }
-
-        private void ProcessVisualStudioFilesStage2BuildExpectedMakeProjectRefenences()
-        {
-            if (Helper.PreProcessedObject(System.Reflection.MethodBase.GetCurrentMethod().Name, this))
-            {
-                VisualStudioFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioFile.VisualStudioFile>>(JsonFile);
-                return;
-            }
-
-            foreach (var visualStudioFile in VisualStudioFiles)
-            {
-                visualStudioFile.BuildExpectedMakeProjectRefenences();
-            }
-            //Parallel.ForEach(VisualStudioFiles, (visualStudioFile) =>
-            //{
-            //    visualStudioFile.BuildExpectedMakeProjectRefenences();
-            //});
 
             Helper.PreProcessedFileSave(JsonFile, VisualStudioFiles);
         }
@@ -125,6 +109,7 @@ namespace MakeProjectFixer
 
             foreach (var visualStudioFile in VisualStudioFiles)
             {
+                visualStudioFile.BuildExpectedMakeProjectReferences(MakeProjects);
                 visualStudioFile.MatchUpMakeProject(MakeProjects);
             }
             //Parallel.ForEach(VisualStudioFiles, (visualStudioFile) =>

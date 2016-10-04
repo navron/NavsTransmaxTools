@@ -30,10 +30,6 @@ namespace MakeProjectFixer
         [Option("sort", HelpText = "Sort the project within the make file", Default = false)]
         public bool SortProject { get; set; }
 
-
-        [Option(@"fix", HelpText = "Fix Errors", Default = false)]
-        public bool FixErrors { get; set; }
-
         [Option(@"temp", HelpText = "Specifies a directory where pre-process stage may save files")]
         public string PreProcessedFolder { get; set; }
 

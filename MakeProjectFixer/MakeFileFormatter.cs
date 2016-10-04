@@ -18,6 +18,8 @@ namespace MakeProjectFixer
 
         public void Run()
         {
+            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+
             var files = Helper.FindFiles(this);
             Parallel.ForEach(files, (file) =>
             {
@@ -53,6 +55,8 @@ namespace MakeProjectFixer
 
         public void Run()
         {
+            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+
             var files = Helper.FindFiles(this);
             foreach (var file in files)
 
@@ -69,15 +73,15 @@ namespace MakeProjectFixer
 
                 var errorFound = false;
                 if (ScanForErrorsExtraDependencyInTheMakeFileHeader)
-                    errorFound |= make.ScanForErrorsExtraDependencyInTheMakeFileHeader(FixErrors);
+                    errorFound |= make.ScanForErrorsExtraDependencyInTheMakeFileHeader();
 
                 if (ScanForErrorsMissingDependencyFromTheMakeFileHeader)
-                    errorFound |= make.ScanForErrorsMissingDependencyFromTheMakeFileHeader(FixErrors);
+                    errorFound |= make.ScanForErrorsMissingDependencyFromTheMakeFileHeader();
 
                 if (ScanForErrorsProjectHeaderSyntax)
-                    errorFound |= make.ScanForErrorsProjectHeaderSyntax(FixErrors);
+                    errorFound |= make.ScanForErrorsProjectHeaderSyntax();
 
-                if (errorFound && FixErrors)
+                if (errorFound)
                 {
                     make.WriteFile(LineLength, SortProject);
                 }
@@ -87,11 +91,13 @@ namespace MakeProjectFixer
     }
 
 
-    [Verb("MatchMakeFileAndVisualStudioProjectCase", HelpText = "Make Files Match VisualStudio Project Name Case")]
+    [Verb("mfMatchVisualStudioProjectCase", HelpText = "Make Files Match VisualStudio Project Name Case")]
     internal class MatchMakeFileAndVisualStudioProjectCase : Store
     {
         public void Run()
         {
+            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+
             this.BuildStore();
 
             foreach (var visualStudioFile in VisualStudioFiles)
@@ -100,26 +106,21 @@ namespace MakeProjectFixer
                 {
                     if (reference.Value == VisualStudioFile.VisualStudioFile.ProjectFound.FoundCaseWrong)
                     {
-                        var makeproject =
-                            MakeProjects.FirstOrDefault(
-                                m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
+                        var makeproject = MakeProjects.FirstOrDefault(m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
                         if (makeproject != null)
                         {
-                            Console.WriteLine(
-                                $"Project {visualStudioFile.ProjectName} has wrong case make reference to {makeproject.ProjectName} should be {reference.Key}");
+                            Program.Console.WriteLine($"Project {visualStudioFile.ProjectName} has wrong case make reference to {makeproject.ProjectName} should be {reference.Key}",ConsoleColor.Green);
                             makeproject.ProjectName = reference.Key;
                         }
                     }
                     if (reference.Value == VisualStudioFile.VisualStudioFile.ProjectFound.NotFound)
                     {
-                        Console.WriteLine(
-                            $"Project {visualStudioFile.ProjectName} missing make project reference {reference.Key}");
+                        Program.Console.WriteLine($"Project {visualStudioFile.ProjectName} missing make project reference {reference.Key}", ConsoleColor.Red);
                     }
                 }
                 visualStudioFile.MatchUpMakeProject(MakeProjects);
             }
 
-            if (!FixErrors) return;
             foreach (var makeFile in MakeFiles)
             {
                 makeFile.WriteFile(this.LineLength, this.SortProject);
@@ -134,6 +135,8 @@ namespace MakeProjectFixer
 
         public void Run()
         {
+            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+
             this.BuildStoreMakeFilesOnly();
 
             var allprojects = new List<MakeProject>();
@@ -142,7 +145,6 @@ namespace MakeProjectFixer
 
             CheckProjects(allprojects);
 
-            if (!FixErrors) return;
             foreach (var makeFile in MakeFiles)
             {
                 makeFile.WriteFile(this.LineLength, this.SortProject);
