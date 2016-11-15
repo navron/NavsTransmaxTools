@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MakeProjectFixer.MakeFile;
-using Newtonsoft.Json;
 
 namespace MakeProjectFixer.VisualStudioFile
 {
@@ -17,15 +16,15 @@ namespace MakeProjectFixer.VisualStudioFile
         public string AssemblyName { get; set; }
 
         // CS or C++
-        public enum ProjectTypeValue { NotSet = 0, Cs, Cpp }
+        public enum ProjectTypeValue { NotSet = 0, CSharp, Cpp }
 
-        public ProjectTypeValue ProjectType { get; }
+        public ProjectTypeValue ProjectType { get; set; }
 
         // List of TSD Reference DLL C#
-        public List<string> TsdReferences { get; private set; }
+        public List<string> RequiredReferencesCSharp { get; set; }
 
         // List of #include Files C++
-        public List<string> IncludeReferences { get; private set; }
+        public List<string> RequiredReferencesCpp { get; set; }
 
         public enum ProjectFound
         {
@@ -40,8 +39,15 @@ namespace MakeProjectFixer.VisualStudioFile
 
         public VisualStudioFile(string file)
         {
-            TsdReferences = new List<string>();
-            IncludeReferences = new List<string>();
+            // file is null when loading via json file
+            if (file != null)
+                ProcessFile(file);
+        }
+
+        private void ProcessFile(string file)
+        {
+            RequiredReferencesCSharp = new List<string>();
+            RequiredReferencesCpp = new List<string>();
             ExpectedMakeProjectReferences = new Dictionary<string, ProjectFound>();
             FileName = file;
             ProjectName = Path.GetFileNameWithoutExtension(file);
@@ -49,39 +55,28 @@ namespace MakeProjectFixer.VisualStudioFile
             var extension = Path.GetExtension(file);
             if (extension != null)
             {
-                if (extension.ToLower().Contains(@"csproj")) ProjectType = ProjectTypeValue.Cs;
+                if (extension.ToLower().Contains(@"csproj")) ProjectType = ProjectTypeValue.CSharp;
                 if (extension.ToLower().Contains(@"vcxproj")) ProjectType = ProjectTypeValue.Cpp;
             }
         }
 
         public void ScanFileForReferences()
         {
-            if (ProjectType == ProjectTypeValue.Cs)
+            if (ProjectType == ProjectTypeValue.CSharp)
             {
                 var vscs = new VsCsharp();
                 vscs.OpenProject(FileName);
-                TsdReferences = vscs.GetTsdReferences();
+                RequiredReferencesCSharp = vscs.GetTsdReferences();
                 AssemblyName = vscs.GetAssemblyName();
             }
             if (ProjectType == ProjectTypeValue.Cpp)
             {
                 var vscpp = new VsCplusplus();
-                IncludeReferences = vscpp.ScanCppProjectForIncludeStatements(FileName);
-            }
-        }
-
-        // Method done before MatchUpMakeProject
-        public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects)
-        {
-            if (ProjectType == ProjectTypeValue.Cs)
-            {
-                var vscs = new VsCsharp();
-                ExpectedMakeProjectReferences = vscs.GetExpectedMakeProjectRefenences(TsdReferences);
-            }
-            if (ProjectType == ProjectTypeValue.Cpp)
-            {
-                var vscpp = new VsCplusplus();
-                ExpectedMakeProjectReferences = vscpp.GetExpectedMakeProjectRefenences(IncludeReferences, makeProjects);
+                if(FileName.Contains("assvc."))
+                {
+                    
+                }
+                RequiredReferencesCpp = vscpp.ScanCppProjectForIncludeStatements(FileName);
             }
         }
 

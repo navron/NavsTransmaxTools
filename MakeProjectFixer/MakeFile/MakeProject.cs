@@ -4,15 +4,20 @@ using Newtonsoft.Json;
 
 namespace MakeProjectFixer.MakeFile
 {
+    /// <summary>
+    /// A Make project is a single Make Target, May be a header or body target
+    /// </summary>
     public class MakeProject
     {
         public MakeProject()
         {
             RawLines = new List<string>();
             PreLines = new List<string>();
+            ProjectLines = new List<string>();
             PostLines = new List<string>();
             DependencyProjects = new List<string>();
             PublishCppHeaderFiles = new List<string>();
+            DependencyProjects2 = new Dictionary<string, bool>();
         }
 
         /// <summary>
@@ -24,6 +29,8 @@ namespace MakeProjectFixer.MakeFile
         /// List of Current Projects marked are Dependencies
         /// </summary>
         public List<string> DependencyProjects { get; set; }
+        // Dependency and IsHeader
+        public Dictionary<string, bool> DependencyProjects2 { get; set; } // Can't Remember what this was for?
 
         /// <summary>
         /// Lines above the ProjectName Line, these are always comments
@@ -31,9 +38,19 @@ namespace MakeProjectFixer.MakeFile
         public List<string> PreLines { get; set; }
 
         /// <summary>
+        /// List of Project Lines
+        /// </summary>
+        public List<string> ProjectLines { get; set; }
+
+        /// <summary>
         /// Bash script lines for this make file project
         /// </summary>
         public List<string> PostLines { get; set; }
+
+        /// <summary>
+        /// This Project is the Header section of the make file
+        /// </summary>
+        public bool IsHeader { get; set; }
 
         [JsonIgnore]
         public IList<string> RawLines { get; set; }
@@ -43,18 +60,27 @@ namespace MakeProjectFixer.MakeFile
         /// </summary>
         public List<string> PublishCppHeaderFiles { get; set; }
 
-        public List<string> FormatMakeProject(int lineLength, bool sortDependenies)
+        public List<string> FormatMakeProject(bool keepFormatting, int lineLength, bool sortDependenies)
         {
             if (sortDependenies)
             {
+                // Header Dependencies First then Project Dependencies 
                 DependencyProjects.Sort();
             }
 
-            var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
+             var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
             var projectLines = new List<string>();
             if (!string.IsNullOrEmpty(ProjectName))
             {
-                projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength);
+                if (IsHeader)
+                {
+                    projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength);
+                }
+                else
+                {
+                    projectLines.Add(projectLine);
+                    //projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength+40);
+                }
             }
 
             PreLines.RemoveAll(string.IsNullOrWhiteSpace);
@@ -71,8 +97,7 @@ namespace MakeProjectFixer.MakeFile
             return project;
         }
 
-
-        internal List<string> GetPublishCppHeaderFiles(List<string> postLines)
+        internal List<string> GetPublishedCppHeaderFiles(List<string> postLines)
         {
             //Sample
             //scripts/cpy $(as_lib_path) /$@/Header.gsoap $(GSOAP_IMPORT)
@@ -95,9 +120,7 @@ namespace MakeProjectFixer.MakeFile
                     }
                 }
             }
-
             return list;
         }
-
     }
 }

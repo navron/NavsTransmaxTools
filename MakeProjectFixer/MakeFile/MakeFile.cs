@@ -6,6 +6,9 @@ using System.Text.RegularExpressions;
 
 namespace MakeProjectFixer.MakeFile
 {
+    /// <summary>
+    /// Store for a single Make File, Contains a Header and Project(s)
+    /// </summary>
     public class MakeFile
     {
         // Space in here is a known mistake, Rebuilding the make files will fix this
@@ -44,9 +47,9 @@ namespace MakeProjectFixer.MakeFile
             ProcessMakeFileRawLines(RawLines.ToList());
         }
 
-        public void WriteFile(int lineLength, bool sortProjects)
+        public void WriteFile(Options options)
         {
-            var output = FormatFile(lineLength, sortProjects);
+            var output = FormatFile(options);
             File.WriteAllLines(FileName, output);
         }
 
@@ -55,18 +58,20 @@ namespace MakeProjectFixer.MakeFile
             //Process the header
             var headerLines = GetRawHeaderLines(rawLines);
             Header = ProcessRawProject(headerLines);
+            Header.IsHeader = true;
 
             //Process the body
             int startpos = headerLines.Count;
             while (startpos < rawLines.Count)
             {
                 var c = ProcessBody(rawLines, startpos);
+                c.IsHeader = false;
                 startpos += c.RawLines.Count;
                 Projects.Add(c);
             }
         }
 
-        internal MakeProject ProcessBody(List<string> rawlines, int startPos)
+        private MakeProject ProcessBody(List<string> rawlines, int startPos)
         {
             var lines = rawlines.GetRange(startPos, rawlines.Count - startPos);
             var projectLines = GetRawProjectLines(lines);
@@ -76,7 +81,6 @@ namespace MakeProjectFixer.MakeFile
 
         internal List<string> GetRawHeaderLines(IList<string> rawLines)
         {
-            // var combineLines = MakeFileHelper.CombineLines(rawLines);
             // Find the header stop which is the end of file or first project
             var afterFirst = false;
             var lines = new List<string>();
@@ -165,12 +169,12 @@ namespace MakeProjectFixer.MakeFile
         /// <summary>
         /// Returns a formatted make file
         /// </summary>
-        public List<string> FormatFile(int lineLength, bool sortProjects)
+        public List<string> FormatFile(Options options)
         {
             var output = new List<string>();
-            output.AddRange(Header.FormatMakeProject(lineLength, sortProjects));
+            output.AddRange(Header.FormatMakeProject(options.FormatProject, options.LineLength, options.SortProject));
 
-            if (sortProjects)
+            if (options.SortProject)
             {
                 Projects.Sort((a, b) => string.Compare(a.ProjectName, b.ProjectName, StringComparison.OrdinalIgnoreCase));
             }
@@ -178,7 +182,7 @@ namespace MakeProjectFixer.MakeFile
             foreach (MakeProject project in Projects)
             {
                 output.Add(string.Empty);
-                output.AddRange(project.FormatMakeProject(lineLength, sortProjects));
+                output.AddRange(project.FormatMakeProject(options.FormatProject, options.LineLength, options.SortProject));
             }
 
             return output;
@@ -218,7 +222,7 @@ namespace MakeProjectFixer.MakeFile
             var folder = Path.GetDirectoryName(FileName);
             if (name == null || folder == null)
                 throw new Exception($"FileName is invalid: {FileName} --aborting");
-            return folder.Contains(name);
+            return folder.EndsWith($"\\{name}");
         }
 
         private bool ScanForErrorsExtraDependencyInTheMakeFileHeaderForDirectoryMakeFile()
@@ -232,6 +236,7 @@ namespace MakeProjectFixer.MakeFile
             foreach (var file in files)
             {
                 var name = Path.GetFileNameWithoutExtension(file);
+                if(name== folderName) continue; // Don't add your-self
                 var temp = $"{folderName}_{name}";
                 fileProjects.Add(temp);
             }
@@ -254,6 +259,13 @@ namespace MakeProjectFixer.MakeFile
             foreach (var removeItem in removeItems)
             {
                 Header.DependencyProjects.Remove(removeItem);
+            }
+            // Add Missing files 
+            foreach (var fileProject in fileProjects)
+            {
+                if(Header.DependencyProjects.Contains(fileProject)) continue;
+                Header.DependencyProjects.Add(fileProject);
+                problems = true;
             }
             return problems;
         }
@@ -300,10 +312,9 @@ namespace MakeProjectFixer.MakeFile
         {
             // Jobs 
             // 1. Scan for cpp published .h files
-
             foreach (var p in Projects)
             {
-               p.PublishCppHeaderFiles = p.GetPublishCppHeaderFiles(p.PostLines);
+               p.PublishCppHeaderFiles = p.GetPublishedCppHeaderFiles(p.PostLines);
             }
         }
 

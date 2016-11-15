@@ -24,13 +24,14 @@ namespace MakeProjectFixer.VisualStudioFile
             // add file name to includeList
 
             var projCollection = new ProjectCollection();
-            if(!File.Exists(projectFileName))
+            if (!File.Exists(projectFileName))
                 throw new Exception($"Project File {projectFileName} not found");
             var p = projCollection.LoadProject(projectFileName);
 
+            // This add the cpp that need scanning (missing .h files that need scanning)
             foreach (ProjectItem item in p.Items)
             {
-                if (item.ItemType == "ClCompile")
+                if (item.ItemType == "ClCompile" || item.ItemType == "ClInclude")
                 {
                     // File list will include Test files
                     fileList.Add(item.EvaluatedInclude);
@@ -49,6 +50,7 @@ namespace MakeProjectFixer.VisualStudioFile
                 var list = ScanFileForIncludeFiles(file);
                 includeFiles.AddRange(list);
             }
+
             var includeReferences = new List<string>();
             foreach (var includeFile in includeFiles)
             {
@@ -75,7 +77,7 @@ namespace MakeProjectFixer.VisualStudioFile
                 return list;
             }
 
-           var lines = File.ReadLines(file);
+            var lines = File.ReadLines(file);
             foreach (var line in lines)
             {
                 if (line.ToLower().Contains("#include"))
@@ -83,26 +85,42 @@ namespace MakeProjectFixer.VisualStudioFile
                     var f = line.Remove(0, "#include".Length);
                     f = f.Replace('"', ' ');
                     f = f.Trim();
+                    f = f.Trim('<');
+                    f = f.Trim('>');
                     list.Add(f);
                 }
             }
             return list;
         }
 
-        public Dictionary<string, VisualStudioFile.ProjectFound> GetExpectedMakeProjectRefenences
-                        (List<string> includeReferences, List<MakeProject> makeProjects)
+        public Dictionary<string, VisualStudioFile.ProjectFound> 
+            GetExpectedMakeProjectRefenences(VisualStudioFile vsFile, List<MakeProject> makeProjects)
         {
             var expectedMakeProjectReferences = new Dictionary<string, VisualStudioFile.ProjectFound>();
-            foreach (var refenence in includeReferences)
+            foreach (var refenence in vsFile.RequiredReferencesCpp)
             {
                 if (refenence == null) continue;
+                if (refenence.Contains("assvc.h"))
+                {
 
+                }
+                // Check for Publish file
                 var mp = makeProjects.FirstOrDefault(m => m.PublishCppHeaderFiles.Contains(refenence));
-                if(mp == null) continue; // not found
+                if (mp == null)
+                {
+                    // check for actual make Projects eg. aslex
+                    var item = refenence.Replace(".h", "").Replace(".cpp", "");
+                    // Must Equal, include case, otherwise fix the project files
+                    mp = makeProjects.FirstOrDefault(m => m.ProjectName == item);
+
+                    if (mp == null) continue; // not found
+                }
 
                 if (expectedMakeProjectReferences.ContainsKey(mp.ProjectName)) continue; // already added
 
-                expectedMakeProjectReferences.Add(mp.ProjectName,VisualStudioFile.ProjectFound.Found);
+                if (mp.ProjectName == vsFile.ProjectName) continue; // Don't Add Myself
+
+                expectedMakeProjectReferences.Add(mp.ProjectName, VisualStudioFile.ProjectFound.Found);
             }
             return expectedMakeProjectReferences;
         }

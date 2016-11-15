@@ -43,25 +43,24 @@ namespace MakeProjectFixer
     {
         public static readonly ConsoleWriter Console = new ConsoleWriter();
 
-
         private static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            Parser.Default.ParseArguments<MakeFileFormatter,
-                                            MakeFileScanForErrors,
-                                            MkDependAllocation,
-                                            MatchMakeFileAndVisualStudioProjectCase,
-                                            MatchMakeProjectDependencyCaseToMakeProjectName,
+            Parser.Default.ParseArguments<mkFormatMakeFile,
+                                            mkScanForErrors,
+                                            mkDependencyAllocation,
+                                            matchMakeFiletoVisualStudioProjectCase,
+                                            matchMakeFileProjectDependencyCaseToMakeFileProjectName,
                                             MkCircularDependCheck,
                                             VsFixCaseReference,
                                             MkReduceDepends
                                            >(args)
-                .WithParsed<MakeFileFormatter>(options => options.Run())
-                .WithParsed<MakeFileScanForErrors>(options => options.Run())
-                .WithParsed<MkDependAllocation>(options => options.Run())
-                .WithParsed<MatchMakeFileAndVisualStudioProjectCase>(options => options.Run())
-                .WithParsed<MatchMakeProjectDependencyCaseToMakeProjectName>(options => options.Run())
+                .WithParsed<mkFormatMakeFile>(options => options.Run())
+                .WithParsed<mkScanForErrors>(options => options.Run())
+                .WithParsed<mkDependencyAllocation>(options => options.Run())
+                .WithParsed<matchMakeFiletoVisualStudioProjectCase>(options => options.Run())
+                .WithParsed<matchMakeFileProjectDependencyCaseToMakeFileProjectName>(options => options.Run())
                 .WithParsed<MkCircularDependCheck>(options => options.Run())
                 .WithParsed<VsFixCaseReference>(options => options.Run())
                 .WithParsed<MkReduceDepends>(options => options.Run())
@@ -71,7 +70,8 @@ namespace MakeProjectFixer
 
         static void CommandLineNotParsed(IEnumerable<Error> errs)
         {
-            System.Console.WriteLine("CommandLineNotParsed");
+            Console.WriteLine("Make File and Visual Studio File Fixer");
+            Console.WriteLine("This program is design to fix different common problems that Transmax has with its build system");
         }
 
         /// <summary>

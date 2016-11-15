@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace MakeProjectFixer
+namespace MakeProjectFixer.Util
 {
     internal static class Helper
     {
@@ -51,18 +51,22 @@ namespace MakeProjectFixer
             return limitedFiles;
         }
 
-
+        // Returns True if the Call can used the Previous built Object File
         public static bool PreProcessedObject(string name, Options options)
         {
-            if (string.IsNullOrEmpty(options.PreProcessedFolder))
+            //  JsonFile is Name + .json. Stored in the current Path
+            options.JsonFile = name + ".json";
+
+            // If Reuse flag is false then return file, 
+            // If the file does not exist then return false to force rebuild of file
+            if (!options.Reuse || !File.Exists(options.JsonFile))
             {
-                options.JsonFile = String.Empty;
+                Program.Console.WriteLine($"Rebuild Method:{name}", ConsoleColor.Yellow);
                 return false;
             }
-            options.JsonFile = Path.Combine(options.PreProcessedFolder, name + ".json");
-            if (string.IsNullOrEmpty(options.PreProcessedFolder) || options.CleanPreProcessedFiles) return false;
-            if (!File.Exists(options.JsonFile)) return false;
 
+            //Other Return true
+            Program.Console.WriteLine($"Load Predefined Method:{name}", ConsoleColor.Green);
             return true;
         }
 
@@ -124,7 +128,7 @@ namespace MakeProjectFixer
                 {
                     reader = new StreamReader(filePath);
                     var fileContents = reader.ReadToEnd();
-                    return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(fileContents);
+                    return JsonConvert.DeserializeObject<T>(fileContents);
                 }
                 finally
                 {

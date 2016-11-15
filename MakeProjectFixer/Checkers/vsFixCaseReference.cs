@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using ColorConsole;
 using CommandLine;
+using MakeProjectFixer.Data;
 using MakeProjectFixer.VisualStudioFile;
 
 namespace MakeProjectFixer.Checkers
@@ -20,7 +19,7 @@ namespace MakeProjectFixer.Checkers
 
         public void Run()
         {
-            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+            Program.Console.WriteLine($"Running {GetType().Name}", ConsoleColor.Cyan);
             // Step 1 Read all Visual Studio Files 
           //  SearchPatterns = new[] { "*.csproj" };
             ////    // Find and limit return set to what is required
@@ -33,14 +32,14 @@ namespace MakeProjectFixer.Checkers
             //    vsFile.ScanFileForReferences();
             //    VisualStudioFiles.Add(vsFile);
             //});
-            this.BuildStore();
+            BuildStore();
           //  VisualStudioFiles = store.VisualStudioFiles;
 
             // Step 3 for each VS File check that the case of each Reference is correct
             foreach (VisualStudioFile.VisualStudioFile vsfile in VisualStudioFiles)
             {
                 var updateDic = new Dictionary<string, string>(); //Old String, New String
-                foreach (var tsdReference in vsfile.TsdReferences)
+                foreach (var tsdReference in vsfile.RequiredReferencesCSharp)
                 {
                     var found = VisualStudioFiles.FirstOrDefault(vs => string.Equals(vs.AssemblyName, tsdReference, StringComparison.Ordinal));
                     if (found != null) continue;

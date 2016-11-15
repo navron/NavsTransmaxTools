@@ -9,16 +9,16 @@ namespace MakeProjectFixer.VisualStudioFile
 {
     internal class VsCsharp : IDisposable
     {
-        private ProjectCollection projectCollection;
-        private Project project;
+        private ProjectCollection msProjectCollection;
+        private Project msProject;
         public VsCsharp()
         {
         }
 
         public void OpenProject(string file)
         {
-            projectCollection = new ProjectCollection();
-            project = projectCollection.LoadProject(file);
+            msProjectCollection = new ProjectCollection();
+            msProject = msProjectCollection.LoadProject(file);
         }
         public List<string> GetTsdReferences()
         {
@@ -26,7 +26,7 @@ namespace MakeProjectFixer.VisualStudioFile
 
             //var projCollection = new ProjectCollection();
             //var p = projCollection.LoadProject(projectFileName);
-            var references = project.GetItems("Reference");
+            var references = msProject.GetItems("Reference");
             foreach (var item in references)
             {
                 var include = item.EvaluatedInclude;
@@ -41,29 +41,33 @@ namespace MakeProjectFixer.VisualStudioFile
 
         public string GetAssemblyName()
         {
-            var p = project.GetProperty("AssemblyName");
+            var p = msProject.GetProperty("AssemblyName");
             return p.EvaluatedValue;
         }
 
-        public Dictionary<string, VisualStudioFile.ProjectFound> GetExpectedMakeProjectRefenences(List<string> tsdReferences)
+        public Dictionary<string, VisualStudioFile.ProjectFound>
+            GetExpectedMakeProjectRefenences(VisualStudioFile vsFile, List<VisualStudioFile> vsFiles)
         {
             var expectedMakeProjectReferences = new Dictionary<string, VisualStudioFile.ProjectFound>();
-            foreach (var tsdRefenence in tsdReferences)
+            foreach (var tsdRefenence in vsFile.RequiredReferencesCSharp)
             {
                 if (tsdRefenence == null) continue;
 
-                var t = tsdRefenence.Split('.');
-                var projectName = t.Last();
-                if (projectName.ToLower() == "workstation")
-                {
-                    projectName = tsdRefenence.Replace(@"Tsd.", "");
-                }
+                // examples
+                //Tsd.AccessControl.Workstation.Security
+                //Tsd.Libraries.Workstation.SettingsUti
+                //Tsd.Libraries.Workstation.Interop.Windows
 
-                if (expectedMakeProjectReferences.ContainsKey(projectName))
+                var project = vsFiles.FirstOrDefault(v => v.AssemblyName == tsdRefenence);
+                if(project == null) continue;
+
+                if (expectedMakeProjectReferences.ContainsKey(project.ProjectName))
                 {
-                    Console.WriteLine($"Visual Studio File XXX as a duplicate TSD Reference {projectName}");
+                    Console.WriteLine($"Visual Studio File XXX as a duplicate TSD Reference {project.ProjectName}");
                 }
-                expectedMakeProjectReferences.Add(projectName, VisualStudioFile.ProjectFound.NotLooked);
+                if (project.ProjectName == vsFile.ProjectName) continue; // Don't Add Myself
+
+                expectedMakeProjectReferences.Add(project.ProjectName, VisualStudioFile.ProjectFound.NotLooked);
             }
             return expectedMakeProjectReferences;
         }

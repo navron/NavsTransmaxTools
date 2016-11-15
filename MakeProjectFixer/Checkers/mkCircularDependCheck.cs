@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using CommandLine;
+using MakeProjectFixer.Data;
 using MakeProjectFixer.MakeFile;
+using MakeProjectFixer.Util;
 using Newtonsoft.Json;
 
 namespace MakeProjectFixer.Checkers
@@ -21,9 +23,9 @@ namespace MakeProjectFixer.Checkers
         //method not unit tested
         public void Run()
         {
-            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+            Program.Console.WriteLine($"Running {GetType().Name}", ConsoleColor.Cyan);
 
-            this.BuildStoreMakeFilesOnly();
+            BuildStoreMakeFilesOnly();
 
             foreach (var makeProject in MakeProjects)
             {

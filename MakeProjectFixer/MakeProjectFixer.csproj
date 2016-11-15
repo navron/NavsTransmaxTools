@@ -61,16 +61,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Checkers\matchMakeFiletoVisualStudioProjectCase.cs" />
     <Compile Include="Checkers\mkCircularDependCheck.cs" />
+    <Compile Include="Checkers\mkFormatMakeFile.cs" />
     <Compile Include="Checkers\mkReduceDepends.cs" />
+    <Compile Include="Checkers\mkScanForErrors.cs" />
     <Compile Include="Checkers\vsFixCaseReference.cs" />
-    <Compile Include="MakeFileFormatter.cs" />
-    <Compile Include="Checkers\mkDependAllocation.cs" />
-    <Compile Include="Store.cs" />
+    <Compile Include="Checkers\matchMakeFileProjectDependencyCaseToMakeFileProjectName.cs" />
+    <Compile Include="Checkers\mkDependencyAllocation.cs" />
+    <Compile Include="Data\Store.cs" />
     <Compile Include="VisualStudioFile\TestVisualStudioFile\TestCSFiles.cs" />
     <Compile Include="VisualStudioFile\TestVisualStudioFile\TestCppFiles.cs" />
     <Compile Include="VisualStudioFile\VisualStudioFile.cs" />
-    <Compile Include="Helper.cs" />
+    <Compile Include="Util\Helper.cs" />
     <Compile Include="MakeFile\MakeFile.cs" />
     <Compile Include="MakeFile\MakeFileHelper.cs" />
     <Compile Include="MakeFile\MakeProject.cs" />
@@ -83,7 +86,6 @@
     <Compile Include="MakeFile\TestsMakeFile\TestHelper.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFile.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFileHelper.cs" />
-    <Compile Include="VisualStudioFileFormatter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

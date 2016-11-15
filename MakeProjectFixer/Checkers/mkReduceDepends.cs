@@ -2,20 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CommandLine;
+using MakeProjectFixer.Data;
 using MakeProjectFixer.MakeFile;
 
 namespace MakeProjectFixer.Checkers
 {
-    [Verb("mkReduceDepends", HelpText = "Reduces Allocates Correct Dependency")]
+    [Verb("mkReduceDepends", HelpText = "Reduces Allocates Dependency To Depth 1,2,3")]
     internal class MkReduceDepends : Store
     {
         readonly List<MakeProject> allProjects = new List<MakeProject>();
 
         public void Run()
         {
-            Program.Console.WriteLine($"Running {this.GetType().Name}", ConsoleColor.Cyan);
+            Program.Console.WriteLine($"Running {GetType().Name}", ConsoleColor.Cyan);
 
-            this.BuildStoreMakeFilesOnly();
+            BuildStoreMakeFilesOnly();
 
             allProjects.AddRange(MakeProjects);
             allProjects.AddRange(MakeHeaderProjects);
@@ -32,9 +33,7 @@ namespace MakeProjectFixer.Checkers
                     var depProject = allProjects.FirstOrDefault(p => p.ProjectName == dependencyProject);
                     if (depProject == null)
                     {
-                        Program.Console.WriteLine(
-                            $"Missing dependencyProject {dependencyProject} in Make Project {makeProject.ProjectName}",
-                            ConsoleColor.Red);
+                        Program.Console.WriteLine($"Missing dependencyProject {dependencyProject} in Make Project {makeProject.ProjectName}", ConsoleColor.Red);
                         continue;
                     }
                     foreach (var depDepProject in depProject.DependencyProjects)
@@ -48,10 +47,9 @@ namespace MakeProjectFixer.Checkers
                     makeProject.DependencyProjects.Remove(item);
                 }
             }
-            //if (!FixErrors) return;
             foreach (var makeFile in MakeFiles)
             {
-                makeFile.WriteFile(this.LineLength, this.SortProject);
+                makeFile.WriteFile(this);
             }
         }
     }

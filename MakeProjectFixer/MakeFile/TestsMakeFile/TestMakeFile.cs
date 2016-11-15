@@ -94,7 +94,7 @@ namespace MakeProjectFixer.MakeFile.TestsMakeFile
         {
             var make = new MakeFile();
             var c = make.ProcessRawProject(givenProject);
-            var actual = c.FormatMakeProject(lineLength, sort);
+            var actual = c.FormatMakeProject(false, lineLength, sort); //TODO FIX TEST
             CollectionAssert.AreEquivalent(expectedProject, actual);
         }
 
@@ -110,8 +110,13 @@ namespace MakeProjectFixer.MakeFile.TestsMakeFile
             var expected = TestHelper.GetLinesFromResource(expectedResource);
             var make = new MakeFile();
             make.ProcessMakeFileRawLines(given.ToList());
-            var actual = make.FormatFile(lineLength, sortProjects);
-    //        SingleFile.WriteAllLines(@"c:\temp\out.mak",actual);
+            var options = new Options
+            {
+                LineLength = lineLength,
+                SortProject = sortProjects
+            };
+            var actual = make.FormatFile(options);
+            // SingleFile.WriteAllLines(@"c:\temp\out.mak",actual);
             CollectionAssert.AreEquivalent(expected, actual);
         }
     }
