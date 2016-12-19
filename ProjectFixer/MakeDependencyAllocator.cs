@@ -87,7 +87,7 @@ namespace ProjectFixer
                 var vsFile = new VisualStudioFile.VisualStudioFile();
             //    vsFile.ReadFile(file);
              //   make.ProcessPublishItems(); //TODO
-                MakeFiles.Add(make);
+         //       MakeFiles.Add(make);
             });
 
             //visualStudioFiles.BuildProjectFileList(options);
