@@ -7,12 +7,16 @@ using ProjectFileFixer;
 
 namespace VisualStudioProjectFixer.Scripts
 {
+    // TODO NOT TESTED, NOT ENABLE
     [Verb("RemoveDotNet35WebConfig", HelpText = "")]
-    public class RemoveDotNet35WebConfig : Options
+    public class RemoveDotNet35WebConfig
     {
+        [Option('d', "dir", HelpText = "Source Root Folder")]
+        public string RootFolder { get; set; }
+
         public void Run()
         {
-            List<string> sourceFileList = Helper.GetProjectFiles(SourceCheckRootFolder, Config.GetSourceSearchPatterns);
+            List<string> sourceFileList = Helper.GetProjectFiles(RootFolder, Config.GetSourceSearchPatterns);
 
             foreach (var filepath in sourceFileList)
             {

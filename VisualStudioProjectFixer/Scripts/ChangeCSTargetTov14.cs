@@ -5,6 +5,7 @@ using CommandLine;
 
 namespace VisualStudioProjectFixer.Scripts
 {
+    // TODO NOT TESTED, NOT ENABLE
     [Verb("ChangeCSTargetTov14", HelpText = "")]
     public class ChangeCSTargetTov14 : Options
     {

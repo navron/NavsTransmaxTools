@@ -2,6 +2,7 @@
 
 namespace VisualStudioProjectFixer.Scripts
 {
+    // TODO NOT TESTED, NOT ENABLE
     [Verb("SetDotNetVersion", HelpText = "Set VS project .Net Version to .")]
     class ProjectSetDotVersion
     {

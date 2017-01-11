@@ -4,6 +4,7 @@ using Microsoft.Build.Evaluation;
 
 namespace VisualStudioProjectFixer.Scripts
 {
+    // Don't used  We want the Version Numbers
     [Verb("RemoveVersionNumbers", HelpText = "Remove meta data from references")]
     public class RemoveVersionNumbers
     {

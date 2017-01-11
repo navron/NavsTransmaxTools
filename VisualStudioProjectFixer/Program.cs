@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CommandLine;
@@ -21,14 +20,15 @@ namespace VisualStudioProjectFixer
 
             // Get all classes with command line Verb Attribute
             var verbTypes = (from type in Assembly.GetExecutingAssembly().GetTypes()
-                let testAttribute = Attribute.GetCustomAttribute(type, typeof(VerbAttribute))
-                where testAttribute != null
-                select type);
+                             let testAttribute = Attribute.GetCustomAttribute(type, typeof(VerbAttribute))
+                             where testAttribute != null
+                             select type);
             // Parser the command line
             var map = Parser.Default.ParseArguments(args, verbTypes.ToArray());
-            map.WithParsed<SetReferenceDllData>(action => action.Run());
-            //    .WithParsed<SyncCreate>(action => action.Run())
-            //    .WithParsed<SyncCleanUp>(action => action.Run());
+            map.WithParsed<SetReferenceDllData>(action => action.Run())
+                .WithParsed<RemoveMetaData>(action => action.Run())
+                .WithParsed<MarkAsDirty>(action => action.Run());
+               
         }
 
         /// <summary>

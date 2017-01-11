@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using Serilog;
 
 namespace VisualStudioProjectFixer.Store
@@ -28,9 +29,14 @@ namespace VisualStudioProjectFixer.Store
             var fileName = Path.Combine(dllPath, $"{dllName}.dll");
             if (!File.Exists(fileName))
             {
-                Log.Error($"File {fileName} does not exist, aborting");
-               // return null;
-                throw new Exception($"File {fileName} does not exist, aborting");
+                var fileNameExe = Path.Combine(dllPath, $"{dllName}.exe");
+                if (!File.Exists(fileNameExe))
+                {
+                    Log.Error($"File {fileName} does not exist, aborting");
+                    // return null;
+                    throw new Exception($"File {fileName} does not exist, aborting");
+                }
+                fileName = fileNameExe;
             }
 
             var an = AssemblyName.GetAssemblyName(fileName);
@@ -44,7 +50,7 @@ namespace VisualStudioProjectFixer.Store
             // None   An unknown or unspecified combination of processor and bits-per-word.
             // X86    A 32-bit Intel processor, either native or in the Windows on Windows environment on a 64-bit platform (WOW64).
             var pa = an.ProcessorArchitecture.ToString();
-            if(pa.Contains("86")) pa = pa.ToLower();
+            if (pa.Contains("86")) pa = pa.ToLower();
 
             var fullName = an.FullName;
             if (!an.Flags.HasFlag(AssemblyNameFlags.PublicKey))
@@ -53,7 +59,9 @@ namespace VisualStudioProjectFixer.Store
                 fullName = $"{spilt[0].Trim()}, {spilt[1].Trim()}, {spilt[2].Trim()}";
             }
 
-            var line = an.ProcessorArchitecture == ProcessorArchitecture.None ? $"{fullName}" : $"{fullName}, processorArchitecture={pa}";
+            var line = an.ProcessorArchitecture == ProcessorArchitecture.None
+                ? $"{fullName}"
+                : $"{fullName}, processorArchitecture={pa}";
             return line;
         }
     }

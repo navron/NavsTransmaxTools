@@ -99,11 +99,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunPowershell.cs" />
     <Compile Include="Scripts\ChangeCSTargetTov14.cs" />
+    <Compile Include="Scripts\MarkAsDirty.cs" />
+    <Compile Include="Scripts\RemoveSystemCore.cs" />
     <Compile Include="Scripts\SetReferenceDllData.cs" />
     <Compile Include="Scripts\SetWorkStationProjectsToAnyCpu.cs" />
     <Compile Include="Scripts\Helper.cs" />
     <Compile Include="Scripts\RemoveDotNet35WebConfig.cs" />
-    <Compile Include="Scripts\ProjectRemoveMetaData.cs" />
+    <Compile Include="Scripts\RemoveMetaData.cs" />
     <Compile Include="Scripts\RemoveVersionNumbers.cs" />
     <Compile Include="Scripts\ProjectSetDotVersion.cs" />
     <Compile Include="Store\DllInformation.cs" />

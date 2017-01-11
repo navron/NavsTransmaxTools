@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Build.Evaluation;
+using Serilog;
 
 namespace VisualStudioProjectFixer.Scripts
 {
+    /// <summary>
+    /// Helper class for common tasks
+    /// </summary>
     static class Helper
     {
-        // Expain to suit needs
-
-
+        /// <summary>
+        /// Get all files matching the search pattern 
+        /// </summary>
         internal static List<string> GetProjectFiles(string rootFolder, string[] searchPatterns)
         {
             var files = searchPatterns.AsParallel()
@@ -21,45 +21,37 @@ namespace VisualStudioProjectFixer.Scripts
             return files.ToList();
         }
 
-
-        static void ProjectMarkAsDirty(List<string> sourceFileList)
+        internal static bool CheckCSharpeFile(string fileName)
         {
-            foreach (var fileName in sourceFileList)
+            if (!File.Exists(fileName))
             {
-                if (!fileName.Contains("csproj")) continue;
-                var project = new Project(fileName);
-                project.MarkDirty();
-                project.Save();
+                Log.Error($"File does not exist {fileName}");
+                return false;
             }
-        }
+            if (fileName.ToLower().Contains(@"\test\"))
+            {
+                Log.Information($"Skipping Test file: {fileName}");
+                return false;
+            }
+            if (fileName.ToLower().Contains(@".ait."))
+            {
+                Log.Information($"Skipping AIT file: {fileName}");
+                return false;
+            }
+            if (fileName.ToLower().Contains(@"unittests"))
+            {
+                // Stupid code that is still in source control and not used
+                if (!Path.GetDirectoryName(fileName).EndsWith("UnitTests")) return false;
+            }
+            // Projects that are not built in the system and that need work to compile
+            var projectFilesNotBuilt = new[]
+            {
+                "RoadSegmentConverter", "IisSetupIntegrationTests", "DrawingTestHarness", "TGPWebService",
+                "WebService.IntegrationTests"
+            };
+            if (projectFilesNotBuilt.Any(fileName.Contains)) return false;
 
-        static void TsdProjectsAreVersion1(List<string> sourceFileList)
-        {
-            const string tsdVersion = " Version=1.0.0.0"; // Note Space is required
-            foreach (var fileName in sourceFileList)
-            {
-                if (!fileName.Contains("csproj")) continue;
-                var project = new Project(fileName);
-                var references = project.GetItems("Reference");
-                foreach (var reference in references)
-                {
-                    var include = reference.EvaluatedInclude;
-                    var values = include.Split(',');
-                    if (values.Length > 1)
-                    {
-                        if (values[0].Contains(@"Tsd."))
-                        {
-                            if (!values[1].Contains(tsdVersion))
-                            {
-                                values[1] = tsdVersion;
-                                reference.UnevaluatedInclude = string.Join(",", values);
-                            }
-                        }
-                    }
-                }
-                if (project.IsDirty) Console.WriteLine($"Changed: {fileName}");
-                project.Save();
-            }
+            return true;
         }
     }
 }
