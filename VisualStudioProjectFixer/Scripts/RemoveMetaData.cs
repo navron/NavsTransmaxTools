@@ -69,7 +69,7 @@ namespace VisualStudioProjectFixer.Scripts
                     reference.RemoveMetadata(@"RequiredTargetFramework");
 
                 // Remove All SpecificVersion and HintPath
-                if (RemoveSpecificVersion && reference.HasMetadata(@"SpecificVersion"))
+                if (RemoveSpecificVersion && reference.HasMetadata(@"SpecificVersion") && AllowSpecificVersionRemoval(split[0]))
                     reference.RemoveMetadata(@"SpecificVersion");
 
                 if (RemoveHintPath && reference.HasMetadata(@"HintPath"))
@@ -95,6 +95,13 @@ namespace VisualStudioProjectFixer.Scripts
             if (!project.IsDirty) return;
             Log.Information($"Project Updated: {fileName}");
             project.Save();
+        }
+
+        private bool AllowSpecificVersionRemoval(string dllName)
+        {
+            // aspdu.net version is wrong, its one of ours but lacking correct version information 
+            var dontAllowFor = new string[] { "aspdu.net" };
+            return !dontAllowFor.Contains(dllName);
         }
     }
 }

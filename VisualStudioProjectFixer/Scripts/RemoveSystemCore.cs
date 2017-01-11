@@ -6,7 +6,7 @@ using Serilog;
 namespace VisualStudioProjectFixer.Scripts
 {
     // TODO NOT TESTED, NOT ENABLE
-    [Verb("RemoveMetaData", HelpText = "Remove Reference Meta Data like HintPath and TargetFramework")]
+    [Verb("RemoveSystemCore", HelpText = "Remove SystemCore (was only a .net 3 thing)")]
     public class RemoveSystemCore
     {
         [Option('d', "dir", HelpText = "Root Folder")]
