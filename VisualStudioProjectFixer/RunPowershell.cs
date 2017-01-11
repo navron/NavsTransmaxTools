@@ -11,7 +11,7 @@ using System.Management.Automation.Runspaces;
 namespace ProjectFileFixer
 {
     public class RunPowershell
-    { 
+    {
         public static void ExecutePowerShellCommand(string sourcepath)
         {
             try
@@ -28,7 +28,7 @@ namespace ProjectFileFixer
                         pipeline.Commands.Add(command);
 
                         pipeline.Commands[0].MergeMyResults(PipelineResultTypes.Error, PipelineResultTypes.Output);
-                        
+
                         pipeline.Input.Write("\n");
 
                         var psresults = pipeline.Invoke();
