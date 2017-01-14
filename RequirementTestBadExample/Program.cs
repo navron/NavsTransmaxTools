@@ -13,8 +13,8 @@ namespace BadExample
         static void Main(string[] args)
         {
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            if (!args.Any()) Environment.Exit(-1);
 
-            // if (!args.Any()) return;
             new Program().Execute(args[0]);
         }
 
@@ -37,7 +37,7 @@ namespace BadExample
                 .ThenBy(tuple => tuple.Item2, StringComparer.InvariantCultureIgnoreCase);
 
             // Write the sorted contents
-            var outputFileName = Path.Combine(Path.GetDirectoryName(fileName),$"{Path.GetFileNameWithoutExtension(fileName)}-graded.txt");
+            var outputFileName = Path.Combine(Path.GetDirectoryName(fileName), $"{Path.GetFileNameWithoutExtension(fileName)}-graded.txt");
             File.WriteAllLines(outputFileName, grades.Select(t => $"{t.Item1},{t.Item2},{t.Item3}"));
         }
 

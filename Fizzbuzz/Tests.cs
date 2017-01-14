@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using NUnit.Framework;
 
 namespace Fizzbuzz
@@ -23,6 +22,5 @@ namespace Fizzbuzz
             var actual = Program.FizzBuzzContent(given);
             Assert.AreEqual(expected, actual);
         }
-
     }
 }
