@@ -26,9 +26,7 @@ namespace MakeFileProjectFixer.Utility
 
             // Scan the Search Patterns in Parallel for all files matching the required
             var files = options.SearchPatterns.AsParallel()
-                .SelectMany(
-                    searchPattern =>
-                            Directory.EnumerateFiles(options.Folder, searchPattern, SearchOption.AllDirectories))
+                .SelectMany(searchPattern =>Directory.EnumerateFiles(options.Folder, searchPattern, SearchOption.AllDirectories))
                 .ToList();
 
             var knownProblemsListToRemove = new List<string>();
@@ -41,12 +39,13 @@ namespace MakeFileProjectFixer.Utility
                 foreach (var badString in knownProblemsListToRemove)
                 {
                     if (file.Contains(badString)) found = true;
+                    if(file.Contains("/ait/")) found = true;
                 }
                 if (!found)
                     limitedFiles.Add(file);
             }
 
-            Console.WriteLine($"Total Files: {files.Count} Limited: {limitedFiles.Count}");
+            Log.Information($"Total Files: {files.Count} Limited: {limitedFiles.Count}");
             if (options.Verbose) limitedFiles.ForEach(Console.WriteLine);
 
             return limitedFiles;
@@ -60,7 +59,7 @@ namespace MakeFileProjectFixer.Utility
 
             // If Reuse flag is false then return file, 
             // If the file does not exist then return false to force rebuild of file
-            if (!options.Reuse || !File.Exists(options.JsonFile))
+            if (options.CleanTemparayFiles || !File.Exists(options.JsonFile))
             {
                 Log.Debug($"Rebuild Method:{name}", ConsoleColor.Yellow);
                 return false;

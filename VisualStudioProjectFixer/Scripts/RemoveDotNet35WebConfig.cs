@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using CommandLine;
 using Microsoft.Build.Evaluation;
-using ProjectFileFixer;
 
 namespace VisualStudioProjectFixer.Scripts
 {

@@ -9,10 +9,10 @@ namespace MakeFileProjectFixer.VisualStudioFile.TestVisualStudioFile
         [Test]
         public void ScanCSFile()
         {
-            const string file = @"C:\Dev\ac\ws\AccessControl.Workstation\AccessControl.Workstation.csproj";
-            var vscs = new VsCsharp();
-            vscs.OpenProject(file);
-            var ass = vscs.GetAssemblyName();
+            //const string file = @"C:\Dev\ac\ws\AccessControl.Workstation\AccessControl.Workstation.csproj";
+            //var vscs = new VsCsharp();
+            //vscs.OpenProject(file);
+            //var ass = vscs.GetAssemblyName();
 
             //       vscpp.ScanCppProjectForIncludeStatements(file);
         }

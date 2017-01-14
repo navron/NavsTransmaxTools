@@ -319,7 +319,7 @@ namespace MakeFileProjectFixer.MakeFile
         /// </summary>
         public void ScanRawLinesForPublishItems()
         {
-            Log.Debug("Scan Raw Lines For Publish Items");
+           // Log.Debug("Scan Raw Lines For Publish Items");
             // Jobs 
             // 1. Scan for cpp published .h files
             foreach (var p in Projects)
@@ -327,6 +327,5 @@ namespace MakeFileProjectFixer.MakeFile
                p.PublishCppHeaderFiles = p.GetPublishedCppHeaderFiles(p.PostLines);
             }
         }
-
     }
 }

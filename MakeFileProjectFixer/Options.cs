@@ -22,7 +22,7 @@ namespace MakeFileProjectFixer
         //[Option("SearchPatterns", HelpText = "file types to search for")]
         // Set in Code
         public string[] SearchPatterns { get; set; }
-
+        
         [Option('v',@"verbose", HelpText = "Verbosely output information")]
         public bool Verbose { get; set; }
 
@@ -35,8 +35,8 @@ namespace MakeFileProjectFixer
         [Option("format", HelpText = "Apply new formatting", Default = false)]
         public bool FormatProject { get; set; }
 
-        [Option(@"reuse", HelpText = "Reuse previous built make and visual studio process files stored in the current folder")]
-        public bool Reuse { get; set; }
+        [Option('c',@"clean", HelpText = "clean previous build make and visual studio process files stored in the current folder")]
+        public bool CleanTemparayFiles { get; set; }
 
         [Option(@"serial", HelpText = "Run in serial mode, helpful to debug, normal action is to run in parallel mode")]
         public bool SerialMode { get; set; }
