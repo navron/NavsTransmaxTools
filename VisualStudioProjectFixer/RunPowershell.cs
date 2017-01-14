@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Management.Automation.Runspaces;
 
-namespace ProjectFileFixer
+namespace VisualStudioProjectFixer
 {
     public class RunPowershell
     {
