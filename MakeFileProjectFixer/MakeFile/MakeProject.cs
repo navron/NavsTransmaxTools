@@ -17,7 +17,7 @@ namespace MakeFileProjectFixer.MakeFile
             PostLines = new List<string>();
             DependencyProjects = new List<string>();
             PublishCppHeaderFiles = new List<string>();
-            DependencyProjects2 = new Dictionary<string, bool>();
+            //DependencyProjects2 = new Dictionary<string, bool>();
         }
 
         /// <summary>
@@ -26,11 +26,12 @@ namespace MakeFileProjectFixer.MakeFile
         public string ProjectName { get; set; }
 
         /// <summary>
-        /// List of Current Projects marked are Dependencies
+        /// List of Current Projects marked as Dependencies
         /// </summary>
         public List<string> DependencyProjects { get; set; }
+
         // Dependency and IsHeader
-        public Dictionary<string, bool> DependencyProjects2 { get; set; } // Can't Remember what this was for?
+     //   public Dictionary<string, bool> DependencyProjects2 { get; set; } // Can't Remember what this was for?
 
         /// <summary>
         /// Lines above the ProjectName Line, these are always comments
@@ -38,7 +39,7 @@ namespace MakeFileProjectFixer.MakeFile
         public List<string> PreLines { get; set; }
 
         /// <summary>
-        /// List of Project Lines
+        /// List of Project Lines (This is really a single command line with \ a the line ending)
         /// </summary>
         public List<string> ProjectLines { get; set; }
 
@@ -48,7 +49,7 @@ namespace MakeFileProjectFixer.MakeFile
         public List<string> PostLines { get; set; }
 
         /// <summary>
-        /// This Project is the Header section of the make file
+        /// This Project is the Header section of the make file, Special rules apply
         /// </summary>
         public bool IsHeader { get; set; }
 
@@ -68,7 +69,7 @@ namespace MakeFileProjectFixer.MakeFile
                 DependencyProjects.Sort();
             }
 
-             var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
+            var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
             var projectLines = new List<string>();
             if (!string.IsNullOrEmpty(ProjectName))
             {

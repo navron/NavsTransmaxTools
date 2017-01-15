@@ -19,10 +19,10 @@ namespace MakeFileProjectFixer.Scripts
         [Option('r', "remove", HelpText = "Remove un-required dependencies")]
         public bool RemoveNotRequiredDependencies { get; set; }
 
-        [Option('p', HelpText = "Process VisualStudio C++ Projects")]
+        [Option("cpp", HelpText = "Process VisualStudio C++ Projects")]
         public bool VisualStudioCpp { get; set; }
 
-        [Option('s', HelpText = "Process VisualStudio C# Projects")]
+        [Option("cs", HelpText = "Process VisualStudio C# Projects")]
         public bool VisualStudioCSharpe { get; set; }
 
         //method not unit tested
@@ -47,56 +47,47 @@ namespace MakeFileProjectFixer.Scripts
 
         private void ProcessMakeProject(MakeProject makeProject)
         {
-            //// Check if there is an matching VisualStudio project 
-            //var vsProject = VisualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
-            //if (vsProject == null)
-            //{
-            //    Log.Debug($"Didn't find MakeProject:{makeProject.ProjectName} matching VisualStudio File");
-            //    return; // Safe, there will be Make project that don't match up
-            //}
-            //if (vsProject.ProjectName == "assvc")
-            //{
+            // Check if there is an matching VisualStudio project 
+            var vsProject = VisualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
+            if (vsProject == null)
+            {
+                Log.Debug($"Didn't find MakeProject:{makeProject.ProjectName} matching VisualStudio File");
+                return; // Safe, there will be Make project that don't match up
+            }
 
-            //}
+            // If add missing Dependencies
+            if (AddMissingDependencies)
+            {
+                Log.Information("Adding Dependencies");
+                foreach (var reference in vsProject.ExpectedMakeProjectReference)
+                {
+                    if (!makeProject.DependencyProjects.Contains(reference))
+                    {
+                        makeProject.DependencyProjects.Add(reference);
+                    }
+                }
+            }
 
-            //// If add missing Dependencies
-            //if (AddMissingDependencies)
-            //{
-            //    foreach (var reference in vsProject.ExpectedMakeProjectReferences)
-            //    {
-            //        if (!makeProject.DependencyProjects.Contains(reference.Key))
-            //        {
-            //            makeProject.DependencyProjects.Add(reference.Key);
-            //        }
-            //    }
-            //}
+            // If remove missing Dependencies
+            if (RemoveNotRequiredDependencies)
+            {
+                Log.Information("Removing Dependencies");
+                var removelist = new List<string>();
+                foreach (var dependency in makeProject.DependencyProjects)
+                {
+                    var vsfile = VisualStudioFiles.FirstOrDefault(v => v.ProjectName == dependency);
+                    if (vsfile == null)
+                        continue; // This code only process make Projects that are Visual Studio projects
 
-            //// If remove missing Dependencies
-            //if (RemoveNotRequiredDependencies)
-            //{
-            //    var removelist = new List<string>();
-            //    foreach (var dependency in makeProject.DependencyProjects)
-            //    {
-            //        var vsfile = VisualStudioFiles.FirstOrDefault(v => v.ProjectName == dependency);
-            //        if (vsfile == null)
-            //            continue; // This code only process make Projects that are Visual Studio projects
+                    if (!vsProject.ExpectedMakeProjectReference.Contains(dependency))
+                        removelist.Add(dependency);
+                }
 
-            //        if (VisualStudioCSharpe && vsfile.ProjectType == VisualStudioFile.VisualStudioFile.ProjectTypeValue.CSharp)
-            //        {
-            //            if (!vsProject.ExpectedMakeProjectReferences.ContainsKey(dependency))
-            //                removelist.Add(dependency);
-            //        }
-            //        if (VisualStudioCpp && vsfile.ProjectType == VisualStudioFile.VisualStudioFile.ProjectTypeValue.CPlusPlus)
-            //        {
-            //            if (!vsProject.ExpectedMakeProjectReferences.ContainsKey(dependency))
-            //                removelist.Add(dependency);
-            //        }
-            //    }
-            //    foreach (var dependency in removelist)
-            //    {
-            //        makeProject.DependencyProjects.Remove(dependency);
-            //    }
-            //}
+                foreach (var dependency in removelist)
+                {
+                    makeProject.DependencyProjects.Remove(dependency);
+                }
+            }
         }
     }
 }

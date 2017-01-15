@@ -12,31 +12,59 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public string ProjectName { get; set; }
         public string FileName { get; set; }
         public string AssemblyName { get; set; }
-        public List<string> RequiredReferences { get; set; }
-        public List<string> ExpectedMakeProjectReference { get; set; }
+        public List<string> CodeFiles { get; set; } = new List<string>();
+        public List<string> RawReferencesIncludes { get; set; } = new List<string>();
+        public HashSet<string> ReferencesSet { get; set; } = new HashSet<string>();
+        public List<string> ExpectedMakeProjectReference { get; set; } = new List<string>();
+
+        //  Can't open a project twice, so keep a reference to it
+        private Project msProject;
+
 
         public VisualStudioCPlusPlusFile(string file)
         {
             FileName = file;
-            RequiredReferences = new List<string>();
-            ExpectedMakeProjectReference = new List<string>();
 
-            //TODO Set ProjectName and AssemblyName
+            // File made be null if loading from json, in which case the Assembly and ProjectName are already set
+            if (file == null) return;
+            AssemblyName = GetAssemblyName(file);
+            ProjectName = Path.GetFileNameWithoutExtension(file);
         }
-
-        public void ScanFileForReferences()
+        private string GetAssemblyName(string vsFileName)
         {
-            RequiredReferences = ScanProjectForReferences(FileName);
+            if (msProject == null) msProject = new Project(vsFileName);
+            var property = msProject.GetProperty("AssemblyName");
+            return property.EvaluatedValue;
         }
-
         public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects, List<IVisualStudioFile> vsFiles)
         {
             ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects);
         }
 
-
-        private List<string> ScanProjectForReferences(string vsFileName)
+        public void ScanFileForReferences()
         {
+            // Build A Scan list of all Valid files from this project
+            CodeFiles = BuildFileScanList(FileName);
+
+            // Scan Each file for RawReferencesIncludes Statements
+            foreach (var includeFile in CodeFiles)
+            {
+                var statements = ScanCodeFileForIncludeStatements(includeFile);
+                RawReferencesIncludes.AddRange(statements);
+            }
+
+            var cleanCodeFiles = CodeFiles.Select(Path.GetFileNameWithoutExtension).ToList();
+            ReferencesSet = ProcessIncludeStatements(RawReferencesIncludes, cleanCodeFiles);
+        }
+
+        private List<string> BuildFileScanList(string vsFileName)
+        {
+            var folder = Path.GetDirectoryName(vsFileName);
+            if (folder == null)
+            {
+                throw new Exception($"Can't get folder from filename {vsFileName}");
+            }
+            // File List to Scan
             var fileList = new List<string>();
 
             // open project file
@@ -49,48 +77,24 @@ namespace MakeFileProjectFixer.VisualStudioFile
             var projCollection = new ProjectCollection();
             if (!File.Exists(vsFileName))
                 throw new Exception($"Project File {vsFileName} not found");
-            var p = projCollection.LoadProject(vsFileName);
+            var project = projCollection.LoadProject(vsFileName);
 
-            // This add the cpp that need scanning (missing .h files that need scanning)
-            foreach (ProjectItem item in p.Items)
+            // Get the files that need scanning (missing .h files that need scanning)
+            foreach (ProjectItem item in project.Items)
             {
-                if (item.ItemType == "ClCompile" || item.ItemType == "ClInclude")
-                {
-                    // File list will include Test files
-                    fileList.Add(item.EvaluatedInclude);
-                }
-            }
+                // File list will include Test files
+                if (item.ItemType != "ClCompile" && item.ItemType != "ClInclude") continue;
 
-            var folder = Path.GetDirectoryName(vsFileName);
-            if (folder == null)
-            {
-                throw new Exception($"Error getting folder name from {vsFileName}");
-            }
-            var includeFiles = new List<string>();
-            foreach (var includeFile in fileList)
-            {
-                var file = Path.Combine(folder, includeFile);
-                var list = ScanFileForIncludeFiles(file);
-                includeFiles.AddRange(list);
-            }
+                var checkFile = Path.Combine(folder, item.EvaluatedInclude);
+                // Visual Studio is normally ok with missing files
+                if (!File.Exists(checkFile)) continue;
 
-            var includeReferences = new List<string>();
-            foreach (var includeFile in includeFiles)
-            {
-                // don’t add references that are own project
-                if (fileList.Contains(includeFile)) continue;
-                // don’t add duplicate references
-                if (includeReferences.Contains(includeFile)) continue;
-
-                // only include .h files 
-                if (!includeFile.ToLower().Contains(".h")) continue;
-
-                includeReferences.Add(includeFile);
+                fileList.Add(checkFile);
             }
-            return includeReferences;
+            return fileList;
         }
 
-        private List<string> ScanFileForIncludeFiles(string file)
+        private List<string> ScanCodeFileForIncludeStatements(string file)
         {
             var list = new List<string>();
 
@@ -114,10 +118,38 @@ namespace MakeFileProjectFixer.VisualStudioFile
             return list;
         }
 
+        /// <summary>
+        /// Process Include Statements and reduce to a clean set that should match Make Project publish
+        /// </summary>
+        /// <param name="rawReferencesIncludes"></param>
+        /// <param name="codeFileNames">List of File Names without Path or extension</param>
+        /// <returns></returns>
+        private HashSet<string> ProcessIncludeStatements(List<string> rawReferencesIncludes, List<string> codeFileNames)
+        {
+            var hashSet = new HashSet<string>();
+            foreach (var reference in rawReferencesIncludes)
+            {
+                // don’t add references that are own project
+                if (codeFileNames.Contains(reference)) continue;
+
+                // don’t add duplicate references
+                if (hashSet.Contains(reference)) continue;
+
+                // only include .h files 
+                if (!reference.ToLower().Contains(".h")) continue;
+
+                //Clean Reference
+                var cleanValue = reference.Replace(".h", "").Replace(".cpp", "");
+
+                hashSet.Add(cleanValue);
+            }
+            return hashSet;
+        }
+
         public List<string> GetExpectedMakeProjectRefenences(List<MakeProject> makeProjects)
         {
-            var expectedMakeProjectReferences = new List<string>();
-            foreach (var reference in RequiredReferences)
+            var list = new List<string>();
+            foreach (var reference in ReferencesSet)
             {
                 if (reference == null) continue;
 
@@ -133,13 +165,13 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     if (mp == null) continue; // not found
                 }
 
-                if (expectedMakeProjectReferences.Contains(mp.ProjectName)) continue; // already added
+                if (list.Contains(mp.ProjectName)) continue; // already added
 
                 if (mp.ProjectName == ProjectName) continue; // Don't Add Myself
 
-                expectedMakeProjectReferences.Add(mp.ProjectName);
+                list.Add(mp.ProjectName);
             }
-            return expectedMakeProjectReferences;
+            return list;
         }
     }
 }

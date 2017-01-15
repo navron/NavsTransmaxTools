@@ -108,7 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Scripts\MakeProjectDependency.cs" />
-    <Compile Include="Scripts\MatchMFtoVsProjectCase.cs" />
+    <Compile Include="Scripts\FixMakeFileProjectFromVsProjectName.cs" />
     <Compile Include="Scripts\mkCircularDependCheck.cs" />
     <Compile Include="Scripts\mkFormatMakeFile.cs" />
     <Compile Include="Scripts\mkReduceDepends.cs" />
@@ -129,7 +129,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="VisualStudioFile\VisualStudioFileHelper.cs" />
     <Compile Include="VisualStudioFile\VisualStudioCPlusPlusFile.cs" />
-    <Compile Include="VisualStudioFile\VisualStudioCSharp.cs" />
+    <Compile Include="VisualStudioFile\VisualStudioCSharpFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestHelper.cs" />
     <Compile Include="MakeFile\TestsMakeFile\TestMakeFile.cs" />

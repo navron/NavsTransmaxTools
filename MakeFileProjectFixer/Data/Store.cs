@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using CommandLine;
 using MakeFileProjectFixer.MakeFile;
 using MakeFileProjectFixer.Utility;
 using MakeFileProjectFixer.VisualStudioFile;
@@ -14,6 +15,7 @@ namespace MakeFileProjectFixer.Data
     /// Holds an in memory set of Make file an Visual studio files so
     /// that they made be queried quickly by 
     /// </summary>
+    [Verb("Store", HelpText = "Debugging Verb, used to create json files of processed visual studio project and make files")]
     internal class Store : Options
     {
         public List<MakeFile.MakeFile> MakeFiles { get; private set; }
@@ -52,9 +54,15 @@ namespace MakeFileProjectFixer.Data
         {
             using (new LoggingTimer("Building Store MakeFiles"))
             {
-                Stage1ReadMakeFiles();
-                Stage2BuildMakeProjects();
+                MakeFiles = Stage1ReadMakeFiles();
+                
+                // Build a MakeProject Set
+                MakeFiles.ForEach(mk=> MakeProjects.AddRange(mk.Projects));
+                // Build a MakeProject Header Set
+                MakeFiles.ForEach(mk => MakeHeaderProjects.Add(mk.Header));
+
                 Stage2CheckMakeProjects(MakeProjects);
+                Stage2CheckMakeProjects(MakeHeaderProjects);
             }
         }
 
@@ -77,62 +85,60 @@ namespace MakeFileProjectFixer.Data
                     VisualStudioFiles.ForEach(vsFile => vsFile.BuildExpectedMakeProjectReferences(MakeProjects, VisualStudioFiles));
 
                 // For Debugging only
-                Helper.PreProcessedFileSave("VisualStudioFiles.json", CSharpFiles);
-                //Stage3BuildCPlusPlusFileList();
-                //ProcessVsFilesStage3BuildExpectedMakeProjectReferences();
-                //ProcessVsFilesStage4MatchUpMakeProject();
+                Helper.PreProcessedFileSave("VisualStudioFiles.json", VisualStudioFiles);
             }
         }
 
-        private void Stage1ReadMakeFiles()
+        private List<MakeFile.MakeFile> Stage1ReadMakeFiles()
         {
-            if (Helper.PreProcessedObject(System.Reflection.MethodBase.GetCurrentMethod().Name, this))
+            if (Helper.PreProcessedObject(MethodBase.GetCurrentMethod().Name, this))
             {
-                MakeFiles = Helper.JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(JsonFile);
-                return;
+                return Helper.JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(JsonFile);
             }
 
-            // This takes about 1 sec, 
-            // Step 1 Read all make files
+             var list = new List<MakeFile.MakeFile>();
+           // This takes about 1 sec, Step 1 Read all make files
             SearchPatterns = new[] { "*.mak" };
-
             var files = Helper.FindFiles(this);
+
             Parallel.ForEach(files, (file) =>
             {
                 var make = new MakeFile.MakeFile();
                 make.ReadFile(file);
                 make.ScanRawLinesForPublishItems();
-                MakeFiles.Add(make);
+                list.Add(make);
             });
 
-            Helper.PreProcessedFileSave(JsonFile, MakeFiles);
+            Helper.PreProcessedFileSave(JsonFile, list);
+            return list;
         }
 
-        private void Stage2BuildMakeProjects()
-        {
-            foreach (MakeFile.MakeFile makeFile in MakeFiles)
-            {
-                MakeProjects.AddRange(makeFile.Projects);
-                MakeHeaderProjects.Add(makeFile.Header);
-            }
-            AllMakeProjects.AddRange(MakeProjects);
-            AllMakeProjects.AddRange(MakeHeaderProjects);
+        // Build a Set of Make Project from the Make Files
+        //private void Stage2BuildMakeProjects(List<MakeFile.MakeFile> makeFiles)
+        //{
+        //    foreach (MakeFile.MakeFile makeFile in makeFiles)
+        //    {
+        //        MakeProjects.AddRange(makeFile.Projects);
+        //        MakeHeaderProjects.Add(makeFile.Header);
+        //    }
+        //    AllMakeProjects.AddRange(MakeProjects);
+        //    AllMakeProjects.AddRange(MakeHeaderProjects);
 
-            foreach (var makeProject in AllMakeProjects)
-            {
-                foreach (var project in makeProject.DependencyProjects)
-                {
-                    var t = AllMakeProjects.FirstOrDefault(a => a.ProjectName == project);
-                    if (t == null) continue; //bug that should ok to ignore
-                    if (makeProject.DependencyProjects2.ContainsKey(project))
-                    {
-                        Log.Debug($"Warning Make Project {makeProject.ProjectName} has duplicate reference {project} Hand Edit to fix", ConsoleColor.Red);
-                        continue;
-                    }
-                    makeProject.DependencyProjects2.Add(project, t.IsHeader);
-                }
-            }
-        }
+        //    //foreach (var makeProject in AllMakeProjects)
+        //    //{
+        //    //    foreach (var project in makeProject.DependencyProjects)
+        //    //    {
+        //    //        var t = AllMakeProjects.FirstOrDefault(a => a.ProjectName == project);
+        //    //        if (t == null) continue; //bug that should ok to ignore
+        //    //        if (makeProject.DependencyProjects.Contains(project))
+        //    //        {
+        //    //            Log.Debug($"Warning Make Project {makeProject.ProjectName} has duplicate reference {project} Hand Edit to fix", ConsoleColor.Red);
+        //    //            continue;
+        //    //        }
+        //    //        makeProject.DependencyProjects.Add(project, t.IsHeader);
+        //    //    }
+        //    //}
+        //}
 
         public void Stage2CheckMakeProjects(List<MakeProject> makeProjects)
         {
@@ -169,13 +175,13 @@ namespace MakeFileProjectFixer.Data
                 Parallel.ForEach(files, (file) => CSharpFiles.Add(new VisualStudioCSharpFile(file)));
             else
                 files.ForEach(file => CSharpFiles.Add(new VisualStudioCSharpFile(file)));
-         
+
             // Scan Visual Studio Files For internal References
             if (RunAsParallel)
                 Parallel.ForEach(CSharpFiles, (vsFile) => vsFile.ScanFileForReferences());
             else
                 CSharpFiles.ForEach(file => file.ScanFileForReferences());
-        
+
             Helper.PreProcessedFileSave(JsonFile, CSharpFiles);
         }
 
@@ -209,27 +215,6 @@ namespace MakeFileProjectFixer.Data
             Helper.PreProcessedFileSave(JsonFile, CPlusPlusFiles);
         }
 
-    
-        //// Method done before MatchUpMakeProject
-        //public void BuildExpectedMakeProjectReferences(VisualStudioFile.VisualStudioFile vsFile, List<MakeProject> makeProjects, List<VisualStudioFile.VisualStudioFile> vsFiles)
-        //{
-        //    if (vsFile.ProjectName == "VideoManagement.Workstation")
-        //    {
-
-        //    }
-        //    if (vsFile.ProjectType == VisualStudioFile.VisualStudioFile.ProjectTypeValue.CSharp)
-        //    {
-        //        var vscs = new VsCsharp();
-        //        vsFile.ExpectedMakeProjectReferences = vscs.GetExpectedMakeProjectRefenences(vsFile, vsFiles);
-        //    }
-        //    if (vsFile.ProjectType == VisualStudioFile.VisualStudioFile.ProjectTypeValue.CPlusPlus)
-        //    {
-        //        var vscpp = new VsCplusplus();
-        //        vsFile.ExpectedMakeProjectReferences = vscpp.GetExpectedMakeProjectRefenences(vsFile, makeProjects);
-        //    }
-        //    vsFile.ExpectedMakeProjectReferences.Add("prebuild_3rdparty", VisualStudioFile.VisualStudioFile.ProjectFound.Found); // Stupid rule, need to fix 
-        //}
-
         //private void ProcessVsFilesStage4MatchUpMakeProject()
         //{
         //    Log.Debug($"Running ProcessVsFilesStage4MatchUpMakeProject");
@@ -248,7 +233,7 @@ namespace MakeFileProjectFixer.Data
         //    Helper.PreProcessedFileSave(JsonFile, VisualStudioFiles);
         //}
 
-      
+
 
         public void CheckVisualStudioFiles(List<IVisualStudioFile> vsFiles)
         {

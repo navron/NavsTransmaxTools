@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using CommandLine;
+using MakeFileProjectFixer.Data;
 using MakeFileProjectFixer.Scripts;
 using Serilog;
 using Serilog.Core;
@@ -68,10 +69,11 @@ namespace MakeFileProjectFixer
             map.WithParsed<mkFormatMakeFile>(options => options.Run())
                 .WithParsed<ScanForErrors>(options => options.Run())
                 .WithParsed<FixDependencies>(options => options.Run())
-                .WithParsed<MatchMFtoVsProjectCase>(options => options.Run())
+                .WithParsed<FixMakeFileProjectFromVsProjectName>(options => options.Run())
                 .WithParsed<MatchMfProjectDependencyCaseToMfProject>(options => options.Run())
                 .WithParsed<MkCircularDependCheck>(options => options.Run())
                 .WithParsed<MkReduceDepends>(options => options.Run())
+                .WithParsed<Store>(options => options.BuildStore())
 
                 .WithNotParsed(HelpFooter);
         }

@@ -43,8 +43,8 @@ namespace MakeFileProjectFixer.MakeFile
 
         public void ReadFile(string fileName)
         {
-            RawLines = File.ReadAllLines(fileName);
             FileName = fileName;
+            RawLines = File.ReadAllLines(FileName);
             ProcessMakeFileRawLines(RawLines.ToList());
         }
 
@@ -303,8 +303,8 @@ namespace MakeFileProjectFixer.MakeFile
             Regex projectCheckerSpaceMissing = new Regex(@"^[a-zA-Z0-9_\.\- ]*:");
             foreach (var line in RawLines)
             {
-                if (projectCheckerSpaceMissing.IsMatch(line)
-                    && !projectCheckerOk.IsMatch(line))
+                if (projectCheckerSpaceMissing.IsMatch(line) &&
+                    !projectCheckerOk.IsMatch(line))
                 {
                     Console.WriteLine($"Found Syntax problem in file \"{FileName}\", Run MakeFormat to fix with default options");
                     problems = true;
