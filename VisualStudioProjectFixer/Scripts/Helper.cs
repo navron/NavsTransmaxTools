@@ -38,7 +38,7 @@ namespace VisualStudioProjectFixer.Scripts
                 Log.Information($"Skipping AIT file: {fileName}");
                 return false;
             }
-            if (fileName.ToLower().Contains(@"unittests"))
+            if (fileName.ToLower().Contains(@"unittests\"))
             {
                 // Stupid code that is still in source control and not used
                 if (!Path.GetDirectoryName(fileName).EndsWith("UnitTests")) return false;
