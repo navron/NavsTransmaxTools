@@ -6,14 +6,15 @@ using Serilog;
 
 namespace MakeFileProjectFixer.Scripts
 {
-    [Verb("FixMakeFileProjectFromVSProjectName", HelpText = "Matches Make Files Names to VisualStudio Project Name Case")]
-    internal class FixMakeFileProjectFromVsProjectName : Store
+    [Verb("FixMakeFileProjectNameFromVSProjectName", HelpText = "Matches Make Files Names to VisualStudio Project Name Case")]
+    internal class FixMakeFileProjectNameFromVsProjectName : Options
     {
         public void Run()
         {
             Log.Information($"Running {GetType().Name}");
 
-            BuildStore();
+            var store = new Store(this.Folder);
+            store.BuildStore();
 
 
             // Scan the ExpectedMakeProjectReferences and match up the Case to the Make Project list

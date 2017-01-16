@@ -18,24 +18,21 @@ namespace MakeFileProjectFixer.Data
     [Verb("Store", HelpText = "Debugging Verb, used to create json files of processed visual studio project and make files")]
     internal class Store : Options
     {
-        public List<MakeFile.MakeFile> MakeFiles { get; private set; }
-        public List<IVisualStudioFile> VisualStudioFiles { get; private set; }
-        public List<VisualStudioCSharpFile> CSharpFiles { get; private set; }
-        public List<VisualStudioCPlusPlusFile> CPlusPlusFiles { get; private set; }
-        public List<MakeProject> MakeProjects { get; private set; }
-        public List<MakeProject> MakeHeaderProjects { get; private set; }
-        public List<MakeProject> AllMakeProjects { get; private set; }
+        public List<MakeFile.MakeFile> MakeFiles { get; private set; } =  new List<MakeFile.MakeFile>();
+        public List<IVisualStudioFile> VisualStudioFiles { get; private set; } = new List<IVisualStudioFile>();
+        public List<VisualStudioCSharpFile> CSharpFiles { get; private set; }= new List<VisualStudioCSharpFile>();
+        public List<VisualStudioCPlusPlusFile> CPlusPlusFiles { get; private set; }= new List<VisualStudioCPlusPlusFile>();
+        public List<MakeProject> MakeProjects { get; private set; }= new List<MakeProject>();
+        public List<MakeProject> MakeHeaderProjects { get; private set; }= new List<MakeProject>();
 
-        public Store()
+        // Call directory when testing via verb 
+//        internal Store(){}
+
+        public Store(string folder)
         {
-            MakeFiles = new List<MakeFile.MakeFile>();
-            MakeProjects = new List<MakeProject>();
-            MakeHeaderProjects = new List<MakeProject>();
-            AllMakeProjects = new List<MakeProject>();
-            CSharpFiles = new List<VisualStudioCSharpFile>();
-            CPlusPlusFiles = new List<VisualStudioCPlusPlusFile>();
-            VisualStudioFiles = new List<IVisualStudioFile>();
+            this.Folder = folder;
         }
+
 
         // Build Both the Make Files and Visual Studio files Store
         public void BuildStore()
@@ -63,6 +60,8 @@ namespace MakeFileProjectFixer.Data
 
                 Stage2CheckMakeProjects(MakeProjects);
                 Stage2CheckMakeProjects(MakeHeaderProjects);
+                Helper.PreProcessedFileSave("MakeProjects.json", MakeProjects);
+                Helper.PreProcessedFileSave("MakeHeaderProjects.json", MakeHeaderProjects);
             }
         }
 

@@ -8,7 +8,7 @@ using Serilog;
 namespace MakeFileProjectFixer.Scripts
 {
     [Verb("mkReduceDepends", HelpText = "Reduces Allocates Dependency To Depth 1,2,3")]
-    internal class MkReduceDepends : Store
+    internal class MkReduceDepends : Options
     {
         readonly List<MakeProject> allProjects = new List<MakeProject>();
 
@@ -16,13 +16,14 @@ namespace MakeFileProjectFixer.Scripts
         {
             Log.Debug($"Running {GetType().Name}");
 
-            BuildStoreMakeFilesOnly();
+            var store = new Store(this.Folder);
+            store.BuildStoreMakeFilesOnly();
 
-            allProjects.AddRange(MakeProjects);
-            allProjects.AddRange(MakeHeaderProjects);
+            allProjects.AddRange(store.MakeProjects);
+            allProjects.AddRange(store.MakeHeaderProjects);
 
             // Only Check Projects
-            foreach (MakeProject makeProject in MakeProjects)
+            foreach (MakeProject makeProject in store.MakeProjects)
             {
                 // if project A uses X,Y & Z
                 // and Project X uses project Y then remove project Y from Project A
@@ -47,7 +48,7 @@ namespace MakeFileProjectFixer.Scripts
                     makeProject.DependencyProjects.Remove(item);
                 }
             }
-            foreach (var makeFile in MakeFiles)
+            foreach (var makeFile in store.MakeFiles)
             {
                 makeFile.WriteFile(this);
             }

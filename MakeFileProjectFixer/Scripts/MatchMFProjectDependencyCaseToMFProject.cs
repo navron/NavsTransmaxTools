@@ -9,21 +9,22 @@ using Serilog;
 namespace MakeFileProjectFixer.Scripts
 {
     [Verb("MatchMFProjectDependencyCaseToMFProject", HelpText = "Matches the Make Project Dependency List Case to Make File ProjectName Case")]
-    internal class MatchMfProjectDependencyCaseToMfProject : Store
+    internal class MatchMfProjectDependencyCaseToMfProject : Options
     {
         public void Run()
         {
             Log.Debug($"Running {GetType().Name}");
 
-            BuildStoreMakeFilesOnly();
+            var store = new Store(this.Folder);
+            store.BuildStoreMakeFilesOnly();
 
             var allprojects = new List<MakeProject>();
-            allprojects.AddRange(MakeProjects);
-            allprojects.AddRange(MakeHeaderProjects);
+            allprojects.AddRange(store.MakeProjects);
+            allprojects.AddRange(store.MakeHeaderProjects);
 
             CheckProjects(allprojects);
 
-            foreach (var makeFile in MakeFiles)
+            foreach (var makeFile in store.MakeFiles)
             {
                 makeFile.WriteFile(this);
             }

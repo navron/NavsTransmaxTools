@@ -11,7 +11,7 @@ using Serilog;
 namespace MakeFileProjectFixer.Scripts
 {
     [Verb("mkCircularDependCheck", HelpText = "Checks for Circular Dependency in Make files")]
-    internal class MkCircularDependCheck : Store
+    internal class MkCircularDependCheck : Options
     {
         private readonly Stack<string> dependencyStack = new Stack<string>();
         // Report, What to see
@@ -24,13 +24,14 @@ namespace MakeFileProjectFixer.Scripts
         {
             Log.Debug($"Running {GetType().Name}", ConsoleColor.Cyan);
 
-            BuildStoreMakeFilesOnly();
+            var store = new Store(this.Folder);
+            store.BuildStoreMakeFilesOnly(); 
 
-            foreach (var makeProject in MakeProjects)
+            foreach (var makeProject in store.MakeProjects)
             {
                 allProjects.Add(new MakeProjectDependency(makeProject));
             }
-            foreach (var makeProject in MakeHeaderProjects)
+            foreach (var makeProject in store.MakeHeaderProjects)
             {
                 allProjects.Add(new MakeProjectDependency(makeProject));
             }

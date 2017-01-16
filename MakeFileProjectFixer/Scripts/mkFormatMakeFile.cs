@@ -6,7 +6,7 @@ using Serilog;
 namespace MakeFileProjectFixer.Scripts
 {
     [Verb("mkFormat", HelpText = "Format Make Files")]
-    internal class mkFormatMakeFile : Store
+    internal class mkFormatMakeFile : Options
     {
         public mkFormatMakeFile()
         {
@@ -16,10 +16,10 @@ namespace MakeFileProjectFixer.Scripts
         public void Run()
         {
             Log.Debug($"Running {GetType().Name}", ConsoleColor.Cyan);
+            var store = new Store(this.Folder);
+            store.BuildStoreMakeFilesOnly();
 
-            BuildStoreMakeFilesOnly();
-
-            foreach (MakeFile.MakeFile makeFile in MakeFiles)
+            foreach (MakeFile.MakeFile makeFile in store.MakeFiles)
             {
                 makeFile.WriteFile(this);
             }

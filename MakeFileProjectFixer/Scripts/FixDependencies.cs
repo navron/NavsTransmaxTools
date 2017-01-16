@@ -6,12 +6,13 @@ using CommandLine;
 using MakeFileProjectFixer.Data;
 using MakeFileProjectFixer.MakeFile;
 using MakeFileProjectFixer.Utility;
+using MakeFileProjectFixer.VisualStudioFile;
 using Serilog;
 
 namespace MakeFileProjectFixer.Scripts
 {
     [Verb("FixDependencies", HelpText = "Allocates Correct Dependency options of add/remove")]
-    internal class FixDependencies : Store
+    internal class FixDependencies : Options
     {
         [Option('a', "add", HelpText = "add missing dependencies")]
         public bool AddMissingDependencies { get; set; }
@@ -28,27 +29,28 @@ namespace MakeFileProjectFixer.Scripts
         //method not unit tested
         public void Run()
         {
-            BuildStore();
+            var store = new Store(this.Folder);
+            store.BuildStore();
 
             using (new LoggingTimer(GetType().Name))
             {
-                foreach (MakeProject makeProject in MakeProjects)
+                foreach (MakeProject makeProject in store.MakeProjects)
                 {
-                    ProcessMakeProject(makeProject);
+                    ProcessMakeProject(makeProject, store.VisualStudioFiles);
                 }
 
                 //if (!FixErrors) return;
-                foreach (var makeFile in MakeFiles)
+                foreach (var makeFile in store.MakeFiles)
                 {
                     makeFile.WriteFile(this);
                 }
             }
         }
 
-        private void ProcessMakeProject(MakeProject makeProject)
+        private void ProcessMakeProject(MakeProject makeProject, List<IVisualStudioFile> visualStudioFiles)
         {
             // Check if there is an matching VisualStudio project 
-            var vsProject = VisualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
+            var vsProject = visualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
             if (vsProject == null)
             {
                 Log.Debug($"Didn't find MakeProject:{makeProject.ProjectName} matching VisualStudio File");
@@ -58,7 +60,7 @@ namespace MakeFileProjectFixer.Scripts
             // If add missing Dependencies
             if (AddMissingDependencies)
             {
-                Log.Information("Adding Dependencies");
+             //   Log.Information("Adding Dependencies");
                 foreach (var reference in vsProject.ExpectedMakeProjectReference)
                 {
                     if (!makeProject.DependencyProjects.Contains(reference))
@@ -71,11 +73,11 @@ namespace MakeFileProjectFixer.Scripts
             // If remove missing Dependencies
             if (RemoveNotRequiredDependencies)
             {
-                Log.Information("Removing Dependencies");
+               // Log.Information("Removing Dependencies");
                 var removelist = new List<string>();
                 foreach (var dependency in makeProject.DependencyProjects)
                 {
-                    var vsfile = VisualStudioFiles.FirstOrDefault(v => v.ProjectName == dependency);
+                    var vsfile = visualStudioFiles.FirstOrDefault(v => v.ProjectName == dependency);
                     if (vsfile == null)
                         continue; // This code only process make Projects that are Visual Studio projects
 

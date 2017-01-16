@@ -40,8 +40,12 @@ namespace MakeFileProjectFixer.VisualStudioFile
             var property = msProject.GetProperty("AssemblyName");
             return property.EvaluatedValue;
         }
-
         public void ScanFileForReferences()
+        {
+            ScanFileForReferences(FileName);
+        }
+
+        public void ScanFileForReferences(string vsFileName)
         {
             if (msProject == null) msProject = new Project(FileName);
 
@@ -101,5 +105,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
             }
             return hashSet.ToList();
         }
+
+      
     }
 }
