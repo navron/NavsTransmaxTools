@@ -16,7 +16,7 @@ namespace MakeFileProjectFixer.Scripts
         {
             Log.Debug($"Running {GetType().Name}");
 
-            var store = new Store(this.Folder);
+            var store = new Store(this);
             store.BuildStoreMakeFilesOnly();
 
             allProjects.AddRange(store.MakeProjects);

@@ -11,9 +11,9 @@ namespace MakeFileProjectFixer.VisualStudioFile
 {
     internal class VisualStudioCSharpFile : IVisualStudioFile
     {
-        public string ProjectName { get; }
-        public string FileName { get; }
-        public string AssemblyName { get; }
+        public string ProjectName { get; set; }
+        public string FileName { get; set; }
+        public string AssemblyName { get; set; }
 
         public HashSet<string> TsdReferences { get; set; } = new HashSet<string>();
         public HashSet<string> OtherReferences { get; set; } = new HashSet<string>();
@@ -62,6 +62,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
                 else
                 {
                     // Only take the first part of the name, so that "Castle.Core" and "Castle.ActiveRecord" are one record of Castle
+                    // But DynMessSign.Workstation needs to be whole ??
                     var split = referenceName.Split('.');
                     OtherReferences.Add(split[0]);
                 }
@@ -80,7 +81,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
             var hashSet = new HashSet<string>();
             foreach (var tsdRefenence in TsdReferences)
             {
-                if (tsdRefenence == null) continue;
+             //   if (tsdRefenence == null) continue;
 
                 // examples
                 //Tsd.AccessControl.Workstation.Security

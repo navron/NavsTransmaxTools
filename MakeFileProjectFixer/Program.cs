@@ -69,7 +69,7 @@ namespace MakeFileProjectFixer
             map.WithParsed<mkFormatMakeFile>(options => options.Run())
                 .WithParsed<ScanForErrors>(options => options.Run())
                 .WithParsed<FixDependencies>(options => options.Run())
-                .WithParsed<FixMakeFileProjectNameFromVsProjectName>(options => options.Run())
+                .WithParsed<FixMakeFileProjectNameCaseFromVisualStudioProjects>(options => options.Run())
                 .WithParsed<MatchMfProjectDependencyCaseToMfProject>(options => options.Run())
                 .WithParsed<MkCircularDependCheck>(options => options.Run())
                 .WithParsed<MkReduceDepends>(options => options.Run())

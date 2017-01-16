@@ -18,6 +18,7 @@ namespace MakeFileProjectFixer.Data
     [Verb("Store", HelpText = "Debugging Verb, used to create json files of processed visual studio project and make files")]
     internal class Store : Options
     {
+        private Options options;
         public List<MakeFile.MakeFile> MakeFiles { get; private set; } =  new List<MakeFile.MakeFile>();
         public List<IVisualStudioFile> VisualStudioFiles { get; private set; } = new List<IVisualStudioFile>();
         public List<VisualStudioCSharpFile> CSharpFiles { get; private set; }= new List<VisualStudioCSharpFile>();
@@ -25,12 +26,15 @@ namespace MakeFileProjectFixer.Data
         public List<MakeProject> MakeProjects { get; private set; }= new List<MakeProject>();
         public List<MakeProject> MakeHeaderProjects { get; private set; }= new List<MakeProject>();
 
-        // Call directory when testing via verb 
-//        internal Store(){}
-
-        public Store(string folder)
+        // Call directory when testing via verb
+        public Store() // required for testing
         {
-            this.Folder = folder;
+            options = this;
+        } 
+
+        public Store(Options options)
+        {
+            this.options = options;
         }
 
 
@@ -96,9 +100,9 @@ namespace MakeFileProjectFixer.Data
             }
 
              var list = new List<MakeFile.MakeFile>();
-           // This takes about 1 sec, Step 1 Read all make files
-            SearchPatterns = new[] { "*.mak" };
-            var files = Helper.FindFiles(this);
+            // This takes about 1 sec, Step 1 Read all make files
+            options.SearchPatterns = new[] { "*.mak" };
+            var files = Helper.FindFiles(options);
 
             Parallel.ForEach(files, (file) =>
             {
@@ -166,9 +170,9 @@ namespace MakeFileProjectFixer.Data
             }
 
             // Step 2 Read all Visual Studio Files 
-            SearchPatterns = new[] { "*.csproj" };
+            options.SearchPatterns = new[] { "*.csproj" };
             // Find and limit return set to what is required
-            var files = Helper.FindFiles(this).Where(VisualStudioFileHelper.IncludeFile).ToList();
+            var files = Helper.FindFiles(options).Where(VisualStudioFileHelper.IncludeFile).ToList();
 
             if (RunAsParallel)
                 Parallel.ForEach(files, (file) => CSharpFiles.Add(new VisualStudioCSharpFile(file)));
@@ -195,9 +199,9 @@ namespace MakeFileProjectFixer.Data
             }
 
             // Step 2 Read all Visual Studio Files 
-            SearchPatterns = new[] { "*.vcxproj" };
+            options.SearchPatterns = new[] { "*.vcxproj" };
             // Find and limit return set to what is required
-            var files = Helper.FindFiles(this).Where(VisualStudioFileHelper.IncludeFile).ToList();
+            var files = Helper.FindFiles(options).Where(VisualStudioFileHelper.IncludeFile).ToList();
 
             // Create File list
             if (RunAsParallel)

@@ -29,7 +29,7 @@ namespace MakeFileProjectFixer.Scripts
         //method not unit tested
         public void Run()
         {
-            var store = new Store(this.Folder);
+            var store = new Store(this);
             store.BuildStore();
 
             using (new LoggingTimer(GetType().Name))

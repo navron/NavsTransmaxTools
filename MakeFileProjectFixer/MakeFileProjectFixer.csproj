@@ -107,8 +107,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Scripts\ListMissingMakeProjects.cs" />
     <Compile Include="Scripts\MakeProjectDependency.cs" />
-    <Compile Include="Scripts\FixMakeFileProjectFromVsProjectName.cs" />
+    <Compile Include="Scripts\FixMakeFileProjectNameCaseFromVisualStudioProjects.cs" />
     <Compile Include="Scripts\mkCircularDependCheck.cs" />
     <Compile Include="Scripts\mkFormatMakeFile.cs" />
     <Compile Include="Scripts\mkReduceDepends.cs" />

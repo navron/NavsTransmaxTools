@@ -24,7 +24,7 @@ namespace MakeFileProjectFixer.Scripts
         {
             Log.Debug($"Running {GetType().Name}", ConsoleColor.Cyan);
 
-            var store = new Store(this.Folder);
+            var store = new Store(this);
             store.BuildStoreMakeFilesOnly(); 
 
             foreach (var makeProject in store.MakeProjects)
