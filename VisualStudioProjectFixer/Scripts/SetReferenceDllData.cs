@@ -91,7 +91,8 @@ namespace VisualStudioProjectFixer.Scripts
             // System Microsoft Files that are in the GAC
              if (dllName.Contains("System.")) return false;
             var dontChangeSystem = new[] { "System","WindowsBase", "WindowsFormsIntegration",
-                                            "PresentationCore", "PresentationFramework", "PresentationUI"
+                                            "PresentationCore", "PresentationFramework", "PresentationUI",
+                                            "stdole"
             };
             if (dontChangeSystem.Contains(dllName)) return false;
 
