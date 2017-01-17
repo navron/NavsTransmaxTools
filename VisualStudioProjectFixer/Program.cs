@@ -27,8 +27,8 @@ namespace VisualStudioProjectFixer
             var map = Parser.Default.ParseArguments(args, verbTypes.ToArray());
             map.WithParsed<SetReferenceDllData>(action => action.Run())
                 .WithParsed<RemoveMetaData>(action => action.Run())
-                .WithParsed<MarkAsDirty>(action => action.Run());
-               
+                .WithParsed<MarkAsDirty>(action => action.Run())
+                .WithParsed<RemoveDLL>(action => action.Run());
         }
 
         /// <summary>

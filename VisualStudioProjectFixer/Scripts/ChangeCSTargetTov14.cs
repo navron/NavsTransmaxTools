@@ -11,7 +11,7 @@ namespace VisualStudioProjectFixer.Scripts
     {
         public void Run()
         {
-            List<string> sourceFileList = Helper.GetProjectFiles(SourceCheckRootFolder, Config.GetSourceSearchPatterns);
+            List<string> sourceFileList = Helper.GetProjectFiles(RootFolder, Config.GetSourceSearchPatterns);
             foreach (var filepath in sourceFileList)
             {
                 if (filepath.Contains(".csproj"))

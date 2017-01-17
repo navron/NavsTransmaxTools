@@ -10,16 +10,10 @@ using Serilog;
 namespace VisualStudioProjectFixer.Scripts
 {
     [Verb("RemoveMetaData", HelpText = "Remove Reference Meta Data like HintPath and TargetFramework")]
-    public class RemoveMetaData
+    public class RemoveMetaData  : Options
     {
-        [Option('p', "parallel", HelpText = "Run in parallel mode")]
-        public bool RunAsParallel { get; set; }
-
         [Option('f', "file", HelpText = "CS Project File")]
         public string FileName { get; set; }
-
-        [Option('d', "dir", HelpText = "Root Folder")]
-        public string RootFolder { get; set; }
 
         [Option('h', "HintPath", HelpText = "Remove Hint Page")]
         public bool RemoveHintPath { get; set; }
@@ -46,7 +40,7 @@ namespace VisualStudioProjectFixer.Scripts
             {
                 files = Helper.GetProjectFiles(RootFolder, new[] {@"*.csproj"});
             }
-
+            Log.Warning($"Removing MetaData Types RemoveHintPath={RemoveHintPath} TargetFramework={RemoveTargetFramework} SpecificVersion={RemoveSpecificVersion}");
             if (RunAsParallel)
                 Parallel.ForEach(files, ProcessFile);
             else
@@ -99,9 +93,10 @@ namespace VisualStudioProjectFixer.Scripts
 
         private bool AllowSpecificVersionRemoval(string dllName)
         {
+            return true;
             // aspdu.net version is wrong, its one of ours but lacking correct version information 
-            var dontAllowFor = new string[] { "aspdu.net" };
-            return !dontAllowFor.Contains(dllName);
+            //var dontAllowFor = new string[] { "aspdu.net" };
+            //return !dontAllowFor.Contains(dllName);
         }
     }
 }

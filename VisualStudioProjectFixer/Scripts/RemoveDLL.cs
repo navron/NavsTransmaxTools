@@ -5,12 +5,17 @@ using Serilog;
 
 namespace VisualStudioProjectFixer.Scripts
 {
-    // TODO NOT TESTED, NOT ENABLE
-    [Verb("RemoveSystemCore", HelpText = "Remove SystemCore (was only a .net 3 thing)")]
-    public class RemoveSystemCore
+    // System.Core was removed with .Net 4
+    // nunit.core.extensions was removed with Nunit3
+
+    [Verb("RemoveDLL", HelpText = "Remove an dll from all projects")]
+    public class RemoveDLL : Options
     {
         [Option('d', "dir", HelpText = "Root Folder")]
         public string RootFolder { get; set; }
+
+        [Option("dllname", HelpText = "dll file name (without extension")]
+        public string DllName { get; set; }
 
         public void Run()
         {
@@ -21,7 +26,7 @@ namespace VisualStudioProjectFixer.Scripts
                 var references = project.GetItems("Reference");
                 foreach (var reference in references)
                 {
-                    if (reference.Xml.Include.Contains("System.Core"))
+                    if (reference.Xml.Include.Contains(DllName))
                     {
                         project.RemoveItem(reference);
                         Console.WriteLine($"{reference.Xml.Include} has been removed from {project.FullPath}");

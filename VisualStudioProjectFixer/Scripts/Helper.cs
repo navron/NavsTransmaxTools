@@ -33,11 +33,11 @@ namespace VisualStudioProjectFixer.Scripts
                 Log.Information($"Skipping Test file: {fileName}");
                 return false;
             }
-            if (fileName.ToLower().Contains(@".ait."))
-            {
-                Log.Information($"Skipping AIT file: {fileName}");
-                return false;
-            }
+            //if (fileName.ToLower().Contains(@".ait."))
+            //{
+            //    Log.Information($"Skipping AIT file: {fileName}");
+            //    return false;
+            //}
             if (fileName.ToLower().Contains(@"unittests\"))
             {
                 // Stupid code that is still in source control and not used

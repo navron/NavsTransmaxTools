@@ -11,19 +11,13 @@ using VisualStudioProjectFixer.Store;
 namespace VisualStudioProjectFixer.Scripts
 {
     [Verb("SetReferenceDLLData", HelpText = "Set the Reference DLL strong name")]
-    public class SetReferenceDllData
+    public class SetReferenceDllData : Options
     {
-        [Option('d', "dir", HelpText = "Source Root Folder")]
-        public string RootFolder { get; set; }
-
         [Option('f', "file", HelpText = "CS Project File")]
         public string FileName { get; set; }
 
         [Option('a', "all", HelpText = "Check all references")]
         public bool CheckAllReferences { get; set; }
-
-        [Option('p', "parallel", HelpText = "Run in parallel mode")]
-        public bool RunAsParallel { get; set; }
 
         public void Run()
         {

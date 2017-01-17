@@ -100,7 +100,8 @@
     <Compile Include="RunPowershell.cs" />
     <Compile Include="Scripts\ChangeCSTargetTov14.cs" />
     <Compile Include="Scripts\MarkAsDirty.cs" />
-    <Compile Include="Scripts\RemoveSystemCore.cs" />
+    <Compile Include="Scripts\ReferenceRules.cs" />
+    <Compile Include="Scripts\RemoveDLL.cs" />
     <Compile Include="Scripts\SetReferenceDllData.cs" />
     <Compile Include="Scripts\SetWorkStationProjectsToAnyCpu.cs" />
     <Compile Include="Scripts\Helper.cs" />
