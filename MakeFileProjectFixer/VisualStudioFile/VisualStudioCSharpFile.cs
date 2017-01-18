@@ -99,11 +99,15 @@ namespace MakeFileProjectFixer.VisualStudioFile
 
                 hashSet.Add(project.ProjectName);
             }
-            // Now add the Others (assuming non GAC references)
-            foreach (var otherReference in OtherReferences)
+            if (OtherReferences.Any())
             {
-                hashSet.Add(otherReference);
+                hashSet.Add("LibThirdParty");
             }
+            // Now add the Others (assuming non GAC references)
+            //foreach (var otherReference in OtherReferences)
+            //{
+            //    hashSet.Add(otherReference);
+            //}
             return hashSet.ToList();
         }
 

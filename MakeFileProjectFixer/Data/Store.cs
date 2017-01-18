@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using Serilog;
 
 namespace MakeFileProjectFixer.Data
 {
+
     /// <summary>
     /// Holds an in memory set of Make file an Visual studio files so
     /// that they made be queried quickly by 
@@ -18,19 +20,27 @@ namespace MakeFileProjectFixer.Data
     [Verb("Store", HelpText = "Debugging Verb, used to create json files of processed visual studio project and make files")]
     internal class Store : Options
     {
-        private Options options;
-        public List<MakeFile.MakeFile> MakeFiles { get; private set; } =  new List<MakeFile.MakeFile>();
+        internal class Settings
+        {
+            internal const string StoreMakeFile = "StoreMakeFile.json";
+            internal const string StoreCSharpFile = "StoreCSharpFile.json";
+            internal const string StoreCPlusPlusFile = "StoreCPlusPlusFile.json";
+        }
+        
+
+        private readonly Options options;
+        public List<MakeFile.MakeFile> MakeFiles { get; private set; } = new List<MakeFile.MakeFile>();
         public List<IVisualStudioFile> VisualStudioFiles { get; private set; } = new List<IVisualStudioFile>();
-        public List<VisualStudioCSharpFile> CSharpFiles { get; private set; }= new List<VisualStudioCSharpFile>();
-        public List<VisualStudioCPlusPlusFile> CPlusPlusFiles { get; private set; }= new List<VisualStudioCPlusPlusFile>();
-        public List<MakeProject> MakeProjects { get; private set; }= new List<MakeProject>();
-        public List<MakeProject> MakeHeaderProjects { get; private set; }= new List<MakeProject>();
+        public List<VisualStudioCSharpFile> CSharpFiles { get; private set; } = new List<VisualStudioCSharpFile>();
+        public List<VisualStudioCPlusPlusFile> CPlusPlusFiles { get; private set; } = new List<VisualStudioCPlusPlusFile>();
+        public List<MakeProject> MakeProjects { get; private set; } = new List<MakeProject>();
+        public List<MakeProject> MakeHeaderProjects { get; private set; } = new List<MakeProject>();
 
         // Call directory when testing via verb
         public Store() // required for testing
         {
             options = this;
-        } 
+        }
 
         public Store(Options options)
         {
@@ -56,9 +66,9 @@ namespace MakeFileProjectFixer.Data
             using (new LoggingTimer("Building Store MakeFiles"))
             {
                 MakeFiles = Stage1ReadMakeFiles();
-                
+
                 // Build a MakeProject Set
-                MakeFiles.ForEach(mk=> MakeProjects.AddRange(mk.Projects));
+                MakeFiles.ForEach(mk => MakeProjects.AddRange(mk.Projects));
                 // Build a MakeProject Header Set
                 MakeFiles.ForEach(mk => MakeHeaderProjects.Add(mk.Header));
 
@@ -94,12 +104,12 @@ namespace MakeFileProjectFixer.Data
 
         private List<MakeFile.MakeFile> Stage1ReadMakeFiles()
         {
-            if (Helper.PreProcessedObject(MethodBase.GetCurrentMethod().Name, this))
+            if (Helper.PreProcessedObject(Settings.StoreMakeFile, options))
             {
-                return Helper.JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(JsonFile);
+                return Helper.JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(Settings.StoreMakeFile);
             }
 
-             var list = new List<MakeFile.MakeFile>();
+            var list = new List<MakeFile.MakeFile>();
             // This takes about 1 sec, Step 1 Read all make files
             options.SearchPatterns = new[] { "*.mak" };
             var files = Helper.FindFiles(options);
@@ -112,7 +122,7 @@ namespace MakeFileProjectFixer.Data
                 list.Add(make);
             });
 
-            Helper.PreProcessedFileSave(JsonFile, list);
+            Helper.PreProcessedFileSave(Settings.StoreMakeFile, list);
             return list;
         }
 
@@ -162,9 +172,9 @@ namespace MakeFileProjectFixer.Data
         private void Stage3BuildCSharpFileList()
         {
             Log.Debug($"Running {MethodBase.GetCurrentMethod().Name}");
-            if (Helper.PreProcessedObject(MethodBase.GetCurrentMethod().Name, this))
+            if (Helper.PreProcessedObject(Settings.StoreCSharpFile, options))
             {
-                CSharpFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioCSharpFile>>(JsonFile);
+                CSharpFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioCSharpFile>>(Settings.StoreCSharpFile);
                 CheckVisualStudioFiles(new List<IVisualStudioFile>(CSharpFiles));
                 return;
             }
@@ -185,15 +195,15 @@ namespace MakeFileProjectFixer.Data
             else
                 CSharpFiles.ForEach(file => file.ScanFileForReferences());
 
-            Helper.PreProcessedFileSave(JsonFile, CSharpFiles);
+            Helper.PreProcessedFileSave(Settings.StoreCSharpFile, CSharpFiles);
         }
 
         private void Stage3BuildCPlusPlusFileList()
         {
             Log.Debug($"Running {MethodBase.GetCurrentMethod().Name}");
-            if (Helper.PreProcessedObject(MethodBase.GetCurrentMethod().Name, this))
+            if (Helper.PreProcessedObject(Settings.StoreCPlusPlusFile, options))
             {
-                CPlusPlusFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioCPlusPlusFile>>(JsonFile);
+                CPlusPlusFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioCPlusPlusFile>>(Settings.StoreCPlusPlusFile);
                 CheckVisualStudioFiles(new List<IVisualStudioFile>(CPlusPlusFiles));
                 return;
             }
@@ -215,7 +225,7 @@ namespace MakeFileProjectFixer.Data
             else
                 CPlusPlusFiles.ForEach(file => file.ScanFileForReferences());
 
-            Helper.PreProcessedFileSave(JsonFile, CPlusPlusFiles);
+            Helper.PreProcessedFileSave(Settings.StoreCPlusPlusFile, CPlusPlusFiles);
         }
 
         //private void ProcessVsFilesStage4MatchUpMakeProject()
@@ -245,6 +255,38 @@ namespace MakeFileProjectFixer.Data
                 throw new Exception("VSFile null, try deleting json files Aborting");
             }
         }
+
+        public void WriteMakeFiles()
+        {
+            foreach (var makeFile in MakeFiles)
+            {
+                makeFile.WriteFile(options);
+            }
+            BackUpAndDelete(Settings.StoreMakeFile);
+        }
+
+        /// <summary>
+        /// Return All the Make Project and Header Projects
+        /// </summary>
+        public List<MakeProject> GetAllMakeProjects
+        {
+            get
+            {
+                var list = new List<MakeProject>();
+                list.AddRange(MakeHeaderProjects);
+                list.AddRange(MakeProjects);
+                return list;
+            }
+        }
+
+        private void BackUpAndDelete(string fileName)
+        {
+            var prevFile = $"Prev{fileName}";
+            File.Delete(prevFile);
+            File.Move(fileName, prevFile);
+        }
+
+
     }
 }
 

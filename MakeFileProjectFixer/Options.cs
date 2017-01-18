@@ -40,7 +40,5 @@ namespace MakeFileProjectFixer
 
         [Option(@"serial", HelpText = "Run in serial mode, helpful to debug, normal action is to run in parallel mode")]
         public bool SerialMode { get; set; }
-
-        public string JsonFile { get; set; }
     }
 }

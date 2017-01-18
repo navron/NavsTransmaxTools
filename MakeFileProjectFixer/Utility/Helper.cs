@@ -52,21 +52,19 @@ namespace MakeFileProjectFixer.Utility
         }
 
         // Returns True if the Call can used the Previous built Object File
-        public static bool PreProcessedObject(string name, Options options)
+        public static bool PreProcessedObject(string fileName, Options options)
         {
-            //  JsonFile is Name + .json. Stored in the current Path
-            options.JsonFile = name + ".json";
 
             // If Reuse flag is false then return file, 
             // If the file does not exist then return false to force rebuild of file
-            if (options.CleanTemparayFiles || !File.Exists(options.JsonFile))
+            if (options.CleanTemparayFiles || !File.Exists(fileName))
             {
-                Log.Debug($"Rebuild Method:{name}", ConsoleColor.Yellow);
+                Log.Debug($"Rebuild Method:{fileName}", ConsoleColor.Yellow);
                 return false;
             }
 
             //Other Return true
-            Log.Debug($"Load Predefined Method:{name}", ConsoleColor.Green);
+            Log.Debug($"Load Predefined Method:{fileName}", ConsoleColor.Green);
             return true;
         }
 
@@ -95,10 +93,10 @@ namespace MakeFileProjectFixer.Utility
             /// <para>Only Public properties and variables will be written to the file. These can be any type though, even other classes.</para>
             /// <para>If there are public properties/variables that you do not want written to the file, decorate them with the [JsonIgnore] attribute.</para>
             /// </summary>
-            /// <typeparam name="T">The type of object being written to the file.</typeparam>
-            /// <param name="filePath">The file path to write the object instance to.</param>
-            /// <param name="objectToWrite">The object instance to write to the file.</param>
-            /// <param name="append">If false the file will be overwritten if it already exists. If true the contents will be appended to the file.</param>
+            /// <typeparam fileName="T">The type of object being written to the file.</typeparam>
+            /// <param fileName="filePath">The file path to write the object instance to.</param>
+            /// <param fileName="objectToWrite">The object instance to write to the file.</param>
+            /// <param fileName="append">If false the file will be overwritten if it already exists. If true the contents will be appended to the file.</param>
             public static void WriteToJsonFile<T>(string filePath, T objectToWrite, bool append = false) where T : new()
             {
                 TextWriter writer = null;
@@ -118,8 +116,8 @@ namespace MakeFileProjectFixer.Utility
             /// Reads an object instance from an Json file.
             /// <para>Object type must have a parameterless constructor.</para>
             /// </summary>
-            /// <typeparam name="T">The type of object to read from the file.</typeparam>
-            /// <param name="filePath">The file path to read the object instance from.</param>
+            /// <typeparam fileName="T">The type of object to read from the file.</typeparam>
+            /// <param fileName="filePath">The file path to read the object instance from.</param>
             /// <returns>Returns a new instance of the object read from the Json file.</returns>
             public static T ReadFromJsonFile<T>(string filePath) where T : new()
             {

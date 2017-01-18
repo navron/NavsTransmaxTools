@@ -36,21 +36,17 @@ namespace MakeFileProjectFixer.Scripts
             {
                 foreach (MakeProject makeProject in store.MakeProjects)
                 {
-                    ProcessMakeProject(makeProject, store.VisualStudioFiles);
+                    ProcessMakeProject(makeProject, store);
                 }
 
-                //if (!FixErrors) return;
-                foreach (var makeFile in store.MakeFiles)
-                {
-                    makeFile.WriteFile(this);
-                }
+                store.WriteMakeFiles();
             }
         }
 
-        private void ProcessMakeProject(MakeProject makeProject, List<IVisualStudioFile> visualStudioFiles)
+        private void ProcessMakeProject(MakeProject makeProject, Store store)
         {
             // Check if there is an matching VisualStudio project 
-            var vsProject = visualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
+            var vsProject = store.VisualStudioFiles.FirstOrDefault(f => f.ProjectName == makeProject.ProjectName);
             if (vsProject == null)
             {
                 Log.Debug($"Didn't find MakeProject:{makeProject.ProjectName} matching VisualStudio File");
@@ -60,7 +56,7 @@ namespace MakeFileProjectFixer.Scripts
             // If add missing Dependencies
             if (AddMissingDependencies)
             {
-             //   Log.Information("Adding Dependencies");
+                //   Log.Information("Adding Dependencies");
                 foreach (var reference in vsProject.ExpectedMakeProjectReference)
                 {
                     if (!makeProject.DependencyProjects.Contains(reference))
@@ -73,13 +69,18 @@ namespace MakeFileProjectFixer.Scripts
             // If remove missing Dependencies
             if (RemoveNotRequiredDependencies)
             {
-               // Log.Information("Removing Dependencies");
+                // Log.Information("Removing Dependencies");
                 var removelist = new List<string>();
                 foreach (var dependency in makeProject.DependencyProjects)
                 {
-                    var vsfile = visualStudioFiles.FirstOrDefault(v => v.ProjectName == dependency);
-                    if (vsfile == null)
-                        continue; // This code only process make Projects that are Visual Studio projects
+                    var isHeader = store.MakeHeaderProjects.Any(mhp => dependency.Contains(mhp.ProjectName));
+                    if (isHeader) removelist.Add(dependency);
+
+                    var vsfile = store.VisualStudioFiles.Any(v => v.ProjectName == dependency);
+                    var realProject = store.MakeProjects.Any(mp => mp.ProjectName == dependency);
+                    if (realProject && !vsfile) continue; // This code only process make Projects that are Visual Studio projects
+                    if (!realProject) removelist.Add(dependency); // Can't have this (missing project)
+
 
                     if (!vsProject.ExpectedMakeProjectReference.Contains(dependency))
                         removelist.Add(dependency);
