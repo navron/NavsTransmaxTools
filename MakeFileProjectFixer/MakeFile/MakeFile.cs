@@ -189,37 +189,8 @@ namespace MakeFileProjectFixer.MakeFile
             return output;
         }
 
-        public bool ScanForErrorsExtraDependencyInTheMakeFileHeader()
-        {
-            Log.Debug("Scanning for Errors Extra Dependency In The Make File Header ");
 
-            // Check For Directory Make file
-            if (IsDirectoryMakeFile())
-            {
-                return ScanForErrorsExtraDependencyInTheMakeFileHeaderForDirectoryMakeFile();
-            }
-
-            var removeItems = new List<string>();
-            var problems = false;
-            foreach (var headerDependencyName in Header.DependencyProjects)
-            {
-                if (Projects.Any(p => p.ProjectName == headerDependencyName)) continue;
-
-                // Extra Dependency in the make file header -- Report
-                Log.Debug($"Extra \"{headerDependencyName}\" Dependency in make file: {FileName}");
-                problems = true;
-
-                Log.Debug($"Deleting Dependency {headerDependencyName} from make file {FileName} header section",ConsoleColor.Yellow);
-                removeItems.Add(headerDependencyName);
-            }
-            foreach (var removeItem in removeItems)
-            {
-                Header.DependencyProjects.Remove(removeItem);
-            }
-            return problems;
-        }
-
-        private bool IsDirectoryMakeFile()
+        public bool IsDirectoryMakeFile()
         {
             var name = Path.GetFileNameWithoutExtension(FileName);
             var folder = Path.GetDirectoryName(FileName);
@@ -228,103 +199,18 @@ namespace MakeFileProjectFixer.MakeFile
             return folder.EndsWith($"\\{name}");
         }
 
-        private bool ScanForErrorsExtraDependencyInTheMakeFileHeaderForDirectoryMakeFile()
-        {
-            Log.Debug("Scanning For Errors Extra Dependency In The Make File Header For Directory MakeFile");
-
-            var folder = Path.GetDirectoryName(FileName);
-            if (folder == null) throw new Exception($"FileName is invalid: {FileName} --aborting");
-            var folderName = Path.GetFileNameWithoutExtension(FileName);
-
-            var files = Directory.EnumerateFiles(folder, "*.mak", SearchOption.TopDirectoryOnly).ToList();
-            var fileProjects = new List<string>();
-            foreach (var file in files)
-            {
-                var name = Path.GetFileNameWithoutExtension(file);
-                if(name== folderName) continue; // Don't add your-self
-                var temp = $"{folderName}_{name}";
-                fileProjects.Add(temp);
-            }
-            var problems = false;
-            var removeItems = new List<string>();
-            foreach (var headerDependencyName in Header.DependencyProjects)
-            {
-                // Any file is ok
-                if (fileProjects.Any(f => f == headerDependencyName)) continue;
-                // and any project in the make file is ok
-                if (Projects.Any(p => p.ProjectName == headerDependencyName)) continue;
-
-                // Extra Dependency in the make file header -- Report
-                Log.Debug($"Extra \"{headerDependencyName}\" Dependency in make file: {FileName}");
-                problems = true;
-
-                Log.Debug($"Deleting Dependency {headerDependencyName} from make file {FileName} header section",ConsoleColor.Yellow);
-                removeItems.Add(headerDependencyName);
-            }
-            foreach (var removeItem in removeItems)
-            {
-                Header.DependencyProjects.Remove(removeItem);
-            }
-            // Add Missing files 
-            foreach (var fileProject in fileProjects)
-            {
-                if(Header.DependencyProjects.Contains(fileProject)) continue;
-                Header.DependencyProjects.Add(fileProject);
-                problems = true;
-            }
-            return problems;
-        }
-
-        public bool ScanForErrorsMissingDependencyFromTheMakeFileHeader()
-        {
-            Log.Debug("Scanning For Errors Missing Dependency From The Make File Header");
-
-            var problems = false;
-            foreach (var project in Projects)
-            {
-                if (Header.DependencyProjects.Any(p => p == project.ProjectName)) continue;
-
-                // Missing Dependency from the make file header
-                Log.Debug($"Missing Dependency in header for \"{project.ProjectName}\"");
-                problems = true;
-             
-                Log.Debug($"Add Dependency {project.ProjectName} to make file {FileName} header section", ConsoleColor.Yellow);
-                Header.DependencyProjects.Add(project.ProjectName);
-            }
-            return problems;
-        }
-
-        public bool ScanForErrorsProjectHeaderSyntax()
-        {
-            Log.Debug("Scanning For Errors Project Header Syntax");
-
-            var problems = false;
-            Regex projectCheckerOk = new Regex(@"^[a-zA-Z0-9_\.\- ]*:");
-            Regex projectCheckerSpaceMissing = new Regex(@"^[a-zA-Z0-9_\.\- ]*:");
-            foreach (var line in RawLines)
-            {
-                if (projectCheckerSpaceMissing.IsMatch(line) &&
-                    !projectCheckerOk.IsMatch(line))
-                {
-                    Console.WriteLine($"Found Syntax problem in file \"{FileName}\", Run MakeFormat to fix with default options");
-                    problems = true;
-                }
-            }
-            return problems;
-        }
-
         /// <summary>
         /// Search all the Project Raw lines for copy .h files to COM\Include
         /// This is how to determine c++ references
         /// </summary>
         public void ScanRawLinesForPublishItems()
         {
-           // Log.Debug("Scan Raw Lines For Publish Items");
+            // Log.Debug("Scan Raw Lines For Publish Items");
             // Jobs 
             // 1. Scan for cpp published .h files
             foreach (var p in Projects)
             {
-               p.PublishCppHeaderFiles = p.GetPublishedCppHeaderFiles(p.PostLines);
+                p.PublishCppHeaderFiles = p.GetPublishedCppHeaderFiles(p.PostLines);
             }
         }
     }

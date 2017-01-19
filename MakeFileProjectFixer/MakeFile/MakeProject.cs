@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using MakeFileProjectFixer;
 
 namespace MakeFileProjectFixer.MakeFile
 {
@@ -17,7 +19,6 @@ namespace MakeFileProjectFixer.MakeFile
             PostLines = new List<string>();
             DependencyProjects = new List<string>();
             PublishCppHeaderFiles = new List<string>();
-            //DependencyProjects2 = new Dictionary<string, bool>();
         }
 
         /// <summary>
@@ -29,9 +30,6 @@ namespace MakeFileProjectFixer.MakeFile
         /// List of Current Projects marked as Dependencies
         /// </summary>
         public List<string> DependencyProjects { get; set; }
-
-        // Dependency and IsHeader
-     //   public Dictionary<string, bool> DependencyProjects2 { get; set; } // Can't Remember what this was for?
 
         /// <summary>
         /// Lines above the ProjectName Line, these are always comments
@@ -52,6 +50,9 @@ namespace MakeFileProjectFixer.MakeFile
         /// This Project is the Header section of the make file, Special rules apply
         /// </summary>
         public bool IsHeader { get; set; }
+
+     // [JsonIgnore]
+      //public MakeFile MakeFile { get; set; }
 
         [JsonIgnore]
         public IList<string> RawLines { get; set; }
@@ -123,5 +124,10 @@ namespace MakeFileProjectFixer.MakeFile
             }
             return list;
         }
+
+        /// <summary>
+        /// Should this project be excluded from either the Make File header or director Folder
+        /// </summary>
+        public bool ShouldExcluded => PreLines.Any(preLine => preLine.Contains("[exclude]", StringComparison.OrdinalIgnoreCase)); 
     }
 }

@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using MakeFileProjectFixer.MakeFile;
 using Newtonsoft.Json;
 
-namespace MakeFileProjectFixer.Scripts
+namespace MakeFileProjectFixer.MakeFile
 {
     class MakeProjectDependency
     {

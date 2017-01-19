@@ -32,9 +32,20 @@ namespace MakeFileProjectFixer.Scripts
                 });
 
                 Log.Information($"There are projects:{projectList.Count} and unique dependency projects:{dependencyList.Count}");
-                var missingDependencyProjects = dependencyList.Where(dependencyProject => !projectList.Contains(dependencyProject)).ToList();
-                if(missingDependencyProjects.Any())
-                    Log.Information("Missing Projects are {@missingDependencyProjects}", missingDependencyProjects);
+
+                foreach (var makeProject in store.GetAllMakeProjects)
+                {
+                    var missingTargets = makeProject.DependencyProjects.Except(projectList).ToList();
+                    if(!missingTargets.Any()) continue;
+
+                    foreach (var makeFile in store.MakeFiles)
+                    {
+                       if()
+                    }
+                    var makefile = store.MakeFiles.First(mk => mk.Projects.Contains(makeProject));
+
+                    Log.Warning("Project: {Project} in file {File} has not Make Target for: {@MissingTargets}", makeProject.ProjectName, makefile.FileName, missingTargets);
+                }
             }
         }
     }
