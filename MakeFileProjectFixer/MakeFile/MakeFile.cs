@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Serilog;
 
 namespace MakeFileProjectFixer.MakeFile
 {
@@ -39,7 +38,7 @@ namespace MakeFileProjectFixer.MakeFile
         /// <summary>
         /// List of Project Configurations
         /// </summary>
-        public List<MakeProject> Projects { get; set; }
+        public List<MakeProject> Projects { get; set; } 
 
         public void ReadFile(string fileName)
         {
@@ -173,7 +172,7 @@ namespace MakeFileProjectFixer.MakeFile
         public List<string> FormatFile(Options options)
         {
             var output = new List<string>();
-            output.AddRange(Header.FormatMakeProject(options.FormatProject, options.LineLength, options.SortProject));
+            output.AddRange(Header.FormatMakeProject(options.FormatProject, options.LineLength, options.SortDependencies));
 
             if (options.SortProject)
             {
@@ -183,7 +182,7 @@ namespace MakeFileProjectFixer.MakeFile
             foreach (MakeProject project in Projects)
             {
                 output.Add(string.Empty);
-                output.AddRange(project.FormatMakeProject(options.FormatProject, options.LineLength, options.SortProject));
+                output.AddRange(project.FormatMakeProject(options.FormatProject, options.LineLength, options.SortDependencies));
             }
 
             return output;

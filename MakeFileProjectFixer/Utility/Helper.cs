@@ -54,16 +54,15 @@ namespace MakeFileProjectFixer.Utility
         // Returns True if the Call can used the Previous built Object File
         public static bool PreProcessedObject(string fileName, Options options)
         {
-
             // If Reuse flag is false then return file, 
             // If the file does not exist then return false to force rebuild of file
-            if (options.CleanTemparayFiles || !File.Exists(fileName))
+            if (!options.ReuseTemporaryFiles || !File.Exists(fileName))
             {
                 Log.Debug($"Rebuild Method:{fileName}", ConsoleColor.Yellow);
                 return false;
             }
 
-            //Other Return true
+            // Otherwise Return true to load file
             Log.Debug($"Load Predefined Method:{fileName}", ConsoleColor.Green);
             return true;
         }

@@ -66,7 +66,7 @@ namespace MakeFileProjectFixer
             // Change Log level if needed
             map.WithParsed<Options>(options => { if (options.Verbose) levelSwitch.MinimumLevel = LogEventLevel.Verbose; });
 
-            map.WithParsed<FormatMakeFile>(options => options.Run())
+            map.WithParsed<FormatMakeFiles>(options => options.Run())
                 .WithParsed<FixDependencies>(options => options.Run())
                 .WithParsed<FixMakeFileCaseFromVisualStudio>(options => options.Run())
                 .WithParsed<MatchMfProjectDependencyCaseToMfProject>(options => options.Run())
@@ -75,6 +75,7 @@ namespace MakeFileProjectFixer
                 .WithParsed<Store>(options => options.BuildStore())
                 .WithParsed<ListMissingMakeProjects>(options => options.Run())
                 .WithParsed<FixMakeFileHeader>(options => options.Run())
+                .WithParsed<RemovedMakeProject>(options => options.Run())
 
                 .WithNotParsed(HelpFooter);
         }

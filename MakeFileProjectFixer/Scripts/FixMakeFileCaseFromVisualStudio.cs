@@ -5,7 +5,6 @@ using CommandLine;
 using MakeFileProjectFixer.Data;
 using MakeFileProjectFixer.MakeFile;
 using MakeFileProjectFixer.Utility;
-using MakeFileProjectFixer.VisualStudioFile;
 using Serilog;
 
 namespace MakeFileProjectFixer.Scripts
@@ -37,26 +36,18 @@ namespace MakeFileProjectFixer.Scripts
             {
                 foreach (var p2 in hashSet)
                 {
-                    if (p1 != p2 && string.Equals(p1, p2, StringComparison.OrdinalIgnoreCase))
-                    {
-                        Log.Error($"VisualStudioFiles contain Make Projects reference of different case '{p1}' and '{p2}'");
-                        Environment.Exit(-1);
-                    }
+                    if (p1 == p2 || !string.Equals(p1, p2, StringComparison.OrdinalIgnoreCase)) continue;
+                    Log.Error($"VisualStudioFiles contain Make Projects reference of different case '{p1}' and '{p2}'");
+                    Environment.Exit(-1);
                 }
             }
 
             var list = hashSet.ToList();
             list.Sort();
-            foreach (var makeProject in store.MakeProjects)
-            {
-                FixProjectNameAndDependcyes(makeProject, list);
-            }
-            foreach (var makeProject in store.MakeHeaderProjects)
-            {
-                FixProjectNameAndDependcyes(makeProject, list);
-            }
+            store.MakeHeaderProjects.ForEach(mp => FixProjectNameAndDependcyes(mp, list));
+            store.MakeProjects.ForEach(mp => FixProjectNameAndDependcyes(mp, list));
 
-           store.WriteMakeFiles();
+            store.WriteMakeFiles();
         }
 
         //Scan the ExpectedMakeProjectReferences and match up the Case to the Make Project list
@@ -86,33 +77,6 @@ namespace MakeFileProjectFixer.Scripts
                 makeProject.DependencyProjects.Add(v.Value);
             }
         }
-
-
-        //foreach (var visualStudioFile in VisualStudioFiles)
-        //{
-        //    foreach (var reference in visualStudioFile.ExpectedMakeProjectReferences)
-        //    {
-        //        if (reference.Value == VisualStudioFile.VisualStudioFile.ProjectFound.FoundCaseWrong)
-        //        {
-        //            var makeproject = MakeProjects.FirstOrDefault(m => string.Equals(m.ProjectName, reference.Key, StringComparison.OrdinalIgnoreCase));
-        //            if (makeproject != null)
-        //            {
-        //                Log.Debug($"Project {visualStudioFile.ProjectName} has wrong case make reference to {makeproject.ProjectName} should be {reference.Key}", ConsoleColor.Green);
-        //                makeproject.ProjectName = reference.Key;
-        //            }
-        //        }
-        //        if (reference.Value == VisualStudioFile.VisualStudioFile.ProjectFound.NotFound)
-        //        {
-        //            Log.Debug($"Project {visualStudioFile.ProjectName} missing make project reference {reference.Key}", ConsoleColor.Red);
-        //        }
-        //    }
-        //    visualStudioFile.MatchUpMakeProject(MakeProjects);
-        //}
-
-        //foreach (var makeFile in MakeFiles)
-        //{
-        //    makeFile.WriteFile(this);
-        //}
     }
 }
 

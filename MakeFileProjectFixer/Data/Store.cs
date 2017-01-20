@@ -160,7 +160,7 @@ namespace MakeFileProjectFixer.Data
                 if (makeProject.ProjectName != null) continue;
                 // Most likely an make file error. 
                 // Print out in Red and abort
-                Log.Error("Error with Make File Project, Project Name Null");
+                Log.Error("Error with Make File Project, Project Name Null in file {File}",FindMakeFileFromMakeProject(makeProject).FileName);
                 foreach (var line in makeProject.FormatMakeProject(true, 200, false))
                 {
                     Log.Warning(line);
@@ -286,7 +286,27 @@ namespace MakeFileProjectFixer.Data
             File.Move(fileName, prevFile);
         }
 
+        public MakeFile.MakeFile FindMakeFileFromMakeProject(MakeProject makeProject)
+        {
+            foreach (var makeFile in MakeFiles)
+            {
+                // Check Header Project
+                if (makeFile.Header.ProjectName == makeProject.ProjectName)
+                {
+                    return makeFile;
+                }
 
+                // Check Projects
+                if (makeFile.Projects.Any(mp => mp.ProjectName == makeProject.ProjectName))
+                {
+                    return makeFile;
+                }
+            }
+
+            Log.Error("Could not find Make File from Make Project {@ProjectName}", makeProject);
+            Environment.Exit(-1);
+            return null;
+        }
     }
 }
 

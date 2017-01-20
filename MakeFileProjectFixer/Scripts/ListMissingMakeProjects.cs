@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CommandLine;
 using MakeFileProjectFixer.Data;
-using MakeFileProjectFixer.MakeFile;
 using MakeFileProjectFixer.Utility;
 using Serilog;
 
@@ -36,17 +32,12 @@ namespace MakeFileProjectFixer.Scripts
                 foreach (var makeProject in store.GetAllMakeProjects)
                 {
                     var missingTargets = makeProject.DependencyProjects.Except(projectList).ToList();
-                    if(!missingTargets.Any()) continue;
+                    if (!missingTargets.Any()) continue;
 
-                    foreach (var makeFile in store.MakeFiles)
-                    {
-                       if()
-                    }
-                    var makefile = store.MakeFiles.First(mk => mk.Projects.Contains(makeProject));
-
-                    Log.Warning("Project: {Project} in file {File} has not Make Target for: {@MissingTargets}", makeProject.ProjectName, makefile.FileName, missingTargets);
+                    Log.Warning("Project: {Project} in file {File} has not Make Target for: {@MissingTargets}",
+                        makeProject.ProjectName, store.FindMakeFileFromMakeProject(makeProject).FileName, missingTargets);
                 }
             }
         }
-    }
+   }
 }

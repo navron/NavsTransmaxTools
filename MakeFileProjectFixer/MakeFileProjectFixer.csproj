@@ -107,13 +107,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="Scripts\FixMakeFileHeader.cs" />
+    <Compile Include="Scripts\RemovedMakeProject.cs" />
     <Compile Include="Scripts\ListMissingMakeProjects.cs" />
     <Compile Include="MakeFile\MakeProjectDependency.cs" />
     <Compile Include="Scripts\FixMakeFileCaseFromVisualStudio.cs" />
     <Compile Include="Scripts\CircularDependeyCheck.cs" />
-    <Compile Include="Scripts\FormatMakeFile.cs" />
+    <Compile Include="Scripts\FormatMakeFiles.cs" />
     <Compile Include="Scripts\ReduceDependency.cs" />
     <Compile Include="Scripts\MatchMFProjectDependencyCaseToMFProject.cs" />
     <Compile Include="Scripts\FixDependencies.cs" />

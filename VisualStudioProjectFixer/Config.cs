@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace VisualStudioProjectFixer
+﻿namespace VisualStudioProjectFixer
 {
     public static class Config
     {

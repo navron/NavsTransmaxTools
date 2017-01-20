@@ -5,10 +5,10 @@ using Serilog;
 
 namespace MakeFileProjectFixer.Scripts
 {
-    [Verb("FormatMakeFile", HelpText = "Format Make Files")]
-    internal class FormatMakeFile : Options
+    [Verb("FormatMakeFiles", HelpText = "Format Make Files")]
+    internal class FormatMakeFiles : Options
     {
-        public FormatMakeFile()
+        public FormatMakeFiles()
         {
             SearchPatterns = new[] { "*.mak" };
         }

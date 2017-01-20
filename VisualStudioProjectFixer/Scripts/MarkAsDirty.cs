@@ -2,7 +2,6 @@
 using System.Text;
 using CommandLine;
 using Microsoft.Build.Evaluation;
-using Serilog;
 
 namespace VisualStudioProjectFixer.Scripts
 {
