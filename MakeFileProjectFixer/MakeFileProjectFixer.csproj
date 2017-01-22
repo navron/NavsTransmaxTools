@@ -107,6 +107,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Scripts\MakeFileChangeCase.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Scripts\FixMakeFileHeader.cs" />
     <Compile Include="Scripts\RemovedMakeProject.cs" />
@@ -120,9 +121,8 @@
     <Compile Include="Scripts\FixDependencies.cs" />
     <Compile Include="Data\Store.cs" />
     <Compile Include="Utility\LoggingTimer.cs" />
-    <Compile Include="VisualStudioFile\Interface1.cs" />
     <Compile Include="VisualStudioFile\TestVisualStudioFile\TestCSFiles.cs" />
-    <Compile Include="VisualStudioFile\TestVisualStudioFile\TestCppFiles.cs" />
+    <Compile Include="VisualStudioFile\TestVisualStudioFile\VisualStudioCSharpFileTests.cs" />
     <Compile Include="VisualStudioFile\IVisualStudioFile.cs" />
     <Compile Include="Utility\Helper.cs" />
     <Compile Include="MakeFile\MakeFile.cs" />

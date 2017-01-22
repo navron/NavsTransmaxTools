@@ -21,29 +21,46 @@ namespace MakeFileProjectFixer.Scripts
 
             // Build Set of Expected Make Project Names from VisualStudioFiles
             var hashSet = new HashSet<string>();
-            foreach (var storeVisualStudioFile in store.VisualStudioFiles)
+            foreach (var studioFile in store.VisualStudioFiles)
             {
-                foreach (var projectName in storeVisualStudioFile.ExpectedMakeProjectReference)
+                // Add this project name (not all project names are in the expected list)
+                hashSet.Add(studioFile.ProjectName);
+
+                // Add all the Expected Make List
+                foreach (var projectName in studioFile.ExpectedMakeProjectReference)
                 {
                     hashSet.Add(projectName);
                 }
             }
 
-            Helper.PreProcessedFileSave("Test.json", hashSet);
             // store.VisualStudioFiles.ForEach(studioFile => studioFile.ExpectedMakeProjectReference.ForEach(projectName => hashSet.Add(projectName)));
             // Check HashSet for duplicate case entries
+            Helper.PreProcessedFileSave("FixMakeFileCaseFromVisualStudioHashSet.json", hashSet);
+            bool founderrors = false;
             foreach (var p1 in hashSet) // Ok bad coding for now
             {
                 foreach (var p2 in hashSet)
                 {
                     if (p1 == p2 || !string.Equals(p1, p2, StringComparison.OrdinalIgnoreCase)) continue;
-                    Log.Error($"VisualStudioFiles contain Make Projects reference of different case '{p1}' and '{p2}'");
-                    Environment.Exit(-1);
+                    Log.Error($"VisualStudioFiles contain Make Projects reference of different case '{p1}' and '{p2}'  -- Fix manually with  MakeFileChangeCase --ProjectName={p2}");
+                    Log.Error($"This means the two visual studio files are referencing the project with different case, fix the visual Studio project");
+
+                    var p1List = new List<string>();
+                    store.VisualStudioFiles.ForEach(vs => vs.ExpectedMakeProjectReference.ForEach(mp => { if (mp == p1) p1List.Add(vs.FileName); }));
+                    var p2List = new List<string>();
+                    store.VisualStudioFiles.ForEach(vs => vs.ExpectedMakeProjectReference.ForEach(mp => { if (mp == p2) p2List.Add(vs.FileName); }));
+
+                    Log.Information("This case {P} is in these files {files}", p1, p1List);
+                    Log.Information("This case {P} is in these files {files}", p2, p2List);
+                    founderrors = true;
                 }
             }
 
+            if (founderrors) Environment.Exit(-1);
+
             var list = hashSet.ToList();
-            list.Sort();
+            list.Sort(StringComparer.OrdinalIgnoreCase);
+            Helper.PreProcessedFileSave("FixMakeFileCaseFromVisualStudioHashSetSortedList.json", list);
             store.MakeHeaderProjects.ForEach(mp => FixProjectNameAndDependcyes(mp, list));
             store.MakeProjects.ForEach(mp => FixProjectNameAndDependcyes(mp, list));
 

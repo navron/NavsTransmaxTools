@@ -18,6 +18,8 @@ namespace MakeFileProjectFixer.MakeFile
             PostLines = new List<string>();
             DependencyProjects = new List<string>();
             PublishCppHeaderFiles = new List<string>();
+            PreDefinedIncludeDependency = new List<string>();
+            PreDefinedExcludeDependency = new List<string>();
         }
 
         /// <summary>
@@ -29,6 +31,12 @@ namespace MakeFileProjectFixer.MakeFile
         /// List of Current Projects marked as Dependencies
         /// </summary>
         public List<string> DependencyProjects { get; set; }
+
+        /// <summary>
+        /// list of Dependencies from the PreLines with Tag [include]
+        /// </summary>
+        public List<string> PreDefinedIncludeDependency { get; set; }
+        public List<string> PreDefinedExcludeDependency { get; set; }
 
         /// <summary>
         /// Lines above the ProjectName Line, these are always comments
@@ -50,8 +58,8 @@ namespace MakeFileProjectFixer.MakeFile
         /// </summary>
         public bool IsHeader { get; set; }
 
-     // [JsonIgnore]
-      //public MakeFile MakeFile { get; set; }
+        // [JsonIgnore]
+        //public MakeFile MakeFile { get; set; }
 
         [JsonIgnore]
         public IList<string> RawLines { get; set; }
@@ -69,7 +77,7 @@ namespace MakeFileProjectFixer.MakeFile
                 DependencyProjects.Sort();
             }
 
-            var projectLine = $"{ProjectName}: {string.Join(" ", DependencyProjects)}";
+            var projectLine = $"{ProjectName}: {string.Join(" ", AllDependenies)}";
             var projectLines = new List<string>();
             if (!string.IsNullOrEmpty(ProjectName))
             {
@@ -79,12 +87,13 @@ namespace MakeFileProjectFixer.MakeFile
                 }
                 else
                 {
-                    projectLines.Add(projectLine);
-                    //projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength+40);
+                    //projectLines.Add(projectLine);
+                    projectLines = MakeFileHelper.ExpandLines(projectLine, lineLength + 40);
                 }
             }
 
             PreLines.RemoveAll(string.IsNullOrWhiteSpace);
+
             // Going to Allow Empty Lines, Expect at the end
             while (PostLines.Count > 0 && string.IsNullOrWhiteSpace(PostLines.Last()))
             {
@@ -92,10 +101,22 @@ namespace MakeFileProjectFixer.MakeFile
             }
 
             var project = new List<string>();
-            project.AddRange(PreLines);
-            project.AddRange(projectLines);
-            project.AddRange(PostLines);
+            project.AddRange(CleanLines(PreLines));
+            project.AddRange(CleanLines(projectLines));
+            project.AddRange(CleanLines(PostLines));
             return project;
+        }
+
+        private List<string> CleanLines(List<string> lines)
+        {
+            return lines.Select(line => line.TrimEnd()).ToList();
+        }
+
+        public void ProcessFile()
+        {
+            PublishCppHeaderFiles = GetPublishedCppHeaderFiles(PostLines);
+            PreDefinedIncludeDependency = GetPreDefinedDependencies("[include]", (PreLines));
+            PreDefinedExcludeDependency = GetPreDefinedDependencies("[excludeDepend]", PreLines);
         }
 
         internal List<string> GetPublishedCppHeaderFiles(List<string> postLines)
@@ -124,9 +145,27 @@ namespace MakeFileProjectFixer.MakeFile
             return list;
         }
 
+        private List<string> GetPreDefinedDependencies(string tag, List<string> preLines)
+        {
+            var list = new List<string>();
+            foreach (var line in preLines)
+            {
+                var index = line.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
+                if (index < 0) continue;
+                var values = line.Remove(index, tag.Length);
+                values = values.Remove(0, 1); // remove the comment at the start of the line
+                var split = values.Split(' ');
+                list.AddRange(MakeFileHelper.CleanItems(split));
+            }
+            return list;
+        }
+
         /// <summary>
         /// Should this project be excluded from either the Make File header or director Folder
         /// </summary>
-        public bool ShouldExcluded => PreLines.Any(preLine => preLine.Contains("[exclude]", StringComparison.OrdinalIgnoreCase)); 
+        public bool ShouldExcluded => PreLines.Any(preLine => preLine.Contains("[exclude]", StringComparison.OrdinalIgnoreCase));
+
+        // Join Both Dependencies lists and return the union set
+        private List<string> AllDependenies => PreDefinedIncludeDependency.Union(DependencyProjects).Except(PreDefinedExcludeDependency).ToList();
     }
 }

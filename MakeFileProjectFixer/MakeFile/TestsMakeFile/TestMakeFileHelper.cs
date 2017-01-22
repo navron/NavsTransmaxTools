@@ -34,7 +34,7 @@ namespace MakeFileProjectFixer.MakeFile.TestsMakeFile
 //Wrong Test        [TestCase(new[] { "one:", "\ttwo\t\tthree", "" }, new[] { "one:", "two", "three" })]
         public void TestCleanLines(string[] given, string[] expected)
         {
-            var acutal = MakeFileHelper.CleanLines(given);
+            var acutal = MakeFileHelper.CleanItems(given);
             CollectionAssert.AreEquivalent(expected, acutal);
         }
     }

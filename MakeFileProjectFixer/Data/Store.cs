@@ -67,6 +67,14 @@ namespace MakeFileProjectFixer.Data
             {
                 MakeFiles = Stage1ReadMakeFiles();
 
+                foreach (var makeFile in MakeFiles)
+                {
+                    if (makeFile == null)
+                    {
+                        Log.Error("Make file is null, why?");
+                    }
+                }
+
                 // Build a MakeProject Set
                 MakeFiles.ForEach(mk => MakeProjects.AddRange(mk.Projects));
                 // Build a MakeProject Header Set
@@ -116,10 +124,9 @@ namespace MakeFileProjectFixer.Data
 
             Parallel.ForEach(files, (file) =>
             {
-                var make = new MakeFile.MakeFile();
-                make.ReadFile(file);
-                make.ScanRawLinesForPublishItems();
-                list.Add(make);
+                var makeFile = new MakeFile.MakeFile();
+                makeFile.ProcessFile(file);
+                list.Add(makeFile);
             });
 
             Helper.PreProcessedFileSave(Settings.StoreMakeFile, list);
@@ -281,7 +288,7 @@ namespace MakeFileProjectFixer.Data
 
         private void BackUpAndDelete(string fileName)
         {
-            var prevFile = $"Prev{fileName}";
+            var prevFile = $"Prev-{fileName}";
             File.Delete(prevFile);
             File.Move(fileName, prevFile);
         }

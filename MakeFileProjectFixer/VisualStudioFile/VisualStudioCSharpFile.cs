@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using MakeFileProjectFixer.MakeFile;
@@ -16,6 +17,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public HashSet<string> TsdReferences { get; set; } = new HashSet<string>();
         public HashSet<string> OtherReferences { get; set; } = new HashSet<string>();
         public HashSet<string> IgnoredReferences { get; set; } = new HashSet<string>();
+        public HashSet<string> ComReferences { get; set; } = new HashSet<string>();
 
         public List<string> ExpectedMakeProjectReference { get; set; } = new List<string>();
 
@@ -65,21 +67,28 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     OtherReferences.Add(split[0]);
                 }
             }
+            // Haven't gone to 64bit yet
+            var comReferences = msProject.GetItems("COMReference");
+            foreach (ProjectItem projectItem in comReferences)
+            {
+                ComReferences.Add(projectItem.EvaluatedInclude);
+            }
         }
 
         public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects, List<IVisualStudioFile> vsFiles)
         {
-            var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile as VisualStudioCSharpFile).ToList();
-            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(vsCSharpFiles);
+            var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
+            var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
+            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(vsCSharpFiles, makeProjects);
         }
 
         // Requires a Full list of all CSharpe Files for scanning for TSD assemblies
-        private List<string> GetExpectedMakeProjectRefenences(List<VisualStudioCSharpFile> vsFiles)
+        private List<string> GetExpectedMakeProjectRefenences(List<VisualStudioCSharpFile> vsFiles, List<MakeProject> makeProjects)
         {
             var hashSet = new HashSet<string>();
             foreach (var tsdRefenence in TsdReferences)
             {
-             //   if (tsdRefenence == null) continue;
+                //   if (tsdRefenence == null) continue;
 
                 // examples
                 //Tsd.AccessControl.Workstation.Security
@@ -87,19 +96,37 @@ namespace MakeFileProjectFixer.VisualStudioFile
                 //Tsd.Libraries.Workstation.Interop.Windows
 
                 var project = vsFiles.FirstOrDefault(v => v.AssemblyName == tsdRefenence);
-                if (project == null) continue;
-
-                if (hashSet.Contains(project.ProjectName))
+                if (project != null)
                 {
-                    Log.Warning($"Visual Studio File {project.ProjectName} as a duplicate TSD Reference ");
-                }
-                if (project.ProjectName == ProjectName) continue; // Don't Add Myself
+                    if (hashSet.Contains(project.ProjectName))
+                    {
+                        Log.Warning($"Visual Studio File {project.ProjectName} as a duplicate TSD Reference ");
+                    }
+                    if (project.ProjectName == ProjectName) continue; // Don't Add Myself
 
-                hashSet.Add(project.ProjectName);
+                    hashSet.Add(project.ProjectName);
+                    continue; // go to next 
+                }
+
+                // is in make file
+                var checkFor = tsdRefenence.Split('.').Last();
+                var test = makeProjects.FirstOrDefault(mp => mp.ProjectName == checkFor);
+                if (test != null)
+                {
+                    hashSet.Add(test.ProjectName);
+                }
+            }
+            // COM References to Make Project, Project Names are incorrect case, not fixing, just working around
+            foreach (var comReference in ComReferences)
+            {
+                if (makeProjects.Any(makeProject => makeProject.ProjectName.Equals(comReference, StringComparison.OrdinalIgnoreCase)))
+                {
+                    hashSet.Add(comReference); //  Case may be wrong
+                }
             }
             if (OtherReferences.Any())
             {
-                hashSet.Add("LibThirdParty");
+                hashSet.Add("lib3rdparty");
             }
             // Now add the Others (assuming non GAC references)
             //foreach (var otherReference in OtherReferences)
@@ -108,7 +135,5 @@ namespace MakeFileProjectFixer.VisualStudioFile
             //}
             return hashSet.ToList();
         }
-
-      
     }
 }

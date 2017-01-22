@@ -71,9 +71,14 @@ namespace MakeFileProjectFixer.MakeFile
             return lines;
         }
 
-        internal static List<string> CleanLines(string[] rawlines)
+        /// <summary>
+        /// Cleans a list of items
+        /// </summary>
+        /// <param name="rawItems"></param>
+        /// <returns></returns>
+        internal static List<string> CleanItems(string[] rawItems)
         {
-            var list = rawlines.Select(r => r.Trim()).ToList();
+            var list = rawItems.Select(r => r.Trim()).ToList();
             list.RemoveAll(string.IsNullOrWhiteSpace);
             return list;
         }

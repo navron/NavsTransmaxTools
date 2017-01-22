@@ -38,13 +38,21 @@ namespace MakeFileProjectFixer.MakeFile
         /// <summary>
         /// List of Project Configurations
         /// </summary>
-        public List<MakeProject> Projects { get; set; } 
+        public List<MakeProject> Projects { get; set; }
 
-        public void ReadFile(string fileName)
+        /// <summary>
+        /// Process the Make File and Build Make Projects, then process them
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void ProcessFile(string fileName)
         {
+            // Build all the Make files 
             FileName = fileName;
             RawLines = File.ReadAllLines(FileName);
             ProcessMakeFileRawLines(RawLines.ToList());
+
+            // Process MakeProject
+            Projects.ForEach(mp => mp.ProcessFile());
         }
 
         public void WriteFile(Options options)
@@ -155,7 +163,7 @@ namespace MakeFileProjectFixer.MakeFile
                     c.ProjectName = lineSplit[0].Trim();
                     // There may be a space, known problem that is ok with make files
                     var dependences = lineSplit[1].Split(' ', '\t');
-                    c.DependencyProjects = MakeFileHelper.CleanLines(dependences);
+                    c.DependencyProjects = MakeFileHelper.CleanItems(dependences);
 
                     continue;
                 }
@@ -198,19 +206,6 @@ namespace MakeFileProjectFixer.MakeFile
             return folder.EndsWith($"\\{name}");
         }
 
-        /// <summary>
-        /// Search all the Project Raw lines for copy .h files to COM\Include
-        /// This is how to determine c++ references
-        /// </summary>
-        public void ScanRawLinesForPublishItems()
-        {
-            // Log.Debug("Scan Raw Lines For Publish Items");
-            // Jobs 
-            // 1. Scan for cpp published .h files
-            foreach (var p in Projects)
-            {
-                p.PublishCppHeaderFiles = p.GetPublishedCppHeaderFiles(p.PostLines);
-            }
-        }
+
     }
 }

@@ -171,6 +171,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
 
                 list.Add(mp.ProjectName);
             }
+    
             return list;
         }
     }

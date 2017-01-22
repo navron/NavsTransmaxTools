@@ -3,7 +3,7 @@
 namespace MakeFileProjectFixer.VisualStudioFile.TestVisualStudioFile
 {
     [TestFixture]
-    public class TestCppFiles
+    public class VisualStudioCSharpFileTests
     {
 
         [Test]
@@ -13,6 +13,12 @@ namespace MakeFileProjectFixer.VisualStudioFile.TestVisualStudioFile
         //    const string file = @"C:\Dev\fr\as\frvwmmssvc\frvwmmssvc.vcxproj";
        //     var vscpp = new VsCplusplus();
         //    vscpp.ScanCppProjectForIncludeStatements(file);
+        }
+
+        [Test]
+        public void TsdReferenceToExpected(string[] given, string[] expected)
+        {
+            
         }
 
     }
