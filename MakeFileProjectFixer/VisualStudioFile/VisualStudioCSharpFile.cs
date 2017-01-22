@@ -153,9 +153,17 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     if (unittest != ProjectName) hashSet.Add(unittest);
                 }
             }
-
+            addOthers = addOthers.Except(hashSet.ToList()).ToList();
             // Add either all 3rd party copy or just NUnit (all CSharp projects have unit tests)
-            hashSet.Add(addOthers.Any() ? "lib3rdparty":""); //Dont like this
+            if (addOthers.Any())
+            {
+                addOthers.ForEach(o=>hashSet.Add(o));
+            }
+            else
+            {
+                hashSet.Add("lib3rdparty"); //Dont like this     
+            }
+           
 
             return hashSet.ToList();
         }
