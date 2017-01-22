@@ -265,11 +265,13 @@ namespace MakeFileProjectFixer.Data
 
         public void WriteMakeFiles()
         {
+            // Should do some thing here to check that it needs writing out.
             foreach (var makeFile in MakeFiles)
             {
                 makeFile.WriteFile(options);
             }
-            BackUpAndDelete(Settings.StoreMakeFile);
+            // Delete the Store Make File, so that it is built the next time
+            File.Delete(Settings.StoreMakeFile);
         }
 
         /// <summary>
@@ -284,13 +286,6 @@ namespace MakeFileProjectFixer.Data
                 list.AddRange(MakeProjects);
                 return list;
             }
-        }
-
-        private void BackUpAndDelete(string fileName)
-        {
-            var prevFile = $"Prev-{fileName}";
-            File.Delete(prevFile);
-            File.Move(fileName, prevFile);
         }
 
         public MakeFile.MakeFile FindMakeFileFromMakeProject(MakeProject makeProject)
