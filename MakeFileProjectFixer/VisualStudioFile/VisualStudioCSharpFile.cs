@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using MakeFileProjectFixer.MakeFile;
 using Microsoft.Build.Evaluation;
 using Serilog;
@@ -20,6 +21,9 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public HashSet<string> ComReferences { get; set; } = new HashSet<string>();
 
         public List<string> ExpectedMakeProjectReference { get; set; } = new List<string>();
+        public List<string> MyExpectedMakeProjectReference { get; set; } = new List<string>();
+
+        public VisualStudioCSharpFile UnitTestProject { get; set; }
 
         //  Can't open a project twice, so keep a reference to it
         private Project msProject;
@@ -32,6 +36,11 @@ namespace MakeFileProjectFixer.VisualStudioFile
             if (file == null) return;
             AssemblyName = GetAssemblyName(file);
             ProjectName = Path.GetFileNameWithoutExtension(file);
+
+            var unitTestFileName = Path.Combine(Path.GetDirectoryName(file), "UnitTests");
+            unitTestFileName = Path.Combine(unitTestFileName, $"{ProjectName}.UnitTests{Path.GetExtension(file)}");
+            if(File.Exists(unitTestFileName))
+                UnitTestProject = new VisualStudioCSharpFile(unitTestFileName);
         }
 
         private string GetAssemblyName(string vsFileName)
@@ -43,9 +52,10 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public void ScanFileForReferences()
         {
             ScanFileForReferences(FileName);
+            UnitTestProject?.ScanFileForReferences();
         }
 
-        public void ScanFileForReferences(string vsFileName)
+        private void ScanFileForReferences(string vsFileName)
         {
             if (msProject == null) msProject = new Project(FileName);
 
@@ -79,11 +89,13 @@ namespace MakeFileProjectFixer.VisualStudioFile
         {
             var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
             var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
-            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(vsCSharpFiles, makeProjects);
+            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(vsCSharpFiles, makeProjects).ToList();
+
+            UnitTestProject?.BuildExpectedMakeProjectReferences(makeProjects, vsFiles);
         }
 
         // Requires a Full list of all CSharpe Files for scanning for TSD assemblies
-        private List<string> GetExpectedMakeProjectRefenences(List<VisualStudioCSharpFile> vsFiles, List<MakeProject> makeProjects)
+        internal List<string> GetExpectedMakeProjectRefenences(List<VisualStudioCSharpFile> vsFiles, List<MakeProject> makeProjects)
         {
             var hashSet = new HashSet<string>();
             foreach (var tsdRefenence in TsdReferences)
@@ -124,15 +136,27 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     hashSet.Add(comReference); //  Case may be wrong
                 }
             }
-            if (OtherReferences.Any())
+
+            // Now add the Others (assuming non GAC references) and only if there matching make project
+            var addOthers = OtherReferences.Where(otherReference => makeProjects.Any(mp => mp.ProjectName == otherReference)).ToList();
+
+            foreach (var s in hashSet)
             {
-                hashSet.Add("lib3rdparty");
+                MyExpectedMakeProjectReference.Add(s);
             }
-            // Now add the Others (assuming non GAC references)
-            //foreach (var otherReference in OtherReferences)
-            //{
-            //    hashSet.Add(otherReference);
-            //}
+
+            var unittests = UnitTestProject?.GetExpectedMakeProjectRefenences(vsFiles, makeProjects);
+            if (unittests != null)
+            {
+                foreach (var unittest in unittests)
+                {
+                    if (unittest != ProjectName) hashSet.Add(unittest);
+                }
+            }
+
+            // Add either all 3rd party copy or just NUnit (all CSharp projects have unit tests)
+            hashSet.Add(addOthers.Any() ? "lib3rdparty":""); //Dont like this
+
             return hashSet.ToList();
         }
     }

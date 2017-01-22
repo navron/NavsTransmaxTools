@@ -126,8 +126,23 @@ namespace MakeFileProjectFixer.VisualStudioFile
         /// <returns></returns>
         private HashSet<string> ProcessIncludeStatements(List<string> rawReferencesIncludes, List<string> codeFileNames)
         {
+            // Take the File name or the folder name 
+           // var list = RawReferencesIncludes.Select(referencesInclude => referencesInclude.Split('/').First()).ToList();
+           var list = new List<string>();
+            foreach (var include in rawReferencesIncludes)
+            {
+                var t = include.Split('/');
+                if (t.Length > 1)
+                {
+                    
+                }
+                var s = t.First();
+
+                    list.Add(s);
+            }
+
             var hashSet = new HashSet<string>();
-            foreach (var reference in rawReferencesIncludes)
+            foreach (var reference in list)
             {
                 // don’t add references that are own project
                 if (codeFileNames.Contains(reference)) continue;
@@ -135,13 +150,12 @@ namespace MakeFileProjectFixer.VisualStudioFile
                 // don’t add duplicate references
                 if (hashSet.Contains(reference)) continue;
 
-                // only include .h files 
-                if (!reference.ToLower().Contains(".h")) continue;
-
-                //Clean Reference
-                var cleanValue = reference.Replace(".h", "").Replace(".cpp", "");
-
-                hashSet.Add(cleanValue);
+                // only include .h files or not extension
+                if (reference.ToLower().Contains(".h") || !reference.ToLower().Contains('.'))
+                {
+                    var cleanValue = reference.Replace(".h", "");
+                    hashSet.Add(cleanValue);
+                }           
             }
             return hashSet;
         }
@@ -171,7 +185,11 @@ namespace MakeFileProjectFixer.VisualStudioFile
 
                 list.Add(mp.ProjectName);
             }
-    
+            if (!list.Any())
+            {
+                list.Add("cpplibraries");
+            }
+           
             return list;
         }
     }
