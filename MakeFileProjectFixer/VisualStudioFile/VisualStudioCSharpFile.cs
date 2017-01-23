@@ -88,7 +88,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects, List<IVisualStudioFile> vsFiles)
         {
             var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
-            var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
+         //   var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
             ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(vsCSharpFiles, makeProjects).ToList();
 
             UnitTestProject?.BuildExpectedMakeProjectReferences(makeProjects, vsFiles);
@@ -152,8 +152,9 @@ namespace MakeFileProjectFixer.VisualStudioFile
                 {
                     if (unittest != ProjectName) hashSet.Add(unittest);
                 }
+                addOthers = addOthers.Except(unittests.ToList()).ToList();
             }
-            addOthers = addOthers.Except(hashSet.ToList()).ToList();
+            
             // Add either all 3rd party copy or just NUnit (all CSharp projects have unit tests)
             if (addOthers.Any())
             {

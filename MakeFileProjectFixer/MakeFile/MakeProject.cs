@@ -116,7 +116,7 @@ namespace MakeFileProjectFixer.MakeFile
         {
             PublishCppHeaderFiles = GetPublishedCppHeaderFiles(PostLines);
             PreDefinedIncludeDependency = GetPreDefinedDependencies("[include]", (PreLines));
-            PreDefinedExcludeDependency = GetPreDefinedDependencies("[excludeDepend]", PreLines);
+            PreDefinedExcludeDependency = GetPreDefinedDependencies("[exclude]", PreLines);
         }
 
         internal List<string> GetPublishedCppHeaderFiles(List<string> postLines)
@@ -163,7 +163,7 @@ namespace MakeFileProjectFixer.MakeFile
         /// <summary>
         /// Should this project be excluded from either the Make File header or director Folder
         /// </summary>
-        public bool ShouldExcluded => PreLines.Any(preLine => preLine.Contains("[exclude]", StringComparison.OrdinalIgnoreCase));
+        public bool ShouldExcluded => PreLines.Any(preLine => preLine.Contains("[excludeheader]", StringComparison.OrdinalIgnoreCase));
 
         // Join Both Dependencies lists and return the union set
         private List<string> AllDependenies => PreDefinedIncludeDependency.Union(DependencyProjects).Except(PreDefinedExcludeDependency).ToList();

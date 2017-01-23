@@ -72,6 +72,8 @@ namespace MakeFileProjectFixer.Data
                     if (makeFile == null)
                     {
                         Log.Error("Make file is null, why?");
+                        Helper.PreProcessedFileSave("MakeFile.json", MakeFiles);
+                        throw new Exception("Navron work out why");
                     }
                 }
 
