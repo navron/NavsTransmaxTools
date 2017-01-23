@@ -61,7 +61,7 @@ namespace VisualStudioProjectFixer.Scripts
                         continue;
                     }
                     Log.Debug($"SetReferenceDLLData Fixing {dllName}");
-                    var r = DllInformation.Instance.GetDllInfo(dllName);
+                    var r = DllInformation.Instance.GetDllInfo(dllName, this);
                     if (!string.IsNullOrEmpty(r))
                     {
                         reference.UnevaluatedInclude = r;

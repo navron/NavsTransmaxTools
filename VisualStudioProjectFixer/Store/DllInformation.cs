@@ -15,14 +15,14 @@ namespace VisualStudioProjectFixer.Store
         // Key=dllName Value=StrongName and ProcessArch
         private readonly Dictionary<string, string> dllInfo = new Dictionary<string, string>();
 
-        public string GetDllInfo(string dllName)
+        public string GetDllInfo(string dllName, Options options)
         {
             if (!dllInfo.ContainsKey(dllName))
-                dllInfo[dllName] = GetDLLLine(dllName);
+                dllInfo[dllName] = GetDllLine(dllName, options);
             return dllInfo[dllName];
         }
 
-        private string GetDLLLine(string dllName)
+        private string GetDllLine(string dllName, Options options)
         {
             const string dllPath = @"C:\CurrentBuild\Dev\Bin";
             var fileName = Path.Combine(dllPath, $"{dllName}.dll");
@@ -32,7 +32,7 @@ namespace VisualStudioProjectFixer.Store
                 if (!File.Exists(fileNameExe))
                 {
                     Log.Error($"File {fileName} does not exist, aborting");
-                    // return null;
+                    if(options.ContinueProcessing) return null;
                     throw new Exception($"File {fileName} does not exist, aborting");
                 }
                 fileName = fileNameExe;
