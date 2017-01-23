@@ -17,6 +17,7 @@ namespace MakeFileProjectFixer.Data
     /// Holds an in memory set of Make file an Visual studio files so
     /// that they made be queried quickly by 
     /// </summary>
+    /// <remarks>This Verb is useful for testing and design</remarks>
     [Verb("Store", HelpText = "Debugging Verb, used to create json files of processed visual studio project and make files")]
     internal class Store : Options
     {
@@ -26,7 +27,7 @@ namespace MakeFileProjectFixer.Data
             internal const string StoreCSharpFile = "StoreCSharpFile.json";
             internal const string StoreCPlusPlusFile = "StoreCPlusPlusFile.json";
         }
-        
+
 
         private readonly Options options;
         public List<MakeFile.MakeFile> MakeFiles { get; private set; } = new List<MakeFile.MakeFile>();
@@ -51,6 +52,7 @@ namespace MakeFileProjectFixer.Data
         // Build Both the Make Files and Visual Studio files Store
         public void BuildStore()
         {
+
             BuildStoreMakeFiles();
             BuildStoreVisalStudioFiles();
         }
@@ -169,7 +171,7 @@ namespace MakeFileProjectFixer.Data
                 if (makeProject.ProjectName != null) continue;
                 // Most likely an make file error. 
                 // Print out in Red and abort
-                Log.Error("Error with Make File Project, Project Name Null in file {File}",FindMakeFileFromMakeProject(makeProject).FileName);
+                Log.Error("Error with Make File Project, Project Name Null in file {File}", FindMakeFileFromMakeProject(makeProject).FileName);
                 foreach (var line in makeProject.FormatMakeProject(true, 200, false))
                 {
                     Log.Warning(line);
