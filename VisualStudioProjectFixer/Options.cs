@@ -9,5 +9,8 @@ namespace VisualStudioProjectFixer
 
         [Option('p', "parallel", HelpText = "Run in parallel mode")]
         public bool RunAsParallel { get; set; }
+
+        [Option('c', "continue", HelpText = "Continue processing if possible")]
+        public bool ContinueProcessing { get; set; }
     }
 }
