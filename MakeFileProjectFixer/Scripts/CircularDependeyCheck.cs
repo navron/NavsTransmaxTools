@@ -39,7 +39,7 @@ namespace MakeFileProjectFixer.Scripts
                     var depProject = allProjectDependency.FirstOrDefault(p => p.MakeProject.ProjectName == dependencyProject);
                     if (depProject == null)
                     {
-                        Log.Error($"Make Project: {project.MakeProject.ProjectName} Dependency: {dependencyProject} does not exist", ConsoleColor.Red);
+                        Log.Error("Make Project: {ProjectName}, Dependency: {DependencyProject} does not exist", project.MakeProject.ProjectName, dependencyProject);
                         error = true;
                     }
                     if (depProject != null)

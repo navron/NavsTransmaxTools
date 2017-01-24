@@ -125,10 +125,16 @@ namespace MakeFileProjectFixer.MakeFile
             //scripts/cpy $(as_lib_path) /$@/Header.gsoap $(GSOAP_IMPORT)
             //scripts/cpy $(as_lib_path) /$@/TypesImpl.h $(AS_INC)
 
+            // but not
+            // scripts/generate $(as_fr_path)/$@ tem.VicWeatherAlgService.h
+
             //I know, crappy code, just hope it works enough. 
             var list = new List<string>();
             foreach (var line in postLines)
             {
+                if(!line.Contains("scripts/cpy")) continue;
+                if(line.Contains(".html")) continue;
+
                 var s = line.Split(' ');
                 foreach (var s1 in s)
                 {

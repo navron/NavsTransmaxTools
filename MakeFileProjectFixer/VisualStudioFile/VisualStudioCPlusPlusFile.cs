@@ -16,12 +16,10 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public string FileName { get; set; }
         public string AssemblyName { get; set; }
         public List<string> CodeFiles { get; set; } = new List<string>();
-        public List<string> CleanCodeFiles { get; set; } = new List<string>(); // //Testing
+        private List<string> CleanCodeFiles { get; set; } = new List<string>(); // //Testing
         public List<string> RawReferencesIncludes { get; set; } = new List<string>();
         public HashSet<string> ReferencesSet { get; set; } = new HashSet<string>();
         public List<string> ExpectedMakeProjectReference { get; set; } = new List<string>();
-
-
 
         //  Can't open a project twice, so keep a reference to it
         private Project msProject;
@@ -60,6 +58,8 @@ namespace MakeFileProjectFixer.VisualStudioFile
                 var statements = ScanCodeFileForIncludeStatements(includeFile);
                 RawReferencesIncludes.AddRange(statements);
             }
+            // limit to distinct values
+            RawReferencesIncludes = RawReferencesIncludes.Distinct().ToList();
 
             CleanCodeFiles = CodeFiles.Select(Path.GetFileName).ToList();
             ReferencesSet = ProcessIncludeStatements(RawReferencesIncludes, CleanCodeFiles);
@@ -115,7 +115,12 @@ namespace MakeFileProjectFixer.VisualStudioFile
             var lines = File.ReadLines(file);
             foreach (var line in lines)
             {
-                if (line.ToLower().Contains("#include")) list.Add(GetHashInclude(line));
+                if (line.ToLower().Contains("#include"))
+                {
+                    var f = GetHashInclude(line);
+                    if(f.Contains(".h",StringComparison.OrdinalIgnoreCase))
+                        list.Add(f);
+                }
 
                 if (line.ToLower().Contains("#using") && line.ToLower().Contains("tsd."))
                     list.Add(GetHashUsing(line));
@@ -123,9 +128,13 @@ namespace MakeFileProjectFixer.VisualStudioFile
             return list;
         }
 
+        // Bad coding here, don't look to closely 
         internal static string GetHashInclude(string line)
         {
-            var f = line.Remove(0, "#include".Length);
+            var f = line.Trim();
+            f = f.Remove(0, "#include".Length);
+            f = f.Trim();
+            f = f.Split(' ').First();
             f = f.Replace('"', ' ');
             f = f.Trim();
             f = f.Trim('<');
@@ -134,7 +143,8 @@ namespace MakeFileProjectFixer.VisualStudioFile
         }
         internal static string GetHashUsing(string line)
         {
-            var t = line.Remove(0, "#using".Length);
+            var t = line.Trim();
+            t = t.Remove(0, "#using".Length);
             t = t.Replace('"', ' ');
             t = t.Trim();
             t = t.Trim('<');
@@ -194,7 +204,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public List<string> GetExpectedMakeProjectRefenences(List<MakeProject> makeProjects, List<VisualStudioCSharpFile> vsFiles)
         {
             // Add References for tsd if matching .Net Project files (raise warning if not matching)
-
+            DebugRefenences = new List<string>();
             var hashSet = new HashSet<string>();
             foreach (var reference in ReferencesSet)
             {
@@ -208,6 +218,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
                         if (project.ProjectName == ProjectName) continue; // Don't Add Myself, wont happen in this cpp case
 
                         hashSet.Add(project.ProjectName);
+                        DebugRefenences.Add($"{project.ProjectName} | .Net Lib");
                         continue; // go to next 
                     }
                     else
@@ -224,7 +235,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     MakeProject mp = null;
                     foreach (var makeProject in makeProjects)
                     {
-                        if (makeProject.PublishCppHeaderFiles.Any(file => file.Contains(reference)))
+                        if (makeProject.PublishCppHeaderFiles.Any(file => file == reference)) // Must match, fix case if needed
                         {
                             mp = makeProject;
                         }
@@ -240,7 +251,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
 
                         if (mp == null) continue; // not found
                     }
-
+                    DebugRefenences.Add($"{mp.ProjectName} | .h publish set for {reference}");
                     if (hashSet.Contains(mp.ProjectName)) continue; // already added
 
                     if (mp.ProjectName == ProjectName) continue; // Don't Add Myself
@@ -254,7 +265,10 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     var mp = makeProjects.FirstOrDefault(m => m.ProjectName == reference);
                     if (mp == null) continue;
                     if (mp.ProjectName != ProjectName) // Don't Add Myself
+                    {
                         hashSet.Add(mp.ProjectName);
+                        DebugRefenences.Add($"{mp.ProjectName} | . folder set for {reference}");
+                    }
                 }
             }
             // Now if the hashset is empty wait on the cpp libraries call, (its a catch all thing)
@@ -265,5 +279,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
 
             return hashSet.ToList();
         }
+
+        public List<string> DebugRefenences { get; set; }
     }
 }

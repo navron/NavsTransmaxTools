@@ -77,6 +77,7 @@ namespace MakeFileProjectFixer
                 .WithParsed<FixMakeFileHeader>(options => options.Run())
                 .WithParsed<RemovedMakeProject>(options => options.Run())
                 .WithParsed<MakeFileChangeCase>(options => options.Run())
+                .WithParsed<ListCaseProblems>(options => options.Run())
 
                 .WithNotParsed(HelpFooter);
         }
