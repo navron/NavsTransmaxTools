@@ -21,6 +21,8 @@ namespace MakeFileProjectFixer.VisualStudioFile
         public HashSet<string> ReferencesSet { get; set; } = new HashSet<string>();
         public List<string> ExpectedMakeProjectReference { get; set; } = new List<string>();
 
+        public VisualStudioCPlusPlusFile UnitTestProject { get; set; }
+
         //  Can't open a project twice, so keep a reference to it
         private Project msProject;
 
@@ -33,6 +35,12 @@ namespace MakeFileProjectFixer.VisualStudioFile
             if (file == null) return;
             AssemblyName = GetAssemblyName(file);
             ProjectName = Path.GetFileNameWithoutExtension(file);
+
+
+            var unitTestFileName = Path.Combine(Path.GetDirectoryName(file), "UnitTests");
+            unitTestFileName = Path.Combine(unitTestFileName, $"{ProjectName}.UnitTests{Path.GetExtension(file)}");
+            if (File.Exists(unitTestFileName))
+                UnitTestProject = new VisualStudioCPlusPlusFile(unitTestFileName);
         }
         private string GetAssemblyName(string vsFileName)
         {
@@ -44,7 +52,18 @@ namespace MakeFileProjectFixer.VisualStudioFile
         {
             var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
             // var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
-            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects, vsCSharpFiles);
+            var includeUnitTestReferences = IncludeUnitTestReferences(makeProjects);
+            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects, vsCSharpFiles, includeUnitTestReferences);
+        }
+
+        private bool IncludeUnitTestReferences(List<MakeProject> makeProjects)
+        {
+            var makeProject = makeProjects.FirstOrDefault(mp => mp.ProjectName == ProjectName);
+            if (makeProject == null)
+            {
+                return false;
+            }
+            return makeProject != null && makeProject.IncludeUnitTestReferences;
         }
 
         public void ScanFileForReferences()
@@ -63,6 +82,8 @@ namespace MakeFileProjectFixer.VisualStudioFile
 
             CleanCodeFiles = CodeFiles.Select(Path.GetFileName).ToList();
             ReferencesSet = ProcessIncludeStatements(RawReferencesIncludes, CleanCodeFiles);
+
+            UnitTestProject?.ScanFileForReferences();
         }
 
         private List<string> BuildFileScanList(string vsFileName)
@@ -201,7 +222,7 @@ namespace MakeFileProjectFixer.VisualStudioFile
             return hashSet;
         }
 
-        public List<string> GetExpectedMakeProjectRefenences(List<MakeProject> makeProjects, List<VisualStudioCSharpFile> vsFiles)
+        public List<string> GetExpectedMakeProjectRefenences(List<MakeProject> makeProjects, List<VisualStudioCSharpFile> vsFiles, bool includeUnitTestReferences)
         {
             // Add References for tsd if matching .Net Project files (raise warning if not matching)
             DebugRefenences = new List<string>();
@@ -271,6 +292,22 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     }
                 }
             }
+
+            var addOthers = new List<string>();
+
+            if (includeUnitTestReferences)
+            {
+                var unittestsReferences = UnitTestProject?.GetExpectedMakeProjectRefenences(makeProjects, vsFiles, false);
+                if (unittestsReferences != null)
+                {
+                    // Don't add this project
+                    foreach (var unittest in unittestsReferences)
+                    {
+                        if (unittest != ProjectName) hashSet.Add(unittest);
+                    }
+                }
+            }
+
             // Now if the hashset is empty wait on the cpp libraries call, (its a catch all thing)
             if (!hashSet.Any())
             {

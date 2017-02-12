@@ -20,12 +20,18 @@ namespace MakeFileProjectFixer.MakeFile
             PublishCppHeaderFiles = new List<string>();
             PreDefinedIncludeDependency = new List<string>();
             PreDefinedExcludeDependency = new List<string>();
+
         }
 
         /// <summary>
         /// Project ProjectName
         /// </summary>
         public string ProjectName { get; set; }
+
+        /// <summary>
+        /// Project Area, service/[common, db, as, ws]
+        /// </summary>
+        public string ProjectArea { get; set; }
 
         /// <summary>
         /// List of Current Projects marked as Dependencies
@@ -173,5 +179,28 @@ namespace MakeFileProjectFixer.MakeFile
 
         // Join Both Dependencies lists and return the union set
         private List<string> AllDependenies => PreDefinedIncludeDependency.Union(DependencyProjects).Except(PreDefinedExcludeDependency).ToList();
+
+
+        // bad quick coding, to fix up
+        public bool IncludeUnitTestReferences
+        {
+             get
+             {
+                 foreach (var line in PostLines)
+                 {
+                     if (line.Contains("/blddll") || line.Contains("/bldlib"))
+                     {
+                         line.Trim();
+                         if (line.EndsWith("1"))
+                         {
+                             return false;
+                         }
+                         return true;
+                     }
+                 }
+
+                 return true;
+             }
+        }
     }
 }

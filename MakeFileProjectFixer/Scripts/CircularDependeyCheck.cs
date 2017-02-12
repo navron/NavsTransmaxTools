@@ -110,7 +110,7 @@ namespace MakeFileProjectFixer.Scripts
                 foreach (var item in dependencyStack)
                 {
                     var mp = store.GetAllMakeProjects.First(x => x.ProjectName == item);
-                    Log.Information("Project: {@ProjectName}, Dependency: {@DependencyProjects}", mp.ProjectName,mp.DependencyProjects);
+                    Log.Information("Area {@Area} Project: {@ProjectName}, Dependency: {@DependencyProjects}", mp.ProjectArea, mp.ProjectName,mp.DependencyProjects);
                 }
                 Log.Information($"How to Read the above, the Stack is the order in which project was check.");
                 Log.Information($"The Project [{makeProjectDependency.MakeProject.ProjectName}] marked a Circular Reference detected, will appear in the stack ");

@@ -53,6 +53,9 @@ namespace MakeFileProjectFixer.MakeFile
 
             // Process MakeProject
             Projects.ForEach(mp => mp.ProcessFile());
+
+            var folder = Path.GetDirectoryName(fileName).Split(Path.DirectorySeparatorChar).Last();
+            Projects.ForEach(mp => mp.ProjectArea = folder);
         }
 
         public void WriteFile(Options options)

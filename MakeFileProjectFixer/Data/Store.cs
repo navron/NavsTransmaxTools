@@ -126,12 +126,24 @@ namespace MakeFileProjectFixer.Data
             options.SearchPatterns = new[] { "*.mak" };
             var files = Helper.FindFiles(options);
 
-            Parallel.ForEach(files, (file) =>
+            if (RunAsParallel)
             {
-                var makeFile = new MakeFile.MakeFile();
-                makeFile.ProcessFile(file);
-                list.Add(makeFile);
-            });
+                Parallel.ForEach(files, (file) =>
+                {
+                    var makeFile = new MakeFile.MakeFile();
+                    makeFile.ProcessFile(file);
+                    list.Add(makeFile);
+                });
+            }
+            else
+            {
+                foreach (var file in files)
+                {
+                    var makeFile = new MakeFile.MakeFile();
+                    makeFile.ProcessFile(file);
+                    list.Add(makeFile);
+                }
+            }
 
             Helper.PreProcessedFileSave(Settings.StoreMakeFile, list);
             return list;
