@@ -187,7 +187,7 @@ namespace MakeFileProjectFixer.MakeFile
              get
              {
                  foreach (var line in PostLines)
-                 {
+                 {                 
                      if (line.Contains("/blddll") || line.Contains("/bldlib"))
                      {
                          line.Trim();
