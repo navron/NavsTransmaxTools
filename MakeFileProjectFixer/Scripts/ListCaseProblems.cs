@@ -167,8 +167,11 @@ namespace MakeFileProjectFixer.Scripts
             foreach (var file in files)
             {
                 var text = File.ReadAllText(file);
-                text = text.Replace(reference, shouldbe);
-                File.WriteAllText(file,text);
+                if (text.Contains(reference))
+                {
+                    text = text.Replace(reference, shouldbe);
+                    File.WriteAllText(file, text);
+                }
             }
         }
     }

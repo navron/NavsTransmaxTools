@@ -48,7 +48,7 @@ namespace MakeFileProjectFixer
     {
         public static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainUnhandledException;
       
             // Log to Console, The application is run in a batch file that will pipe the contents to an log file
             var levelSwitch = new LoggingLevelSwitch { MinimumLevel = LogEventLevel.Information };
@@ -92,8 +92,8 @@ namespace MakeFileProjectFixer
         /// Handles any exception that was done thrown and wasn't catch downstream. 
         /// </summary>
         /// <param name="sender">The object that sent the exception</param>
-        /// <param name="e">The unhanded exception. </param>
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        /// <param name="e">The unhanded exception.</param>
+        private static void CurrentDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             var exception = e.ExceptionObject as Exception;
             Log.Error($"Application exiting with error: {exception?.Message ?? "UnknownReason"}");
