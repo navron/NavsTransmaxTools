@@ -135,7 +135,7 @@ namespace MakeFileProjectFixer.MakeFile
             // scripts/generate $(as_fr_path)/$@ tem.VicWeatherAlgService.h
 
             //I know, crappy code, just hope it works enough. 
-            var list = new List<string>();
+            var list = new HashSet<string>();
             foreach (var line in postLines)
             {
                 if(!line.Contains("scripts/cpy")) continue;
@@ -154,7 +154,7 @@ namespace MakeFileProjectFixer.MakeFile
                     }
                 }
             }
-            return list;
+            return list.ToList();
         }
 
         private List<string> GetPreDefinedDependencies(string tag, List<string> preLines)
