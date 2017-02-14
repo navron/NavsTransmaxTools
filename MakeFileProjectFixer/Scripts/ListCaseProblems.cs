@@ -29,6 +29,7 @@ namespace MakeFileProjectFixer.Scripts
                 if (DoCheckMakeProjects(store, Fix)) return;
                 if (CheckMakeProjectHaveUnquiePublishValues(store, Fix)) return;
                 if (DoVisualStuidoProjects(store, Fix)) return;
+                if (DoVisualStuidoProjects2(store, Fix)) return;
             }
         }
 
@@ -103,7 +104,6 @@ namespace MakeFileProjectFixer.Scripts
                     dicSet[cppHeaderFile] = makeProject;
                 }
             }
-            return false; // know problems
             return fail;
         }
 
@@ -127,7 +127,7 @@ namespace MakeFileProjectFixer.Scripts
 
         private bool DoVisualStuidoProjects(Store store, bool fix)
         {
-            Log.Information("Running DoCheckMakeProjects");
+            Log.Information("Running DoVisualStuidoProjects");
             var dicSet = new Dictionary<string, MakeProject>();
             foreach (var makeProject in store.MakeProjects)
             {
@@ -150,6 +150,36 @@ namespace MakeFileProjectFixer.Scripts
                         if (fix)
                         {
                             ChangeCaseIn(Path.GetDirectoryName(cPlusPlusFile.FileName), reference, item);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool DoVisualStuidoProjects2(Store store, bool fix)
+        {
+            Log.Information("Running DoVisualStuidoProjects2");
+            var dicSet = new Dictionary<string, MakeProject>();
+            foreach (var makeProject in store.MakeProjects)
+            {
+                dicSet[makeProject.ProjectName] = makeProject;
+            }
+            var list = dicSet.Select(item => item.Key).ToList();
+
+            foreach (var cPlusPlusFile in store.CPlusPlusFiles)
+            {
+                foreach (var reference in cPlusPlusFile.ReferencesSet)
+                {
+                    var test = reference.Split('.').First();
+                    foreach (var item in list)
+                    {
+                        if (!test.Equals(item, StringComparison.OrdinalIgnoreCase) || test.Equals(item))
+                            continue;
+                        Log.Information("Possible Ref {Ref} in VS {file} is incorrect case, should be {case}", test, cPlusPlusFile.ProjectName, item);
+                        if (fix)
+                        {
+                            ChangeCaseIn(Path.GetDirectoryName(cPlusPlusFile.FileName), test, item);
                         }
                     }
                 }
