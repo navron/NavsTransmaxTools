@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace MakeFileProjectFixer.MakeFile
 {
@@ -120,12 +121,12 @@ namespace MakeFileProjectFixer.MakeFile
 
         public void ProcessFile()
         {
-            PublishCppHeaderFiles = GetPublishedCppHeaderFiles(PostLines);
+            PublishCppHeaderFiles = GetPublishedCppHeaderFiles(PostLines, this);
             PreDefinedIncludeDependency = GetPreDefinedDependencies("[include]", (PreLines));
             PreDefinedExcludeDependency = GetPreDefinedDependencies("[exclude]", PreLines);
         }
 
-        internal List<string> GetPublishedCppHeaderFiles(List<string> postLines)
+        private List<string> GetPublishedCppHeaderFiles(List<string> postLines, MakeProject makeProject)
         {
             //Sample
             //scripts/cpy $(as_lib_path) /$@/Header.gsoap $(GSOAP_IMPORT)
@@ -138,8 +139,8 @@ namespace MakeFileProjectFixer.MakeFile
             var list = new HashSet<string>();
             foreach (var line in postLines)
             {
-                if(!line.Contains("scripts/cpy")) continue;
-                if(line.Contains(".html")) continue;
+                if (!line.Contains("scripts/cpy")) continue;
+                if (line.Contains(".html")) continue;
 
                 var s = line.Split(' ');
                 foreach (var s1 in s)
@@ -153,6 +154,21 @@ namespace MakeFileProjectFixer.MakeFile
                         }
                     }
                 }
+            }
+
+            if (postLines.Any(l => l.Contains(@"common/bldevent")))
+            {
+                var header = makeProject.ProjectName;
+                // name is XXXEvent  
+                header = header.ToUpper();
+                header = header.Replace("EVENT", "Event");
+                if (makeProject.ProjectName != header)
+                {
+                    Log.Warning("Project Name for bldevent project is wrong case, fixing {old} -> {new}", makeProject.ProjectName, header);
+                    makeProject.ProjectName = header;
+                }
+
+                list.Add($"{header}.h");
             }
             return list.ToList();
         }
@@ -184,23 +200,23 @@ namespace MakeFileProjectFixer.MakeFile
         // bad quick coding, to fix up
         public bool IncludeUnitTestReferences
         {
-             get
-             {
-                 foreach (var line in PostLines)
-                 {                 
-                     if (line.Contains("/blddll") || line.Contains("/bldlib"))
-                     {
-                         line.Trim();
-                         if (line.EndsWith("1"))
-                         {
-                             return false;
-                         }
-                         return true;
-                     }
-                 }
+            get
+            {
+                foreach (var line in PostLines)
+                {
+                    if (line.Contains("/blddll") || line.Contains("/bldlib"))
+                    {
+                        line.Trim();
+                        if (line.EndsWith("1"))
+                        {
+                            return false;
+                        }
+                        return true;
+                    }
+                }
 
-                 return true;
-             }
+                return true;
+            }
         }
     }
 }

@@ -179,7 +179,7 @@ namespace MakeFileProjectFixer.Scripts
                         Log.Information("Possible Ref {Ref} in VS {file} is incorrect case, should be {case}", test, cPlusPlusFile.ProjectName, item);
                         if (fix)
                         {
-                            ChangeCaseIn(Path.GetDirectoryName(cPlusPlusFile.FileName), test, item);
+                     //       ChangeCaseIn(Path.GetDirectoryName(cPlusPlusFile.FileName), test, item);
                         }
                     }
                 }
