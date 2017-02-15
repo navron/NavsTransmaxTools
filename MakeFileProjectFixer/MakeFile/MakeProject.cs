@@ -170,6 +170,12 @@ namespace MakeFileProjectFixer.MakeFile
 
                 list.Add($"{header}.h");
             }
+
+            if (postLines.Any(l => l.Contains(@"as/blddll")))
+            {
+                var header = makeProject.ProjectName;
+                list.Add($"{header}.h");
+            }
             return list.ToList();
         }
 

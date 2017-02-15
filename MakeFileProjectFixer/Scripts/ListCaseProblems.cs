@@ -29,7 +29,7 @@ namespace MakeFileProjectFixer.Scripts
                 if (DoCheckMakeProjects(store, Fix)) return;
                 if (CheckMakeProjectHaveUnquiePublishValues(store, Fix)) return;
                 if (DoVisualStuidoProjects(store, Fix)) return;
-                if (DoVisualStuidoProjects2(store, Fix)) return;
+             //   if (DoVisualStuidoProjects2(store, Fix)) return;
             }
         }
 
