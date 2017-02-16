@@ -67,7 +67,9 @@ namespace MakeFileProjectFixer.VisualStudioFile
                 var referenceName = referenceSplit[0];
                 if (referenceName.Contains(@"Tsd."))
                     TsdReferences.Add(referenceName);
-                else if(referenceName.Contains(@"ait.specs"))
+                else if (referenceName.Contains(@"ait.specs"))
+                    TsdReferences.Add(referenceName);
+                else if (referenceName.Contains(@"ait.utils"))
                     TsdReferences.Add(referenceName);
                 else if (referenceName.StartsWith("System.") || referenceName == "System")
                     IgnoredReferences.Add(referenceName);

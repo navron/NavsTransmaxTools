@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Serilog;
@@ -15,6 +16,11 @@ namespace VisualStudioProjectFixer.Scripts
         /// </summary>
         internal static List<string> GetProjectFiles(string rootFolder, string[] searchPatterns)
         {
+            if (!Directory.Exists(rootFolder))
+            {
+                Log.Error("Root Path {@path} does not exist --aborting",rootFolder);
+                throw new NullReferenceException(rootFolder);
+            }
             var files = searchPatterns.AsParallel()
                 .SelectMany(
                     searchPattern => Directory.EnumerateFiles(rootFolder, searchPattern, SearchOption.AllDirectories));
