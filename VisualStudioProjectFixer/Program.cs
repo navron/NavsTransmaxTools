@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Management.Automation;
 using System.Reflection;
 using CommandLine;
 using Serilog;
@@ -28,7 +29,8 @@ namespace VisualStudioProjectFixer
             map.WithParsed<SetReferenceDllData>(action => action.Run())
                 .WithParsed<RemoveMetaData>(action => action.Run())
                 .WithParsed<MarkAsDirty>(action => action.Run())
-                .WithParsed<RemoveDLL>(action => action.Run());
+                .WithParsed<RemoveDLL>(action => action.Run())
+                .WithParsed<DetectLocalReference>(action => action.Run());
         }
 
         /// <summary>

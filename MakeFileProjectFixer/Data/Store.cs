@@ -84,6 +84,9 @@ namespace MakeFileProjectFixer.Data
                 // Build a MakeProject Header Set
                 MakeFiles.ForEach(mk => MakeHeaderProjects.Add(mk.Header));
 
+                // For Each Make Project do any post build work
+                MakeProjects.ForEach(mp=>mp.PostBuildWork(MakeProjects));
+
                 Stage2CheckMakeProjects(MakeProjects);
                 Stage2CheckMakeProjects(MakeHeaderProjects);
                 Helper.PreProcessedFileSave("MakeProjects.json", MakeProjects);

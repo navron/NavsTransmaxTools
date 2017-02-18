@@ -36,7 +36,7 @@ namespace VisualStudioProjectFixer.Scripts
             }
             if (fileName.ToLower().Contains(@"\test\"))
             {
-                Log.Information($"Skipping Test file: {fileName}");
+                Log.Debug($"Skipping Test file: {fileName}");
                 return false;
             }
             //if (fileName.ToLower().Contains(@".ait."))

@@ -71,6 +71,8 @@ namespace MakeFileProjectFixer.VisualStudioFile
                     TsdReferences.Add(referenceName);
                 else if (referenceName.Contains(@"ait.utils"))
                     TsdReferences.Add(referenceName);
+                else if (referenceName.Contains(@"ait.screens"))
+                    TsdReferences.Add(referenceName);
                 else if (referenceName.StartsWith("System.") || referenceName == "System")
                     IgnoredReferences.Add(referenceName);
                 else

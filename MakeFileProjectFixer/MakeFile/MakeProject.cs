@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Serilog;
 
@@ -189,6 +190,7 @@ namespace MakeFileProjectFixer.MakeFile
                 var values = line.Remove(index, tag.Length);
                 values = values.Remove(0, 1); // remove the comment at the start of the line
                 var split = values.Split(' ');
+             
                 list.AddRange(MakeFileHelper.CleanItems(split));
             }
             return list;
@@ -223,6 +225,37 @@ namespace MakeFileProjectFixer.MakeFile
 
                 return true;
             }
+        }
+
+        public void PostBuildWork(List<MakeProject> makeProjects)
+        {
+            PreDefinedIncludeDependency = UpdatePreDefinedIncludeDependency(PreDefinedIncludeDependency, makeProjects);
+        }
+
+        private List<string> UpdatePreDefinedIncludeDependency(List<string> preDefinedIncludeDependency, List<MakeProject> makeProjects)
+        {
+            var projectNames = makeProjects.Select(mp => mp.ProjectName).ToList();
+            projectNames.Sort();
+
+            var list = new List<string>();
+            foreach (var project in preDefinedIncludeDependency)
+            {
+                //Assume check for regex
+                if (project.StartsWith("^"))
+                {
+                    var r = new Regex(project);
+                    foreach (var projectName in projectNames)
+                    {
+                        if(r.IsMatch(projectName))
+                            list.Add(projectName);
+                    }
+                }
+                else
+                {
+                    list.Add(project);
+                }
+            }
+            return list;
         }
     }
 }

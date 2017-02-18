@@ -99,6 +99,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RunPowershell.cs" />
     <Compile Include="Scripts\ChangeCSTargetTov14.cs" />
+    <Compile Include="Scripts\DetectLocalReference.cs" />
     <Compile Include="Scripts\MarkAsDirty.cs" />
     <Compile Include="Scripts\ReferenceRules.cs" />
     <Compile Include="Scripts\RemoveDLL.cs" />
