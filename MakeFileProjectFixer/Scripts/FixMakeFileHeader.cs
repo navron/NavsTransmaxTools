@@ -23,7 +23,7 @@ namespace MakeFileProjectFixer.Scripts
                 if (!makeFile.Header.IsHeader) throw new Exception($"Make File {makeFile.FileName} has header {makeFile.Header.ProjectName}set incorrectly");
 
                 if (makeFile.IsDirectoryMakeFile())
-                    CheckMakeFileDirectoryFile(makeFile, store);
+                    makeFile.Header.DependencyProjects = GetMakeFileDirectoryDependencyList(makeFile, store);
                 else
                     CheckMakeFileFile(makeFile);
             }
@@ -63,7 +63,7 @@ namespace MakeFileProjectFixer.Scripts
             }
         }
 
-        private void CheckMakeFileDirectoryFile(MakeFile.MakeFile makeFile, Store store)
+        private List<string> GetMakeFileDirectoryDependencyList(MakeFile.MakeFile makeFile, Store store)
         {
             Log.Debug($"Scanning Directory MakeFile:{makeFile.FileName}");
 
@@ -74,31 +74,31 @@ namespace MakeFileProjectFixer.Scripts
             var files = Directory.EnumerateFiles(folder, "*.mak", SearchOption.TopDirectoryOnly).ToList();
             // Get a listing of all project files with the extension and not including folder project file
             // select into a string with the folder name as the prefix 
-            var fileProjects = (from file in files select Path.GetFileNameWithoutExtension(file) into name where name != folderName select $"{folderName}_{name}").ToList();
-            var fileProjectStore = (from project in store.MakeHeaderProjects where !project.ShouldExcluded && fileProjects.Contains(project.ProjectName) select project.ProjectName).ToList();
+            var fileMakeHeaders = (from file in files select Path.GetFileNameWithoutExtension(file) into name where name != folderName select $"{folderName}_{name}").ToList();
+           // var fileProjectStore = (from project in store.MakeHeaderProjects where !project.ShouldExcluded && fileMakeHeaders.Contains(project.ProjectName) select project.ProjectName).ToList();
+
+            var makeHeadersExcludeList = (from project in store.MakeHeaderProjects where project.ShouldExcluded && fileMakeHeaders.Contains(project.ProjectName) select project.ProjectName).ToList();
 
             // The Project List that is in this make file, Directory Make files may still have projects
-            var projectList = makeFile.Projects.Select(p => p.ProjectName).ToList();
+            var makeProjectsList = makeFile.Projects.Select(p => p.ProjectName).ToList();
 
-            var combineFileandProjects = new List<string>();
-            combineFileandProjects.AddRange(fileProjectStore);
-            combineFileandProjects.AddRange(projectList);
 
-            var additions = makeFile.Header.DependencyProjects.Except(combineFileandProjects).ToList();
-            additions = additions.Except(fileProjects).ToList();
-            if (additions.Any())
+            var combineMakeDirectoryAndProjects = new List<string>();
+            combineMakeDirectoryAndProjects.AddRange(fileMakeHeaders.Except(makeHeadersExcludeList));
+            combineMakeDirectoryAndProjects.AddRange(makeProjectsList);
+
+            if (makeFile.Header.DependencyProjects.Except(combineMakeDirectoryAndProjects).Any())
             {
-                Log.Information("Make Folder File {FileName} has {@Addiations} additional projects", makeFile.FileName, additions);
-                additions.ForEach(extra => makeFile.Header.DependencyProjects.Remove(extra));
+                Log.Information("Make Folder File {FileName} has {@Addiations} additional projects", makeFile.FileName, makeFile.Header.DependencyProjects.Except(combineMakeDirectoryAndProjects));
             }
 
-            var missings = combineFileandProjects.Except(makeFile.Header.DependencyProjects).ToList();
+            var missings = combineMakeDirectoryAndProjects.Except(makeFile.Header.DependencyProjects).ToList();
             missings = missings.Except(makeFile.Header.DependencyProjects).ToList();
-            if (missings.Any())
+            if (missings.Except(makeFile.Header.DependencyProjects).Any())
             {
-                Log.Information("Make File {FileName} has {@Missings} missing projects", makeFile.FileName, missings);
-                missings.ForEach(missing => makeFile.Header.DependencyProjects.Add(missing));
+                Log.Information("Make File {FileName} has {@Missings} missing projects", makeFile.FileName, missings.Except(makeFile.Header.DependencyProjects));
             }
+            return combineMakeDirectoryAndProjects;
         }
     }
 }
