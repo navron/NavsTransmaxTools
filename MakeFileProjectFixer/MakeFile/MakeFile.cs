@@ -199,7 +199,6 @@ namespace MakeFileProjectFixer.MakeFile
             return output;
         }
 
-
         public bool IsDirectoryMakeFile()
         {
             var name = Path.GetFileNameWithoutExtension(FileName);
@@ -208,7 +207,5 @@ namespace MakeFileProjectFixer.MakeFile
                 throw new Exception($"FileName is invalid: {FileName} --aborting");
             return folder.EndsWith($"\\{name}");
         }
-
-
     }
 }

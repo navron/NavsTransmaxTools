@@ -39,7 +39,6 @@ namespace MakeFileProjectFixer.Scripts
             // expect folder makefile, which should contain all header projects in that folder
             var projectList = makeFile.Projects.Where(mp => !mp.ShouldExcluded).Select(mp => mp.ProjectName).ToList();
 
-
             var test = new List<string>();
             foreach (var makeFileProject in makeFile.Projects)
             {
@@ -76,6 +75,10 @@ namespace MakeFileProjectFixer.Scripts
             // select into a string with the folder name as the prefix 
             var fileProjects = (from file in files select Path.GetFileNameWithoutExtension(file) into name where name != folderName select $"{folderName}_{name}").ToList();
             var fileProjectStore = (from project in store.MakeHeaderProjects where !project.ShouldExcluded && fileProjects.Contains(project.ProjectName) select project.ProjectName).ToList();
+
+            // Remove any Make File from the Directory header
+            var fileProjectExcludeStore = (from project in store.MakeHeaderProjects where project.ShouldExcluded && fileProjects.Contains(project.ProjectName) select project.ProjectName).ToList();
+            fileProjects = fileProjects.Except(fileProjectExcludeStore).ToList();
 
             // The Project List that is in this make file, Directory Make files may still have projects
             var projectList = makeFile.Projects.Select(p => p.ProjectName).ToList();

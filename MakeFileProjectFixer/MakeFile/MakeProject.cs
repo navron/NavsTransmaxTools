@@ -22,7 +22,6 @@ namespace MakeFileProjectFixer.MakeFile
             PublishCppHeaderFiles = new List<string>();
             PreDefinedIncludeDependency = new List<string>();
             PreDefinedExcludeDependency = new List<string>();
-
         }
 
         /// <summary>
@@ -177,6 +176,12 @@ namespace MakeFileProjectFixer.MakeFile
                 var header = makeProject.ProjectName;
                 list.Add($"{header}.h");
             }
+            //if (postLines.Any(l => l.Contains(@"common/bldsoapdll")))
+            //{
+            //    var header = makeProject.ProjectName;
+            //    list.Add($"{header}clnt");
+            //}
+
             return list.ToList();
         }
 
