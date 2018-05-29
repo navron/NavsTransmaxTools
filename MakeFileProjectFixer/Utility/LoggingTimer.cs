@@ -4,6 +4,7 @@ using Serilog;
 
 namespace MakeFileProjectFixer.Utility
 {
+    /// <inheritdoc />
     /// <summary>
     /// A disposable timer that will log the time it takes for an action.
     /// </summary>

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Messaging;
 using CommandLine;
 using MakeFileProjectFixer.Data;
 using MakeFileProjectFixer.MakeFile;

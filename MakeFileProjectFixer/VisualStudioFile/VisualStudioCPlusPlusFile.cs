@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using MakeFileProjectFixer.MakeFile;
 using Microsoft.Build.Evaluation;
-using MakeFileProjectFixer;
 using Serilog;
 
 namespace MakeFileProjectFixer.VisualStudioFile

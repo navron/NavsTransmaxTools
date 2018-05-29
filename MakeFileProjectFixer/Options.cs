@@ -2,15 +2,15 @@
 
 namespace MakeFileProjectFixer
 {
-    // Documentation at https://github.com/gsscoder/commandline/wiki/Latest-Version
+    // Documentation at https://github.com/commandlineparser/commandline/wiki
     public class Options
     {
         private string folder;
         [Option('d', @"dir", Required = false, HelpText = "Base folder to search for files ", Default = "CurrentDir")]
         public string Folder
         {
-            get { return folder; }
-            set { folder = value == "CurrentDir" ? System.IO.Directory.GetCurrentDirectory() : value; }
+            get => folder;
+            set => folder = value == "CurrentDir" ? System.IO.Directory.GetCurrentDirectory() : value;
         }
 
         [Option('f', @"file", Required = false, HelpText = "Specifies a single file, Program does not scan for files")]
@@ -22,6 +22,9 @@ namespace MakeFileProjectFixer
 
         [Option('v', @"verbose", HelpText = "Verbosely output information")]
         public bool Verbose { get; set; }
+
+        [Option("debug", HelpText = "Debug output information")]
+        public bool Debug { get; set; }
 
         [Option(@"length", HelpText = "Length of the Line that the project dependences wrap, --Zero to disable--", Default = 100)]
         public int LineLength { get; set; }

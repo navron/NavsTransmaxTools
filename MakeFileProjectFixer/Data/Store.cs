@@ -12,7 +12,6 @@ using Serilog;
 
 namespace MakeFileProjectFixer.Data
 {
-
     /// <summary>
     /// Holds an in memory set of Make file an Visual studio files so
     /// that they made be queried quickly by 
@@ -27,7 +26,6 @@ namespace MakeFileProjectFixer.Data
             internal const string StoreCSharpFile = "StoreCSharpFile.json";
             internal const string StoreCPlusPlusFile = "StoreCPlusPlusFile.json";
         }
-
 
         private readonly Options options;
         public List<MakeFile.MakeFile> MakeFiles { get; private set; } = new List<MakeFile.MakeFile>();
@@ -48,11 +46,9 @@ namespace MakeFileProjectFixer.Data
             this.options = options;
         }
 
-
         // Build Both the Make Files and Visual Studio files Store
         public void BuildStore()
         {
-
             BuildStoreMakeFiles();
             BuildStoreVisalStudioFiles();
         }
@@ -151,33 +147,6 @@ namespace MakeFileProjectFixer.Data
             Helper.PreProcessedFileSave(Settings.StoreMakeFile, list);
             return list;
         }
-
-        // Build a Set of Make Project from the Make Files
-        //private void Stage2BuildMakeProjects(List<MakeFile.MakeFile> makeFiles)
-        //{
-        //    foreach (MakeFile.MakeFile makeFile in makeFiles)
-        //    {
-        //        MakeProjects.AddRange(makeFile.Projects);
-        //        MakeHeaderProjects.Add(makeFile.Header);
-        //    }
-        //    AllMakeProjects.AddRange(MakeProjects);
-        //    AllMakeProjects.AddRange(MakeHeaderProjects);
-
-        //    //foreach (var makeProject in AllMakeProjects)
-        //    //{
-        //    //    foreach (var project in makeProject.DependencyProjects)
-        //    //    {
-        //    //        var t = AllMakeProjects.FirstOrDefault(a => a.ProjectName == project);
-        //    //        if (t == null) continue; //bug that should ok to ignore
-        //    //        if (makeProject.DependencyProjects.Contains(project))
-        //    //        {
-        //    //            Log.Debug($"Warning Make Project {makeProject.ProjectName} has duplicate reference {project} Hand Edit to fix", ConsoleColor.Red);
-        //    //            continue;
-        //    //        }
-        //    //        makeProject.DependencyProjects.Add(project, t.IsHeader);
-        //    //    }
-        //    //}
-        //}
 
         public void Stage2CheckMakeProjects(List<MakeProject> makeProjects)
         {

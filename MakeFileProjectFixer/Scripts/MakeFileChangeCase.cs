@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using CommandLine;
 using MakeFileProjectFixer.Data;
-using MakeFileProjectFixer.MakeFile;
-using MakeFileProjectFixer.Utility;
 using Serilog;
 
 namespace MakeFileProjectFixer.Scripts

@@ -79,8 +79,8 @@ namespace MakeFileProjectFixer.Scripts
             var makeHeadersExcludeList = (from project in store.MakeHeaderProjects where project.ShouldExcluded && fileMakeHeaders.Contains(project.ProjectName) select project.ProjectName).ToList();
 
             // Remove any Make File from the Directory header
-            var fileProjectExcludeStore = (from project in store.MakeHeaderProjects where project.ShouldExcluded && fileProjects.Contains(project.ProjectName) select project.ProjectName).ToList();
-            fileProjects = fileProjects.Except(fileProjectExcludeStore).ToList();
+      //      var fileProjectExcludeStore = (from project in store.MakeHeaderProjects where project.ShouldExcluded && fileProjects.Contains(project.ProjectName) select project.ProjectName).ToList();
+       //     fileProjects = fileProjects.Except(fileProjectExcludeStore).ToList();
 
             // The Project List that is in this make file, Directory Make files may still have projects
             var makeProjectsList = makeFile.Projects.Select(p => p.ProjectName).ToList();

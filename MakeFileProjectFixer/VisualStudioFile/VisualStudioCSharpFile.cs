@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Remoting.Metadata.W3cXsd2001;
 using MakeFileProjectFixer.MakeFile;
 using Microsoft.Build.Evaluation;
 using Serilog;
