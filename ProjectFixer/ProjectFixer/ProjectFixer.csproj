@@ -73,6 +73,7 @@
     <Compile Include="Data\StoreMakeFile.cs" />
     <Compile Include="Scripts\ListCaseProblems.cs" />
     <Compile Include="Scripts\MakeFileChangeCase.cs" />
+    <Compile Include="Utility\JsonSerialization.cs" />
     <Compile Include="Utility\StringExtensions.cs" />
     <Compile Include="Scripts\FixMakeFileHeader.cs" />
     <Compile Include="Scripts\RemovedMakeProject.cs" />

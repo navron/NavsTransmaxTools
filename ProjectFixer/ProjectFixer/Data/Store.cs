@@ -117,7 +117,7 @@ namespace ProjectFixer.Data
         {
             if (Helper.PreProcessedObject(Settings.StoreMakeFile, options))
             {
-                return Helper.JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(Settings.StoreMakeFile);
+                return JsonSerialization.ReadFromJsonFile<List<MakeFile.MakeFile>>(Settings.StoreMakeFile);
             }
 
             var list = new List<MakeFile.MakeFile>();
@@ -169,7 +169,7 @@ namespace ProjectFixer.Data
             Log.Debug($"Running {MethodBase.GetCurrentMethod().Name}");
             if (Helper.PreProcessedObject(Settings.StoreCSharpFile, options))
             {
-                CSharpFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioCSharpFile>>(Settings.StoreCSharpFile);
+                CSharpFiles = JsonSerialization.ReadFromJsonFile<List<VisualStudioCSharpFile>>(Settings.StoreCSharpFile);
                 CheckVisualStudioFiles(new List<IVisualStudioFile>(CSharpFiles));
                 return;
             }
@@ -198,7 +198,7 @@ namespace ProjectFixer.Data
             Log.Debug($"Running {MethodBase.GetCurrentMethod().Name}");
             if (Helper.PreProcessedObject(Settings.StoreCPlusPlusFile, options))
             {
-                CPlusPlusFiles = Helper.JsonSerialization.ReadFromJsonFile<List<VisualStudioCPlusPlusFile>>(Settings.StoreCPlusPlusFile);
+                CPlusPlusFiles = JsonSerialization.ReadFromJsonFile<List<VisualStudioCPlusPlusFile>>(Settings.StoreCPlusPlusFile);
                 CheckVisualStudioFiles(new List<IVisualStudioFile>(CPlusPlusFiles));
                 return;
             }
