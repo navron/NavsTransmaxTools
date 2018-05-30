@@ -104,7 +104,7 @@ namespace ProjectFixer.Data
 
                 // Build Expected MakeProject References
                 if (RunAsParallel)
-                    Parallel.ForEach(VisualStudioFiles, (vsFile) => vsFile.BuildExpectedMakeProjectReferences(MakeProjects, VisualStudioFiles));
+                    Parallel.ForEach(VisualStudioFiles, new ParallelOptions {MaxDegreeOfParallelism = 10}, (vsFile) => vsFile.BuildExpectedMakeProjectReferences(MakeProjects, VisualStudioFiles));
                 else
                     VisualStudioFiles.ForEach(vsFile => vsFile.BuildExpectedMakeProjectReferences(MakeProjects, VisualStudioFiles));
 
