@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using CommandLine;
 using ProjectFixer.Data;
 using ProjectFixer.Scripts;
@@ -70,13 +68,14 @@ namespace ProjectFixer
             // Change Log level if needed
             map.WithParsed<Options>(options => { if (options.Verbose) levelSwitch.MinimumLevel = LogEventLevel.Verbose; });
 
-            map.WithParsed<FormatMakeFiles>(options => options.Run())
+            map.WithParsed<Store>(options => options.Run())
+                .WithParsed<FormatMakeFiles>(options => options.Run())
                 .WithParsed<FixDependencies>(options => options.Run())
                 .WithParsed<FixMakeFileCaseFromVisualStudio>(options => options.Run())
                 .WithParsed<MatchMfProjectDependencyCaseToMfProject>(options => options.Run())
                 .WithParsed<CircularDependeyCheck>(options => options.Run())
                 .WithParsed<ReduceDependency>(options => options.Run())
-                .WithParsed<Store>(options => options.BuildStore())
+                
                 .WithParsed<ListMissingMakeProjects>(options => options.Run())
                 .WithParsed<FixMakeFileHeader>(options => options.Run())
                 .WithParsed<RemovedMakeProject>(options => options.Run())

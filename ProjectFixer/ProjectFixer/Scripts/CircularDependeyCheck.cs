@@ -24,7 +24,7 @@ namespace ProjectFixer.Scripts
             Log.Information($"Running {GetType().Name}");
 
             var store = new Store(this);
-            store.BuildStoreMakeFilesOnly();
+            store.BuildMakeFiles();
 
             // Convert all Make Projects (including headers) to an MakeProjectDependency class
             var allProjectDependency = store.GetAllMakeProjects.Select(makeProject => new MakeProjectDependency(makeProject)).ToList();

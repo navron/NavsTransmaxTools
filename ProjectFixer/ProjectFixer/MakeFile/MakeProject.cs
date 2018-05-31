@@ -210,7 +210,6 @@ namespace ProjectFixer.MakeFile
         // Join Both Dependencies lists and return the union set
         private List<string> AllDependenies => PreDefinedIncludeDependency.Union(DependencyProjects).Except(PreDefinedExcludeDependency).ToList();
 
-
         // bad quick coding, to fix up
         public bool IncludeUnitTestReferences
         {

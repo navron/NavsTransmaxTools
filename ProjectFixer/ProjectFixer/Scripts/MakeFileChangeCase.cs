@@ -16,7 +16,7 @@ namespace ProjectFixer.Scripts
             Log.Information($"Running {GetType().Name}");
 
             var store = new Store(this);
-            store.BuildStoreMakeFilesOnly();
+            store.BuildMakeFiles();
 
             foreach (var makeProject in store.GetAllMakeProjects)
             {

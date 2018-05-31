@@ -17,7 +17,7 @@ namespace ProjectFixer.Scripts
             Log.Information($"Running {GetType().Name}");
 
             var store = new Store(this);
-            store.BuildStore();
+            store.Run();
 
             // Build Set of Expected Make Project Names from VisualStudioFiles
             var hashSet = new HashSet<string>();

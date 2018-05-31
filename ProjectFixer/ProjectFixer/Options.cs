@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Threading.Tasks;
+using CommandLine;
 
 namespace ProjectFixer
 {
@@ -45,5 +46,8 @@ namespace ProjectFixer
 
         [Option('p', "parallel", HelpText = "Run in parallel mode if supported")]
         public bool RunAsParallel { get; set; }
+
+        public ParallelOptions ParallelOption => new ParallelOptions() {MaxDegreeOfParallelism = RunAsParallel ? 8 : 1};
+
     }
 }

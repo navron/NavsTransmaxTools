@@ -14,7 +14,7 @@ namespace ProjectFixer.Scripts
         public void Run()
         {
             var store = new Store(this);
-            store.BuildStoreMakeFilesOnly();
+            store.BuildMakeFiles();
 
             using (new LoggingTimer(GetType().Name))
             {

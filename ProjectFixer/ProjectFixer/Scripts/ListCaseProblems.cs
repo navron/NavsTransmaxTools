@@ -21,7 +21,7 @@ namespace ProjectFixer.Scripts
         public void Run()
         {
             var store = new Store(this);
-            store.BuildStore();
+            store.Run();
             using (new LoggingTimer(GetType().Name))
             {
                 if (CheckMakeProjectNonGenircePublishValues(store, Fix)) return;
@@ -137,7 +137,7 @@ namespace ProjectFixer.Scripts
             }
             var list = dicSet.Select(item => item.Key).ToList();
 
-            foreach (var cPlusPlusFile in store.CPlusPlusFiles)
+            foreach (var cPlusPlusFile in store.CppFiles)
             {
                 foreach (var reference in cPlusPlusFile.ReferencesSet)
                 {
@@ -166,7 +166,7 @@ namespace ProjectFixer.Scripts
             }
             var list = dicSet.Select(item => item.Key).ToList();
 
-            foreach (var cPlusPlusFile in store.CPlusPlusFiles)
+            foreach (var cPlusPlusFile in store.CppFiles)
             {
                 foreach (var reference in cPlusPlusFile.ReferencesSet)
                 {

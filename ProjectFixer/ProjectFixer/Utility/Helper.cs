@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json;
 using Serilog;
 
 namespace ProjectFixer.Utility
@@ -23,7 +22,7 @@ namespace ProjectFixer.Utility
                 throw new Exception($"Folder {options.Folder} does not exist -- aborting");
 
             if (options.SearchPatterns == null)
-                throw new Exception($"Programming error, SearchPatterns is null -- aborting");
+                throw new Exception("Programming error, SearchPatterns is null -- aborting");
 
             // Scan the Search Patterns in Parallel for all files matching the required
             var files = options.SearchPatterns.AsParallel()

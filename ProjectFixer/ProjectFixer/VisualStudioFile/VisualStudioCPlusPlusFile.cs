@@ -49,10 +49,10 @@ namespace ProjectFixer.VisualStudioFile
         }
         public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects, List<IVisualStudioFile> vsFiles)
         {
-            var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
-            // var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
-            var includeUnitTestReferences = IncludeUnitTestReferences(makeProjects);
-            ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects, vsCSharpFiles, includeUnitTestReferences);
+           // var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
+         //    var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
+         //   var includeUnitTestReferences = IncludeUnitTestReferences(makeProjects);
+         //   ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects, vsCPlusFiles, includeUnitTestReferences);
         }
 
         private bool IncludeUnitTestReferences(List<MakeProject> makeProjects)

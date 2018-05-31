@@ -20,7 +20,7 @@ namespace ProjectFixer.Scripts
         public void Run()
         {
             var store = new Store(this);
-            store.BuildStore();
+            store.Run();
 
             using (new LoggingTimer(GetType().Name))
             {
