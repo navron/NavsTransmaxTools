@@ -35,7 +35,6 @@ namespace ProjectFixer.VisualStudioFile
             AssemblyName = GetAssemblyName(file);
             ProjectName = Path.GetFileNameWithoutExtension(file);
 
-
             var unitTestFileName = Path.Combine(Path.GetDirectoryName(file), "UnitTests");
             unitTestFileName = Path.Combine(unitTestFileName, $"{ProjectName}.UnitTests{Path.GetExtension(file)}");
             if (File.Exists(unitTestFileName))
@@ -43,25 +42,33 @@ namespace ProjectFixer.VisualStudioFile
         }
         private string GetAssemblyName(string vsFileName)
         {
-            if (msProject == null) msProject = new Project(vsFileName);
+            //    return String.Empty;
+
+            // I think I copied this from the CSharp code, don't think it works with CPP
+            if (msProject == null)
+                try
+                {
+                    msProject = new Project(vsFileName);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             var property = msProject.GetProperty("AssemblyName");
             return property.EvaluatedValue;
         }
         public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects, List<IVisualStudioFile> vsFiles)
         {
-           // var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
-         //    var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
-         //   var includeUnitTestReferences = IncludeUnitTestReferences(makeProjects);
-         //   ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects, vsCPlusFiles, includeUnitTestReferences);
+            // var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
+            //    var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
+            //   var includeUnitTestReferences = IncludeUnitTestReferences(makeProjects);
+            //   ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(makeProjects, vsCPlusFiles, includeUnitTestReferences);
         }
 
         private bool IncludeUnitTestReferences(List<MakeProject> makeProjects)
         {
             var makeProject = makeProjects.FirstOrDefault(mp => mp.ProjectName == ProjectName);
-            if (makeProject == null)
-            {
-                return false;
-            }
             return makeProject != null && makeProject.IncludeUnitTestReferences;
         }
 
@@ -102,23 +109,23 @@ namespace ProjectFixer.VisualStudioFile
             // search all lines for all #include "filename.h" 
             // add file name to includeList
 
-            var projCollection = new ProjectCollection();
-            if (!File.Exists(vsFileName))
-                throw new Exception($"Project File {vsFileName} not found");
-            var project = projCollection.LoadProject(vsFileName);
+            //var projCollection = new ProjectCollection();
+            //if (!File.Exists(vsFileName))
+            //    throw new Exception($"Project File {vsFileName} not found");
+            //var project = projCollection.LoadProject(vsFileName);
 
-            // Get the files that need scanning (missing .h files that need scanning)
-            foreach (ProjectItem item in project.Items)
-            {
-                // File list will include Test files
-                if (item.ItemType != "ClCompile" && item.ItemType != "ClInclude") continue;
+            //// Get the files that need scanning (missing .h files that need scanning)
+            //foreach (ProjectItem item in project.Items)
+            //{
+            //    // File list will include Test files
+            //    if (item.ItemType != "ClCompile" && item.ItemType != "ClInclude") continue;
 
-                var checkFile = Path.Combine(folder, item.EvaluatedInclude);
-                // Visual Studio is normally ok with missing files
-                if (!File.Exists(checkFile)) continue;
+            //    var checkFile = Path.Combine(folder, item.EvaluatedInclude);
+            //    // Visual Studio is normally ok with missing files
+            //    if (!File.Exists(checkFile)) continue;
 
-                fileList.Add(checkFile);
-            }
+            //    fileList.Add(checkFile);
+            //}
             return fileList;
         }
 
@@ -138,7 +145,7 @@ namespace ProjectFixer.VisualStudioFile
                 if (line.ToLower().Contains("#include"))
                 {
                     var f = GetHashInclude(line);
-                    if(f.Contains(".h",StringComparison.OrdinalIgnoreCase))
+                    if (f.Contains(".h", StringComparison.OrdinalIgnoreCase))
                         list.Add(f);
                 }
 

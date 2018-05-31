@@ -38,13 +38,25 @@ namespace ProjectFixer.VisualStudioFile
 
             var unitTestFileName = Path.Combine(Path.GetDirectoryName(file), "UnitTests");
             unitTestFileName = Path.Combine(unitTestFileName, $"{ProjectName}.UnitTests{Path.GetExtension(file)}");
-            if(File.Exists(unitTestFileName))
+            if (File.Exists(unitTestFileName))
                 UnitTestProject = new VisualStudioCSharpFile(unitTestFileName);
         }
 
         private string GetAssemblyName(string vsFileName)
         {
-            if (msProject == null) msProject = new Project(vsFileName);
+            if (msProject == null)
+            {
+                try
+                {
+                    msProject = new Project(vsFileName);
+                }
+                catch (Microsoft.Build.Exceptions.InvalidProjectFileException e)
+                {
+                    Log.Error($"File {vsFileName} is most likely an .NetCore project, add to ingore list");
+                    throw new Exception("Aborting");
+                }
+
+            }
             var property = msProject.GetProperty("AssemblyName");
             return property.EvaluatedValue;
         }
@@ -93,7 +105,7 @@ namespace ProjectFixer.VisualStudioFile
         public void BuildExpectedMakeProjectReferences(List<MakeProject> makeProjects, List<IVisualStudioFile> vsFiles)
         {
             var vsCSharpFiles = vsFiles.OfType<VisualStudioCSharpFile>().Select(vsFile => vsFile).ToList();
-         //   var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
+            //   var vsCPlusFiles = vsFiles.OfType<VisualStudioCPlusPlusFile>().Select(vsFile => vsFile).ToList();
             ExpectedMakeProjectReference = GetExpectedMakeProjectRefenences(vsCSharpFiles, makeProjects).ToList();
 
             UnitTestProject?.BuildExpectedMakeProjectReferences(makeProjects, vsFiles);
@@ -159,17 +171,17 @@ namespace ProjectFixer.VisualStudioFile
                 }
                 addOthers = addOthers.Except(unittests.ToList()).ToList();
             }
-            
+
             // Add either all 3rd party copy or just NUnit (all CSharp projects have unit tests)
             if (addOthers.Any())
             {
-                addOthers.ForEach(o=>hashSet.Add(o));
+                addOthers.ForEach(o => hashSet.Add(o));
             }
             else
             {
                 hashSet.Add("lib3rdparty"); //Dont like this     
             }
-           
+
 
             return hashSet.ToList();
         }

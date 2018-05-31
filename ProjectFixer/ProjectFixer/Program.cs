@@ -68,7 +68,7 @@ namespace ProjectFixer
             // Change Log level if needed
             map.WithParsed<Options>(options => { if (options.Verbose) levelSwitch.MinimumLevel = LogEventLevel.Verbose; });
 
-            map.WithParsed<Store>(options => options.Run())
+            map.WithParsed<StoreTest>(options => options.Run())
                 .WithParsed<FormatMakeFiles>(options => options.Run())
                 .WithParsed<FixDependencies>(options => options.Run())
                 .WithParsed<FixMakeFileCaseFromVisualStudio>(options => options.Run())

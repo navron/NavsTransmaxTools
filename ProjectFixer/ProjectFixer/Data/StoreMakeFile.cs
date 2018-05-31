@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using ProjectFixer.MakeFile;
 using ProjectFixer.Utility;
-using ProjectFixer.VisualStudioFile;
 using Serilog;
 
 namespace ProjectFixer.Data

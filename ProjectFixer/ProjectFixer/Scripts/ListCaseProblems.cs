@@ -20,8 +20,8 @@ namespace ProjectFixer.Scripts
         //method not unit tested
         public void Run()
         {
-            var store = new Store(this);
-            store.Run();
+            var store = new Store(this).BuildStore();
+
             using (new LoggingTimer(GetType().Name))
             {
                 if (CheckMakeProjectNonGenircePublishValues(store, Fix)) return;

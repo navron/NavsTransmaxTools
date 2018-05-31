@@ -75,6 +75,7 @@
     <Compile Include="Data\StoreCSharpFiles.cs" />
     <Compile Include="Scripts\ListCaseProblems.cs" />
     <Compile Include="Scripts\MakeFileChangeCase.cs" />
+    <Compile Include="Scripts\Store.cs" />
     <Compile Include="Utility\JsonSerialization.cs" />
     <Compile Include="Utility\StringExtensions.cs" />
     <Compile Include="Scripts\FixMakeFileHeader.cs" />

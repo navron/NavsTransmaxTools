@@ -19,8 +19,12 @@ namespace ProjectFixer.VisualStudioFile
 
             var excludedlist = new List<string>
             {
-                "Tsd.Libraries.Common.Eventing", // In code but not in build system, Need to ask about this 
-               // "ManagementConsole" // Jono special, Its missing a number of files. Needs work, Not in build.
+                "Tsd.Libraries.Common.Eventing" // In code but not in build system, Need to ask about this 
+               // "ManagementConsole" // Jono special, Its missing a number of files. Needs work, Not in build.,
+                ,"nugetProj" // Can't handle .Net.Core files
+                ,"LogPipelineHeaderGenerator"
+                ,"RestClientGenerator"
+                ,"STREAMS." // STREAMS.Historical.BI.RestApi
             };
             // Exclude any known problems
             if (excludedlist.Any(file.Contains)) return false;
