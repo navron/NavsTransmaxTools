@@ -10,8 +10,14 @@ namespace ProjectFixer
         [Option('d', @"dir", Required = false, HelpText = "Base folder to search for files ", Default = "CurrentDir")]
         public string Folder
         {
-            get => folder;
-            set => folder = value == "CurrentDir" ? System.IO.Directory.GetCurrentDirectory() : value;
+            get
+            {
+                return folder;
+            }
+            set
+            {
+                folder = value == "CurrentDir" ? System.IO.Directory.GetCurrentDirectory() : value;
+            }
         }
 
         [Option('f', @"file", Required = false, HelpText = "Specifies a single file, Program does not scan for files")]
@@ -47,7 +53,7 @@ namespace ProjectFixer
         [Option('p', "parallel", HelpText = "Run in parallel mode if supported")]
         public bool RunAsParallel { get; set; }
 
-        public ParallelOptions ParallelOption => new ParallelOptions() {MaxDegreeOfParallelism = RunAsParallel ? 8 : 1};
+        public ParallelOptions ParallelOption => new ParallelOptions() { MaxDegreeOfParallelism = RunAsParallel ? 8 : 1 };
 
     }
 }

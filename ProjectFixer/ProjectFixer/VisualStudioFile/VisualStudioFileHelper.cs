@@ -25,6 +25,9 @@ namespace ProjectFixer.VisualStudioFile
                 ,"LogPipelineHeaderGenerator"
                 ,"RestClientGenerator"
                 ,"STREAMS." // STREAMS.Historical.BI.RestApi
+
+                //CPP files that are VS2017
+                ,"DynMessSign.Common.AS.vcxproj"
             };
             // Exclude any known problems
             if (excludedlist.Any(file.Contains)) return false;

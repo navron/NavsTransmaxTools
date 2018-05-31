@@ -25,7 +25,6 @@ namespace ProjectFixer.VisualStudioFile
         //  Can't open a project twice, so keep a reference to it
         private Project msProject;
 
-
         public VisualStudioCPlusPlusFile(string file)
         {
             FileName = file;
@@ -42,19 +41,22 @@ namespace ProjectFixer.VisualStudioFile
         }
         private string GetAssemblyName(string vsFileName)
         {
-            //    return String.Empty;
-
             // I think I copied this from the CSharp code, don't think it works with CPP
             if (msProject == null)
+            {
                 try
                 {
+                    // This only works with the version of Visual Studio that built the program.
+                    // Error is Exception The imported project "c:\Microsoft.Cpp.Default.props" was not found.
                     msProject = new Project(vsFileName);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    Log.Error($"File {vsFileName} cause a problem");
+                    Log.Error($"Exception {e.Message}{Environment.NewLine}{e.StackTrace}");
+                    throw new Exception("Aborting");
                 }
+            }
             var property = msProject.GetProperty("AssemblyName");
             return property.EvaluatedValue;
         }
